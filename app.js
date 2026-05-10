@@ -1,3 +1,29 @@
+// Debug: List all pages
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== Film Flow Debug ===');
+    
+    // List all pages
+    const pages = document.querySelectorAll('.page');
+    console.log('📄 Total pages found:', pages.length);
+    pages.forEach((page, index) => {
+        console.log(`  ${index + 1}. ${page.id} - display: ${window.getComputedStyle(page).display}`);
+    });
+    
+    // List all nav buttons
+    const navButtons = document.querySelectorAll('.nav-btn');
+    console.log('🔘 Total nav buttons:', navButtons.length);
+    
+    // Check if functions are bound
+    console.log('showListPage:', typeof showListPage);
+    console.log('showAddPage:', typeof showAddPage);
+    console.log('showStatsPage:', typeof showAddPage);
+    
+    // Force show first page
+    setTimeout(() => {
+        console.log('Forcing show coverflow page');
+        showCoverflowPage();
+    }, 100);
+});
 // Film Flow - Film Photography Journal
 // Complete Application Logic
 
@@ -1625,3 +1651,6 @@ statsStyle.textContent = `
     }
 `;
 document.head.appendChild(statsStyle);
+
+
+
