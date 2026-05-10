@@ -1,5 +1,5 @@
 // Film Flow - Film Photography Journal
-// Main Application Logic
+// Complete Application Logic
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize the application
@@ -8,8 +8,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load existing films from localStorage
     loadFilms();
     
-    // Initialize gallery
-    initGallery();
+    // Initialize Select2 for country/city selection
+    initSelect2();
+    
+    // Initialize Cover Flow
+    initCoverFlow();
     
     // Update statistics
     updateStatistics();
@@ -17,12 +20,65 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Global variables
 let films = [];
-let currentGalleryIndex = 0;
+let currentCoverFlowIndex = 0;
 let uploadedPhotos = {
     1: null,
     2: null,
     3: null
 };
+
+// Film Flow - Film Photography Journal
+// Complete Application Logic
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize the application
+    initApp();
+    
+    // Load existing films from localStorage
+    loadFilms();
+    
+    // Initialize Select2 for country/city selection
+    initSelect2();
+    
+    // Initialize Cover Flow
+    initCoverFlow();
+    
+    // Update statistics
+    updateStatistics();
+});
+
+// Global variables
+let films = [];
+let currentCoverFlowIndex = 0;
+let uploadedPhotos = {
+    1: null,
+    2: null,
+    3: null
+};
+
+// Country and city data
+const countries = [
+    { code: 'CN', name: 'China', cities: ['Beijing', 'Shanghai', 'Guangzhou', 'Shenzhen', 'Chengdu', 'Hangzhou', 'Nanjing', 'Wuhan', 'Xi\'an', 'Chongqing'] },
+    { code: 'JP', name: 'Japan', cities: ['Tokyo', 'Osaka', 'Kyoto', 'Yokohama', 'Nagoya', 'Sapporo', 'Fukuoka', 'Kobe', 'Hiroshima', 'Sendai'] },
+    { code: 'US', name: 'United States', cities: ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia', 'San Antonio', 'San Diego', 'Dallas', 'San Jose'] },
+    { code: 'GB', name: 'United Kingdom', cities: ['London', 'Birmingham', 'Manchester', 'Liverpool', 'Leeds', 'Sheffield', 'Bristol', 'Glasgow', 'Edinburgh', 'Cardiff'] },
+    { code: 'FR', name: 'France', cities: ['Paris', 'Marseille', 'Lyon', 'Toulouse', 'Nice', 'Nantes', 'Strasbourg', 'Montpellier', 'Bordeaux', 'Lille'] },
+    { code: 'DE', name: 'Germany', cities: ['Berlin', 'Hamburg', 'Munich', 'Cologne', 'Frankfurt', 'Stuttgart', 'Düsseldorf', 'Dortmund', 'Essen', 'Leipzig'] },
+    { code: 'IT', name: 'Italy', cities: ['Rome', 'Milan', 'Naples', 'Turin', 'Palermo', 'Genoa', 'Bologna', 'Florence', 'Venice', 'Verona'] },
+    { code: 'KR', name: 'South Korea', cities: ['Seoul', 'Busan', 'Incheon', 'Daegu', 'Daejeon', 'Gwangju', 'Suwon', 'Ulsan', 'Changwon', 'Goyang'] },
+    { code: 'AU', name: 'Australia', cities: ['Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide', 'Gold Coast', 'Canberra', 'Newcastle', 'Wollongong', 'Hobart'] },
+    { code: 'CA', name: 'Canada', cities: ['Toronto', 'Montreal', 'Vancouver', 'Calgary', 'Edmonton', 'Ottawa', 'Winnipeg', 'Quebec City', 'Hamilton', 'Kitchener'] },
+    { code: 'TW', name: 'Taiwan', cities: ['Taipei', 'Kaohsiung', 'Taichung', 'Tainan', 'Banqiao', 'Hsinchu', 'Keelung', 'Chiayi', 'Taoyuan', 'Changhua'] },
+    { code: 'HK', name: 'Hong Kong', cities: ['Hong Kong Island', 'Kowloon', 'New Territories', 'Lantau Island'] },
+    { code: 'MO', name: 'Macau', cities: ['Macau Peninsula', 'Taipa', 'Coloane'] },
+    { code: 'SG', name: 'Singapore', cities: ['Singapore'] },
+    { code: 'MY', name: 'Malaysia', cities: ['Kuala Lumpur', 'George Town', 'Johor Bahru', 'Ipoh', 'Shah Alam', 'Petaling Jaya', 'Kuching', 'Kota Kinabalu', 'Malacca City', 'Alor Setar'] },
+    { code: 'TH', name: 'Thailand', cities: ['Bangkok', 'Chiang Mai', 'Pattaya', 'Phuket', 'Khon Kaen', 'Udon Thani', 'Hat Yai', 'Nakhon Ratchasima', 'Surat Thani', 'Nakhon Si Thammarat'] },
+    { code: 'VN', name: 'Vietnam', cities: ['Hanoi', 'Ho Chi Minh City', 'Da Nang', 'Haiphong', 'Can Tho', 'Bien Hoa', 'Nha Trang', 'Hue', 'Vung Tau', 'Qui Nhon'] },
+    { code: 'PH', name: 'Philippines', cities: ['Manila', 'Quezon City', 'Davao City', 'Caloocan', 'Cebu City', 'Zamboanga City', 'Taguig', 'Antipolo', 'Pasig', 'Valenzuela'] },
+    { code: 'ID', name: 'Indonesia', cities: ['Jakarta', 'Surabaya', 'Bandung', 'Medan', 'Semarang', 'Makassar', 'Palembang', 'Depok', 'Tangerang', 'South Tangerang'] },
+    { code: 'IN', name: 'India', cities: ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Ahmedabad', 'Chennai', 'Kolkata', 'Surat', 'Pune', 'Jaipur'] }
+];
 
 // Initialize application
 function initApp() {
@@ -33,31 +89,102 @@ function initApp() {
         saveFilmRecord();
     });
     
-    // Setup navigation buttons
-    setupNavigation();
-    
-    // Setup gallery controls
-    setupGalleryControls();
+    // Setup country change event
+    const countrySelect = document.getElementById('country');
+    countrySelect.addEventListener('change', function() {
+        updateCities(this.value);
+    });
     
     // Initialize toast notifications
     initToast();
 }
 
-// Setup navigation
-function setupNavigation() {
-    // Navigation items
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach(item => {
-        item.addEventListener('click', function() {
-            // Remove active class from all items
-            navItems.forEach(nav => nav.classList.remove('active'));
-            // Add active class to clicked item
-            this.classList.add('active');
-        });
+// Initialize Select2
+function initSelect2() {
+    // Initialize country select
+    $('#country').select2({
+        placeholder: 'Select country',
+        allowClear: true,
+        width: '100%',
+        theme: 'default'
+    });
+    
+    // Initialize city select
+    $('#city').select2({
+        placeholder: 'Select city',
+        allowClear: true,
+        width: '100%',
+        theme: 'default',
+        disabled: true
+    });
+    
+    // Populate countries
+    const countrySelect = document.getElementById('country');
+    countries.forEach(country => {
+        const option = document.createElement('option');
+        option.value = country.code;
+        option.textContent = country.name;
+        countrySelect.appendChild(option);
     });
 }
 
-// Switch between pages
+// Update cities based on selected country
+function updateCities(countryCode) {
+    const citySelect = document.getElementById('city');
+    const select2City = $('#city');
+    
+    if (!countryCode) {
+        citySelect.disabled = true;
+        select2City.prop('disabled', true);
+        select2City.empty();
+        select2City.append('<option value="">Select country first</option>');
+        select2City.val('').trigger('change');
+        return;
+    }
+    
+    // Find selected country
+    const country = countries.find(c => c.code === countryCode);
+    if (!country) return;
+    
+    // Enable city select
+    citySelect.disabled = false;
+    select2City.prop('disabled', false);
+    
+    // Clear existing options
+    select2City.empty();
+    select2City.append('<option value="">Select city</option>');
+    
+    // Add cities
+    country.cities.forEach(city => {
+        const option = document.createElement('option');
+        option.value = city;
+        option.textContent = city;
+        citySelect.appendChild(option);
+    });
+    
+    select2City.val('').trigger('change');
+}
+
+// Page Navigation Functions
+function showCoverflowPage() {
+    switchPage('coverflow-page');
+    initCoverFlow();
+}
+
+function showListPage() {
+    switchPage('list-page');
+    renderRecordsList();
+}
+
+function showAddPage() {
+    switchPage('add-page');
+}
+
+function showStatsPage() {
+    switchPage('stats-page');
+    updateStatistics();
+}
+
 function switchPage(pageId) {
     // Hide all pages
     const pages = document.querySelectorAll('.page');
@@ -69,843 +196,690 @@ function switchPage(pageId) {
     const selectedPage = document.getElementById(pageId);
     if (selectedPage) {
         selectedPage.classList.add('active');
-        
-        // Update navigation
-        const navItems = document.querySelectorAll('.nav-item');
-        navItems.forEach(item => item.classList.remove('active'));
-        
-        if (pageId === 'gallery-page') {
-            document.querySelector('.nav-item:nth-child(1)').classList.add('active');
-            initGallery();
-        } else if (pageId === 'add-page') {
-            document.querySelector('.nav-item.add-btn').classList.add('active');
-        } else if (pageId === 'stats-page') {
-            document.querySelector('.nav-item:nth-child(3)').classList.add('active');
-            updateStatistics();
-        }
-        
-        showToast(`Switched to ${selectedPage.querySelector('h2').textContent}`, 'info');
+        showToast(`Switched to ${selectedPage.querySelector('h2')?.textContent || 'Home'}`, 'info');
     }
 }
 
-// Initialize gallery
-function initGallery() {
-    const galleryTrack = document.querySelector('.coverflow-track');
+// Cover Flow Functions
+function initCoverFlow() {
+    // Filter films that have photos
+    const filmsWithPhotos = films.filter(film => film.photos && film.photos.length > 0);
     
-    if (films.length === 0) {
-        galleryTrack.innerHTML = `
+    if (filmsWithPhotos.length === 0) {
+        const track = document.getElementById('coverflow-track');
+        track.innerHTML = `
             <div class="coverflow-empty">
                 <div class="empty-icon">
                     <i class="fas fa-camera"></i>
                 </div>
-                <h3>No films yet</h3>
+                <h3>No photos yet</h3>
                 <p>Add your first film record to start the gallery</p>
-                <button class="btn btn-primary" onclick="switchPage('add-page')">
+                <button class="btn btn-primary" onclick="showListPage()">
+                    <i class="fas fa-list"></i> Go to Records
+                </button>
+            </div>
+        `;
+        document.getElementById('camera-info').textContent = '-';
+        document.getElementById('film-info').textContent = '-';
+        return;
+    }
+    
+    // Create array of all photos with their film info
+    let allPhotos = [];
+    filmsWithPhotos.forEach(film => {
+        film.photos.forEach((photo, photoIndex) => {
+            allPhotos.push({
+                image: photo,
+                film: film,
+                photoIndex: photoIndex
+            });
+        });
+    });
+    
+    // Clear track
+    const track = document.getElementById('coverflow-track');
+    track.innerHTML = '';
+    
+    // Create cover flow items
+    allPhotos.forEach((item, index) => {
+        const itemElement = document.createElement('div');
+        itemElement.className = 'coverflow-item';
+        itemElement.dataset.index = index;
+        
+        itemElement.innerHTML = `
+            <img src="${item.image}" alt="Film photo ${index + 1}">
+        `;
+        
+        track.appendChild(itemElement);
+    });
+    
+    // Set initial position
+    currentCoverFlowIndex = Math.floor(allPhotos.length / 2);
+    updateCoverFlow();
+    
+    // Setup swipe events
+    setupSwipeEvents();
+}
+
+function updateCoverFlow() {
+    const items = document.querySelectorAll('.coverflow-item');
+    const totalItems = items.length;
+    
+    if (totalItems === 0) return;
+    
+    // Get current photo info
+    const filmsWithPhotos = films.filter(film => film.photos && film.photos.length > 0);
+    let photoCount = 0;
+    let currentFilm = null;
+    let currentPhotoIndex = 0;
+    
+    for (const film of filmsWithPhotos) {
+        if (currentCoverFlowIndex < photoCount + film.photos.length) {
+            currentFilm = film;
+            currentPhotoIndex = currentCoverFlowIndex - photoCount;
+            break;
+        }
+        photoCount += film.photos.length;
+    }
+    
+    // Update photo info
+    if (currentFilm) {
+        document.getElementById('camera-info').textContent = currentFilm.camera || 'Unknown Camera';
+        document.getElementById('film-info').textContent = currentFilm.name || 'Unknown Film';
+    }
+    
+    // Update item positions
+    items.forEach((item, index) => {
+        // Remove all position classes
+        item.classList.remove('center', 'left-1', 'left-2', 'left-3', 'right-1', 'right-2', 'right-3');
+        
+        const distance = index - currentCoverFlowIndex;
+        
+        if (distance === 0) {
+            item.classList.add('center');
+        } else if (distance === -1) {
+            item.classList.add('left-1');
+        } else if (distance === -2) {
+            item.classList.add('left-2');
+        } else if (distance === -3) {
+            item.classList.add('left-3');
+        } else if (distance === 1) {
+            item.classList.add('right-1');
+        } else if (distance === 2) {
+            item.classList.add('right-2');
+        } else if (distance === 3) {
+            item.classList.add('right-3');
+        } else if (distance < -3) {
+            item.style.display = 'none';
+        } else if (distance > 3) {
+            item.style.display = 'none';
+        } else {
+            item.style.display = 'block';
+        }
+    });
+}
+
+function setupSwipeEvents() {
+    const track = document.getElementById('coverflow-track');
+    let startX = 0;
+    let isDragging = false;
+    
+    // Mouse events
+    track.addEventListener('mousedown', (e) => {
+        startX = e.clientX;
+        isDragging = true;
+        track.style.cursor = 'grabbing';
+    });
+    
+    track.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+    });
+    
+    track.addEventListener('mouseup', (e) => {
+        if (!isDragging) return;
+        
+        const endX = e.clientX;
+        const diffX = startX - endX;
+        
+        if (Math.abs(diffX) > 50) {
+            if (diffX > 0) {
+                // Swipe left
+                navigateCoverFlow(1);
+            } else {
+                // Swipe right
+                navigateCoverFlow(-1);
+            }
+        }
+        
+        isDragging = false;
+        track.style.cursor = 'grab';
+    });
+    
+    track.addEventListener('mouseleave', () => {
+        isDragging = false;
+        track.style.cursor = 'grab';
+    });
+    
+    // Touch events
+    track.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        isDragging = true;
+    });
+    
+    track.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+    });
+    
+    track.addEventListener('touchend', (e) => {
+        if (!isDragging) return;
+        
+        const endX = e.changedTouches[0].clientX;
+        const diffX = startX - endX;
+        
+        if (Math.abs(diffX) > 30) {
+            if (diffX > 0) {
+                // Swipe left
+                navigateCoverFlow(1);
+            } else {
+                // Swipe right
+                navigateCoverFlow(-1);
+            }
+        }
+        
+        isDragging = false;
+    });
+    
+    // Keyboard events
+    document.addEventListener('keydown', (e) => {
+        if (document.getElementById('coverflow-page').classList.contains('active')) {
+            if (e.key === 'ArrowLeft') {
+                navigateCoverFlow(-1);
+            } else if (e.key === 'ArrowRight') {
+                navigateCoverFlow(1);
+            }
+        }
+    });
+}
+
+function navigateCoverFlow(direction) {
+    const items = document.querySelectorAll('.coverflow-item');
+    const totalItems = items.length;
+    
+    if (totalItems === 0) return;
+    
+    currentCoverFlowIndex += direction;
+    
+    // Wrap around
+    if (currentCoverFlowIndex < 0) {
+        currentCoverFlowIndex = totalItems - 1;
+    } else if (currentCoverFlowIndex >= totalItems) {
+        currentCoverFlowIndex = 0;
+    }
+    
+    updateCoverFlow();
+}
+
+// Records List Functions
+function renderRecordsList() {
+    const container = document.getElementById('records-container');
+    
+    if (films.length === 0) {
+        container.innerHTML = `
+            <div class="empty-list">
+                <div class="empty-icon">
+                    <i class="fas fa-film"></i>
+                </div>
+                <h3>No records yet</h3>
+                <p>Add your first film record</p>
+                <button class="btn btn-primary" onclick="showAddPage()">
                     <i class="fas fa-plus"></i> Add First Record
                 </button>
             </div>
         `;
-        updateGalleryIndicator();
         return;
     }
     
-    // Clear gallery
-    galleryTrack.innerHTML = '';
-    
-    // Create film cards
-    films.forEach((film, index) => {
-        const filmCard = createFilmCard(film, index);
-        galleryTrack.appendChild(filmCard);
+    // Sort films by date (newest first)
+    const sortedFilms = [...films].sort((a, b) => {
+        return new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt);
     });
     
-    // Set first film as active
-    setActiveFilm(0);
-    updateGalleryIndicator();
-    
-    // Setup scroll snapping
-    setupGalleryScroll();
-}
-
-// Create film card for gallery
-function createFilmCard(film, index) {
-    const card = document.createElement('div');
-    card.className = 'film-card';
-    card.dataset.index = index;
-    
-    // Get first photo for card
-    const firstPhoto = film.photos && film.photos.length > 0 ? film.photos[0] : null;
-    
-    card.innerHTML = `
-        <div class="film-images" onclick="setActiveFilm(${index})">
-            ${firstPhoto ? 
-                `<img src="${firstPhoto}" alt="${film.name}" class="film-image">` :
-                `<div class="film-image" style="background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white;">
-                    <i class="fas fa-film" style="font-size: 3rem;"></i>
-                </div>`
-            }
-            ${film.photos && film.photos.length > 0 ? 
-                `<div class="image-count">${film.photos.length} photo${film.photos.length > 1 ? 's' : ''}</div>` : ''
-            }
-        </div>
-        <div class="film-info">
-            <h3 class="film-title">${film.name}</h3>
-            <div class="film-meta">
-                <span class="film-tag">${film.type}</span>
-                ${film.camera ? `<span class="film-tag">${film.camera}</span>` : ''}
+    // Create records list
+    container.innerHTML = sortedFilms.map(film => `
+        <div class="record-item">
+            <div class="record-photos">
+                ${film.photos && film.photos.length > 0 ? 
+                    film.photos.map(photo => `
+                        <div class="record-photo">
+                            <img src="${photo}" alt="Film photo">
+                        </div>
+                    `).join('') : 
+                    '<div class="record-photo" style="display: flex; align-items: center; justify-content: center; color: var(--label-tertiary);"><i class="fas fa-image"></i></div>'
+                }
             </div>
-            <div class="film-date">${formatDate(film.date)}</div>
+            <div class="record-info">
+                <div class="record-camera">${film.camera || 'Unknown Camera'}</div>
+                <div class="record-film">${film.name || 'Unknown Film'}</div>
+                <div class="record-date">
+                    <i class="fas fa-calendar"></i>
+                    ${formatDate(film.date || film.createdAt)}
+                </div>
+                ${film.city ? `
+                    <div class="record-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        ${film.city}${film.country ? `, ${getCountryName(film.country)}` : ''}
+                    </div>
+                ` : ''}
+            </div>
         </div>
-    `;
-    
-    return card;
+    `).join('');
 }
 
-// Set active film in gallery
-function setActiveFilm(index) {
-    // Update active card
-    const filmCards = document.querySelectorAll('.film-card');
-    filmCards.forEach(card => card.classList.remove('active'));
-    
-    if (filmCards[index]) {
-        filmCards[index].classList.add('active');
-        currentGalleryIndex = index;
-        
-        // Update film details
-        updateFilmDetails(films[index]);
-        
-        // Scroll to center
-        filmCards[index].scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-            inline: 'center'
-        });
-    }
-    
-    updateGalleryIndicator();
+function getCountryName(countryCode) {
+    const country = countries.find(c => c.code === countryCode);
+    return country ? country.name : countryCode;
 }
 
-// Update film details panel
-function updateFilmDetails(film) {
-    if (!film) return;
+// Initialize application
+function initApp() {
+    // Setup form submission
+    const filmForm = document.getElementById('film-form');
+    filmForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveFilmRecord();
+    });
     
-    document.getElementById('current-film-title').textContent = film.name;
-    document.getElementById('detail-camera').textContent = film.camera || '-';
-    document.getElementById('detail-film').textContent = film.name;
-    document.getElementById('detail-iso').textContent = film.iso || '-';
-    document.getElementById('detail-date').textContent = formatDate(film.date);
-    document.getElementById('detail-notes').textContent = film.notes || 'No notes';
+    // Setup country change event
+    const countrySelect = document.getElementById('country');
+    countrySelect.addEventListener('change', function() {
+        updateCities(this.value);
+    });
     
-    // Update tags
-    const tagsContainer = document.getElementById('current-film-tags');
-    tagsContainer.innerHTML = '';
+    // Initialize toast notifications
+    initToast();
+}
+
+// Initialize Select2
+function initSelect2() {
+    // Initialize country select
+    $('#country').select2({
+        placeholder: 'Select country',
+        allowClear: true,
+        width: '100%',
+        theme: 'default'
+    });
     
-    const tags = [film.type];
-    if (film.location) tags.push(film.location);
+    // Initialize city select
+    $('#city').select2({
+        placeholder: 'Select city',
+        allowClear: true,
+        width: '100%',
+        theme: 'default',
+        disabled: true
+    });
     
-    tags.forEach(tag => {
-        const tagElement = document.createElement('span');
-        tagElement.className = 'tag';
-        tagElement.textContent = tag;
-        tagsContainer.appendChild(tagElement);
+    // Populate countries
+    const countrySelect = document.getElementById('country');
+    countries.forEach(country => {
+        const option = document.createElement('option');
+        option.value = country.code;
+        option.textContent = country.name;
+        countrySelect.appendChild(option);
     });
 }
 
-// Setup gallery scroll
-function setupGalleryControls() {
-    // Touch swipe support
-    const galleryTrack = document.querySelector('.coverflow-track');
-    let startX = 0;
-    let scrollLeft = 0;
+// Update cities based on selected country
+function updateCities(countryCode) {
+    const citySelect = document.getElementById('city');
+    const select2City = $('#city');
     
-    galleryTrack.addEventListener('touchstart', (e) => {
-        startX = e.touches[0].pageX;
-        scrollLeft = galleryTrack.scrollLeft;
-    });
-    
-    galleryTrack.addEventListener('touchmove', (e) => {
-        if (!startX) return;
-        const x = e.touches[0].pageX;
-        const walk = (x - startX) * 2;
-        galleryTrack.scrollLeft = scrollLeft - walk;
-    });
-    
-    galleryTrack.addEventListener('touchend', () => {
-        startX = 0;
-    });
-}
-
-// Scroll gallery
-function scrollGallery(direction) {
-    const newIndex = currentGalleryIndex + direction;
-    
-    if (newIndex >= 0 && newIndex < films.length) {
-        setActiveFilm(newIndex);
-    }
-}
-
-// Update gallery indicator
-function updateGalleryIndicator() {
-    document.getElementById('current-index').textContent = films.length > 0 ? currentGalleryIndex + 1 : 0;
-    document.getElementById('total-films').textContent = films.length;
-}
-
-// Photo upload functions
-function triggerUpload(boxNumber) {
-    document.getElementById(`photo-${boxNumber}`).click();
-}
-
-function handlePhotoUpload(boxNumber, input) {
-    const file = input.files[0];
-    if (!file) return;
-    
-    // 检查文件类型
-    if (!file.type.startsWith('image/')) {
-        showToast('请上传图片文件', 'error');
+    if (!countryCode) {
+        citySelect.disabled = true;
+        select2City.prop('disabled', true);
+        select2City.empty();
+        select2City.append('<option value="">Select country first</option>');
+        select2City.val('').trigger('change');
         return;
     }
     
-    // 检查文件大小（最大50MB，压缩后会变小）
-    if (file.size > 50 * 1024 * 1024) {
-        showToast('图片大小应小于50MB', 'error');
+    // Find selected country
+    const country = countries.find(c => c.code === countryCode);
+    if (!country) return;
+    
+    // Enable city select
+    citySelect.disabled = false;
+    select2City.prop('disabled', false);
+    
+    // Clear existing options
+    select2City.empty();
+    select2City.append('<option value="">Select city</option>');
+    
+    // Add cities
+    country.cities.forEach(city => {
+        const option = document.createElement('option');
+        option.value = city;
+        option.textContent = city;
+        citySelect.appendChild(option);
+    });
+    
+    select2City.val('').trigger('change');
+}
+
+// Page Navigation Functions
+function showCoverflowPage() {
+    switchPage('coverflow-page');
+    initCoverFlow();
+}
+
+function showListPage() {
+    switchPage('list-page');
+    renderRecordsList();
+}
+
+function showAddPage() {
+    switchPage('add-page');
+}
+
+function showStatsPage() {
+    switchPage('stats-page');
+    updateStatistics();
+}
+
+function switchPage(pageId) {
+    // Hide all pages
+    const pages = document.querySelectorAll('.page');
+    pages.forEach(page => {
+        page.classList.remove('active');
+    });
+    
+    // Show selected page
+    const selectedPage = document.getElementById(pageId);
+    if (selectedPage) {
+        selectedPage.classList.add('active');
+        showToast(`Switched to ${selectedPage.querySelector('h2')?.textContent || 'Home'}`, 'info');
+    }
+}
+
+// Cover Flow Functions
+function initCoverFlow() {
+    // Filter films that have photos
+    const filmsWithPhotos = films.filter(film => film.photos && film.photos.length > 0);
+    
+    if (filmsWithPhotos.length === 0) {
+        const track = document.getElementById('coverflow-track');
+        track.innerHTML = `
+            <div class="coverflow-empty">
+                <div class="empty-icon">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <h3>No photos yet</h3>
+                <p>Add your first film record to start the gallery</p>
+                <button class="btn btn-primary" onclick="showListPage()">
+                    <i class="fas fa-list"></i> Go to Records
+                </button>
+            </div>
+        `;
+        document.getElementById('camera-info').textContent = '-';
+        document.getElementById('film-info').textContent = '-';
         return;
     }
     
-    // 创建Canvas进行压缩
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const img = new Image();
-        img.onload = function() {
-            // 计算压缩尺寸 - 针对胶片照片优化
-            const maxWidth = 1920; // 最大宽度，适合4K显示
-            const maxHeight = 1920; // 最大高度
-            let width = img.width;
-            let height = img.height;
-            
-            // 计算缩放比例，保持宽高比
-            if (width > maxWidth || height > maxHeight) {
-                const ratio = Math.min(maxWidth / width, maxHeight / height);
-                width = Math.floor(width * ratio);
-                height = Math.floor(height * ratio);
-            }
-            
-            // 创建Canvas
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            
-            // 绘制图片
-            const ctx = canvas.getContext('2d');
-            
-            // 设置高质量压缩
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-            
-            // 填充白色背景（防止透明背景变黑）
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, width, height);
-            
-            // 绘制图片
-            ctx.drawImage(img, 0, 0, width, height);
-            
-            // 压缩质量设置（针对胶片照片优化）
-            let quality = 0.75; // 75%质量，平衡画质和文件大小
-            
-            // 如果是JPEG，使用更高压缩
-            if (file.type === 'image/jpeg' || file.type === 'image/jpg') {
-                quality = 0.7; // JPEG 70%质量
-            }
-            
-            // 转换为DataURL
-            canvas.toBlob(function(blob) {
-                const compressedReader = new FileReader();
-                compressedReader.onload = function(e) {
-                    uploadedPhotos[boxNumber] = e.target.result;
-                    updatePhotoPreview(boxNumber, e.target.result);
-                    
-                    // 显示压缩信息
-                    const originalSize = (file.size / 1024 / 1024).toFixed(2);
-                    const compressedSize = (blob.size / 1024 / 1024).toFixed(2);
-                    const compressionRatio = ((1 - blob.size / file.size) * 100).toFixed(1);
-                    
-                    showToast(`照片 ${boxNumber}: ${originalSize}MB → ${compressedSize}MB (压缩${compressionRatio}%)`, 'success');
-                };
-                compressedReader.readAsDataURL(blob);
-            }, file.type, quality);
-        };
-        img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-}
-function updatePhotoPreview(boxNumber, imageData) {
-    const uploadBox = document.getElementById(`upload-box-${boxNumber}`);
-    const previewContainer = document.getElementById('photo-preview');
-    
-    // Hide upload box
-    uploadBox.style.display = 'none';
-    
-    // Create preview element
-    let previewElement = document.getElementById(`preview-${boxNumber}`);
-    if (!previewElement) {
-        previewElement = document.createElement('div');
-        previewElement.id = `preview-${boxNumber}`;
-        previewElement.className = 'preview-image';
-        previewContainer.appendChild(previewElement);
-    }
-    
-    previewElement.innerHTML = `
-        <img src="${imageData}" alt="Preview ${boxNumber}">
-        <button class="remove-photo" onclick="removePhoto(${boxNumber})">
-            <i class="fas fa-times"></i>
-        </button>
-    `;
-}
-
-function removePhoto(boxNumber) {
-    uploadedPhotos[boxNumber] = null;
-    
-    // Show upload box
-    const uploadBox = document.getElementById(`upload-box-${boxNumber}`);
-    uploadBox.style.display = 'flex';
-    
-    // Remove preview
-    const previewElement = document.getElementById(`preview-${boxNumber}`);
-    if (previewElement) {
-        previewElement.remove();
-    }
-    
-    showToast(`Photo ${boxNumber} removed`, 'warning');
-}
-
-// Save film record
-function saveFilmRecord() {
-    // Get form values
-    const filmName = document.getElementById('film-name').value.trim();
-    const filmType = document.getElementById('film-type').value;
-    const iso = document.getElementById('iso').value;
-    const camera = document.getElementById('camera').value.trim();
-    const dateShot = document.getElementById('date-shot').value;
-    const location = document.getElementById('location').value.trim();
-    const notes = document.getElementById('notes').value.trim();
-    
-    // Validate required fields
-    if (!filmName || !filmType) {
-        showToast('Please fill in Film Name and Film Type', 'error');
-        return;
-    }
-    
-    // Collect uploaded photos
-    const photos = [];
-    for (let i = 1; i <= 3; i++) {
-        if (uploadedPhotos[i]) {
-            photos.push(uploadedPhotos[i]);
-        }
-    }
-    
-    // Create film object
-    const film = {
-        id: Date.now(),
-        name: filmName,
-        type: filmType,
-        iso: iso || null,
-        camera: camera || null,
-        date: dateShot || new Date().toISOString().split('T')[0],
-        location: location || null,
-        notes: notes || null,
-        photos: photos,
-        createdAt: new Date().toISOString()
-    };
-    
-    // Add to films array
-    films.push(film);
-    
-    // Save to localStorage
-    saveFilms();
-    
-    // Reset form
-    resetForm();
-    
-    // Show success message
-    showToast(`"${filmName}" saved successfully!`, 'success');
-    
-    // Switch to gallery page
-    setTimeout(() => {
-        switchPage('gallery-page');
-    }, 1000);
-}
-
-// Reset form
-function resetForm() {
-    document.getElementById('film-form').reset();
-    
-    // Reset photos
-    for (let i = 1; i <= 3; i++) {
-        uploadedPhotos[i] = null;
-        const uploadBox = document.getElementById(`upload-box-${i}`);
-        if (uploadBox) uploadBox.style.display = 'flex';
-    }
-    
-    // Clear previews
-    const previewContainer = document.getElementById('photo-preview');
-    previewContainer.innerHTML = '';
-}
-
-// Save films to localStorage
-function saveFilms() {
-    try {
-        localStorage.setItem('filmFlowRecords', JSON.stringify(films));
-    } catch (e) {
-        showToast('Error saving data: ' + e.message, 'error');
-    }
-}
-
-// Load films from localStorage
-function loadFilms() {
-    try {
-        const saved = localStorage.getItem('filmFlowRecords');
-        if (saved) {
-            films = JSON.parse(saved);
-            
-            // Ensure photos are properly loaded
-            films.forEach(film => {
-                if (!film.photos) film.photos = [];
+    // Create array of all photos with their film info
+    let allPhotos = [];
+    filmsWithPhotos.forEach(film => {
+        film.photos.forEach((photo, photoIndex) => {
+            allPhotos.push({
+                image: photo,
+                film: film,
+                photoIndex: photoIndex
             });
+        });
+    });
+    
+    // Clear track
+    const track = document.getElementById('coverflow-track');
+    track.innerHTML = '';
+    
+    // Create cover flow items
+    allPhotos.forEach((item, index) => {
+        const itemElement = document.createElement('div');
+        itemElement.className = 'coverflow-item';
+        itemElement.dataset.index = index;
+        
+        itemElement.innerHTML = `
+            <img src="${item.image}" alt="Film photo ${index + 1}">
+        `;
+        
+        track.appendChild(itemElement);
+    });
+    
+    // Set initial position
+    currentCoverFlowIndex = Math.floor(allPhotos.length / 2);
+    updateCoverFlow();
+    
+    // Setup swipe events
+    setupSwipeEvents();
+}
+
+function updateCoverFlow() {
+    const items = document.querySelectorAll('.coverflow-item');
+    const totalItems = items.length;
+    
+    if (totalItems === 0) return;
+    
+    // Get current photo info
+    const filmsWithPhotos = films.filter(film => film.photos && film.photos.length > 0);
+    let photoCount = 0;
+    let currentFilm = null;
+    let currentPhotoIndex = 0;
+    
+    for (const film of filmsWithPhotos) {
+        if (currentCoverFlowIndex < photoCount + film.photos.length) {
+            currentFilm = film;
+            currentPhotoIndex = currentCoverFlowIndex - photoCount;
+            break;
         }
-    } catch (e) {
-        showToast('Error loading data: ' + e.message, 'error');
-        films = [];
-    }
-}
-
-// Update statistics
-function updateStatistics() {
-    // Update overview stats
-    document.getElementById('stat-total').textContent = films.length;
-    
-    // Count unique cameras
-    const cameras = new Set();
-    films.forEach(film => {
-        if (film.camera) cameras.add(film.camera);
-    });
-    document.getElementById('stat-cameras').textContent = cameras.size;
-    
-    // Update detailed stats
-    updateCameraStats();
-    updateFilmStats();
-    updateTypeStats();
-    updateTimelineStats();
-}
-
-// Update camera statistics
-function updateCameraStats() {
-    const cameraStats = document.getElementById('camera-stats');
-    
-    if (films.length === 0) {
-        cameraStats.innerHTML = `
-            <div class="empty-stat">
-                <i class="fas fa-camera-slash"></i>
-                <p>No camera data yet</p>
-            </div>
-        `;
-        return;
+        photoCount += film.photos.length;
     }
     
-    // Count films by camera
-    const cameraCount = {};
-    films.forEach(film => {
-        if (film.camera) {
-            cameraCount[film.camera] = (cameraCount[film.camera] || 0) + 1;
+    // Update photo info
+    if (currentFilm) {
+        document.getElementById('camera-info').textContent = currentFilm.camera || 'Unknown Camera';
+        document.getElementById('film-info').textContent = currentFilm.name || 'Unknown Film';
+    }
+    
+    // Update item positions
+    items.forEach((item, index) => {
+        // Remove all position classes
+        item.classList.remove('center', 'left-1', 'left-2', 'left-3', 'right-1', 'right-2', 'right-3');
+        
+        const distance = index - currentCoverFlowIndex;
+        
+        if (distance === 0) {
+            item.classList.add('center');
+        } else if (distance === -1) {
+            item.classList.add('left-1');
+        } else if (distance === -2) {
+            item.classList.add('left-2');
+        } else if (distance === -3) {
+            item.classList.add('left-3');
+        } else if (distance === 1) {
+            item.classList.add('right-1');
+        } else if (distance === 2) {
+            item.classList.add('right-2');
+        } else if (distance === 3) {
+            item.classList.add('right-3');
+        } else if (distance < -3) {
+            item.style.display = 'none';
+        } else if (distance > 3) {
+            item.style.display = 'none';
+        } else {
+            item.style.display = 'block';
         }
     });
+}
+
+function setupSwipeEvents() {
+    const track = document.getElementById('coverflow-track');
+    let startX = 0;
+    let isDragging = false;
     
-    // Create bar chart
-    let html = '';
-    const cameras = Object.keys(cameraCount).sort((a, b) => cameraCount[b] - cameraCount[a]);
+    // Mouse events
+    track.addEventListener('mousedown', (e) => {
+        startX = e.clientX;
+        isDragging = true;
+        track.style.cursor = 'grabbing';
+    });
     
-    cameras.forEach(camera => {
-        const count = cameraCount[camera];
-        const percentage = (count / films.length) * 100;
+    track.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+    });
+    
+    track.addEventListener('mouseup', (e) => {
+        if (!isDragging) return;
         
-        html += `
-            <div class="stat-bar-item">
-                <div class="bar-label">${camera}</div>
-                <div class="bar-container">
-                    <div class="bar-fill" style="width: ${percentage}%"></div>
-                    <div class="bar-value">${count}</div>
-                </div>
-            </div>
-        `;
-    });
-    
-    cameraStats.innerHTML = html;
-}
-
-// Update film statistics
-function updateFilmStats() {
-    const filmStats = document.getElementById('film-stats');
-    
-    if (films.length === 0) {
-        filmStats.innerHTML = `
-            <div class="empty-stat">
-                <i class="fas fa-film"></i>
-                <p>No film data yet</p>
-            </div>
-        `;
-        return;
-    }
-    
-    // Count films by name
-    const filmCount = {};
-    films.forEach(film => {
-        filmCount[film.name] = (filmCount[film.name] || 0) + 1;
-    });
-    
-    // Create bar chart
-    let html = '';
-    const filmNames = Object.keys(filmCount).sort((a, b) => filmCount[b] - filmCount[a]);
-    
-    filmNames.forEach(filmName => {
-        const count = filmCount[filmName];
-        const percentage = (count / films.length) * 100;
+        const endX = e.clientX;
+        const diffX = startX - endX;
         
-        html += `
-            <div class="stat-bar-item">
-                <div class="bar-label">${filmName}</div>
-                <div class="bar-container">
-                    <div class="bar-fill" style="width: ${percentage}%"></div>
-                    <div class="bar-value">${count}</div>
-                </div>
-            </div>
-        `;
-    });
-    
-    filmStats.innerHTML = html;
-}
-
-// Update film type statistics
-function updateTypeStats() {
-    const typeStats = document.getElementById('type-stats');
-    
-    if (films.length === 0) {
-        typeStats.innerHTML = `
-            <div class="empty-stat">
-                <i class="fas fa-chart-pie"></i>
-                <p>No type data yet</p>
-            </div>
-        `;
-        return;
-    }
-    
-    // Count films by type
-    const typeCount = {};
-    films.forEach(film => {
-        typeCount[film.type] = (typeCount[film.type] || 0) + 1;
-    });
-    
-    // Create pie chart (simplified)
-    let html = '<div class="pie-chart">';
-    const types = Object.keys(typeCount);
-    let startAngle = 0;
-    
-    // Colors for pie chart
-    const colors = ['#007aff', '#34c759', '#ff9500', '#ff3b30', '#af52de', '#5856d6'];
-    
-    types.forEach((type, index) => {
-        const count = typeCount[type];
-        const percentage = (count / films.length) * 100;
-        const angle = (percentage / 100) * 360;
-        
-        html += `
-            <div class="pie-segment" style="
-                --start-angle: ${startAngle}deg;
-                --end-angle: ${startAngle + angle}deg;
-                --color: ${colors[index % colors.length]};
-            ">
-                <div class="segment-label">${type} (${count})</div>
-            </div>
-        `;
-        
-        startAngle += angle;
-    });
-    
-    html += '</div>';
-    typeStats.innerHTML = html;
-}
-
-// Update timeline statistics
-function updateTimelineStats() {
-    const timelineStats = document.getElementById('timeline-stats');
-    
-    if (films.length === 0) {
-        timelineStats.innerHTML = `
-            <div class="empty-stat">
-                <i class="fas fa-calendar"></i>
-                <p>No timeline data yet</p>
-            </div>
-        `;
-        return;
-    }
-    
-    // Group films by month
-    const monthCount = {};
-    films.forEach(film => {
-        const date = new Date(film.date);
-        const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        monthCount[monthYear] = (monthCount[monthYear] || 0) + 1;
-    });
-    
-    // Create timeline
-    let html = '<div class="timeline">';
-    const months = Object.keys(monthCount).sort();
-    
-    months.forEach(month => {
-        const count = monthCount[month];
-        const [year, monthNum] = month.split('-');
-        const monthName = new Date(year, monthNum - 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-        
-        html += `
-            <div class="timeline-item">
-                <div class="timeline-date">${monthName}</div>
-                <div class="timeline-bar">
-                    <div class="timeline-fill" style="width: ${Math.min(count * 20, 100)}%"></div>
-                    <div class="timeline-count">${count} roll${count > 1 ? 's' : ''}</div>
-                </div>
-            </div>
-        `;
-    });
-    
-    html += '</div>';
-    timelineStats.innerHTML = html;
-}
-
-// Format date
-function formatDate(dateString) {
-    if (!dateString) return 'Unknown date';
-    
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return dateString;
-    
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
-}
-
-// Toast notification system
-function initToast() {
-    const toast = document.getElementById('toast');
-    if (!toast) return;
-    
-    // Create toast if it doesn't exist
-    if (!toast) {
-        const toastElement = document.createElement('div');
-        toastElement.id = 'toast';
-        toastElement.className = 'toast';
-        toastElement.innerHTML = `
-            <div class="toast-content">
-                <i class="toast-icon"></i>
-                <span class="toast-message"></span>
-            </div>
-        `;
-        document.body.appendChild(toastElement);
-    }
-}
-
-function showToast(message, type = 'info') {
-    const toast = document.getElementById('toast');
-    if (!toast) return;
-    
-    // Set icon based on type
-    const iconMap = {
-        success: 'fas fa-check-circle',
-        error: 'fas fa-exclamation-circle',
-        warning: 'fas fa-exclamation-triangle',
-        info: 'fas fa-info-circle'
-    };
-    
-    const toastIcon = toast.querySelector('.toast-icon');
-    const toastMessage = toast.querySelector('.toast-message');
-    
-    toastIcon.className = `toast-icon ${iconMap[type] || iconMap.info}`;
-    toastMessage.textContent = message;
-    
-    // Show toast
-    toast.classList.add('show');
-    
-    // Hide after 3 seconds
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 3000);
-}
-
-// Add CSS for statistics
-const statsStyle = document.createElement('style');
-statsStyle.textContent = `
-    .stat-bar-item {
-        margin-bottom: 12px;
-    }
-    
-    .bar-label {
-        font-size: 14px;
-        margin-bottom: 4px;
-        color: var(--label-secondary);
-    }
-    
-    .bar-container {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-    
-    .bar-fill {
-        height: 8px;
-        background: var(--accent-color);
-        border-radius: 4px;
-        transition: width 0.5s ease;
-    }
-    
-    .bar-value {
-        font-size: 14px;
-        font-weight: 600;
-        min-width: 30px;
-        text-align: right;
-    }
-    
-    .pie-chart {
-        width: 200px;
-        height: 200px;
-        border-radius: 50%;
-        position: relative;
-        margin: 0 auto;
-        background: conic-gradient(
-            var(--color1, #007aff) 0% 30%,
-            var(--color2, #34c759) 30% 60%,
-            var(--color3, #ff9500) 60% 100%
-        );
-    }
-    
-    .pie-segment {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 50% 0%);
-        transform: rotate(var(--start-angle, 0deg));
-    }
-    
-    .segment-label {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 12px;
-        font-weight: 600;
-        color: white;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    }
-    
-    .timeline {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-    }
-    
-    .timeline-item {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }
-    
-    .timeline-date {
-        font-size: 14px;
-        color: var(--label-secondary);
-        min-width: 80px;
-    }
-    
-    .timeline-bar {
-        flex: 1;
-        height: 24px;
-        background: var(--tertiary-background);
-        border-radius: 12px;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .timeline-fill {
-        height: 100%;
-        background: linear-gradient(90deg, var(--accent-color), var(--accent-secondary));
-        border-radius: 12px;
-        transition: width 0.5s ease;
-    }
-    
-    .timeline-count {
-        position: absolute;
-        right: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--label-primary);
-    }
-`;
-document.head.appendChild(statsStyle);
-
-// Export data function (for future use)
-function exportData() {
-    const data = {
-        version: '2.0',
-        app: 'Film Flow',
-        exportedAt: new Date().toISOString(),
-        totalFilms: films.length,
-        films: films
-    };
-    
-    const jsonString = JSON.stringify(data, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `film-flow-backup-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    showToast('Data exported successfully!', 'success');
-}
-
-// Import data function (for future use)
-function importData() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    
-    input.onchange = function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = JSON.parse(e.target.result);
-                
-                if (!data.films || !Array.isArray(data.films)) {
-                    throw new Error('Invalid file format');
-                }
-                
-                if (confirm(`Import ${data.films.length} film records? This will replace your current data.`)) {
-                    films = data.films;
-                    saveFilms();
-                    initGallery();
-                    updateStatistics();
-                    showToast(`Imported ${data.films.length} films`, 'success');
-                }
-            } catch (error) {
-                showToast('Error importing: ' + error.message, 'error');
+        if (Math.abs(diffX) > 50) {
+            if (diffX > 0) {
+                // Swipe left
+                navigateCoverFlow(1);
+            } else {
+                // Swipe right
+                navigateCoverFlow(-1);
             }
-        };
-        reader.readAsText(file);
-    };
+        }
+        
+        isDragging = false;
+        track.style.cursor = 'grab';
+    });
     
-    input.click();
+    track.addEventListener('mouseleave', () => {
+        isDragging = false;
+        track.style.cursor = 'grab';
+    });
+    
+    // Touch events
+    track.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        isDragging = true;
+    });
+    
+    track.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+    });
+    
+    track.addEventListener('touchend', (e) => {
+        if (!isDragging) return;
+        
+        const endX = e.changedTouches[0].clientX;
+        const diffX = startX - endX;
+        
+        if (Math.abs(diffX) > 30) {
+            if (diffX > 0) {
+                // Swipe left
+                navigateCoverFlow(1);
+            } else {
+                // Swipe right
+                navigateCoverFlow(-1);
+            }
+        }
+        
+        isDragging = false;
+    });
+    
+    // Keyboard events
+    document.addEventListener('keydown', (e) => {
+        if (document.getElementById('coverflow-page').classList.contains('active')) {
+            if (e.key === 'ArrowLeft') {
+                navigateCoverFlow(-1);
+            } else if (e.key === 'ArrowRight') {
+                navigateCoverFlow(1);
+            }
+        }
+    });
+}
+
+function navigateCoverFlow(direction) {
+    const items = document.querySelectorAll('.coverflow-item');
+    const totalItems = items.length;
+    
+    if (totalItems === 0) return;
+    
+    currentCoverFlowIndex += direction;
+    
+    // Wrap around
+    if (currentCoverFlowIndex < 0) {
+        currentCoverFlowIndex = totalItems - 1;
+    } else if (currentCoverFlowIndex >= totalItems) {
+        currentCoverFlowIndex = 0;
+    }
+    
+    updateCoverFlow();
+}
+
+// Records List Functions
+function renderRecordsList() {
+    const container = document.getElementById('records-container');
+    
+    if (films.length === 0) {
+        container.innerHTML = `
+            <div class="empty-list">
+                <div class="empty-icon">
+                    <i class="fas fa-film"></i>
+                </div>
+                <h3>No records yet</h3>
+                <p>Add your first film record</p>
+                <button class="btn btn-primary" onclick="showAddPage()">
+                    <i class="fas fa-plus"></i> Add First Record
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    // Sort films by date (newest first)
+    const sortedFilms = [...films].sort((a, b) => {
+        return new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt);
+    });
+    
+    // Create records list
+    container.innerHTML = sortedFilms.map(film => `
+        <div class="record-item">
+            <div class="record-photos">
+                ${film.photos && film.photos.length > 0 ? 
+                    film.photos.map(photo => `
+                        <div class="record-photo">
+                            <img src="${photo}" alt="Film photo">
+                        </div>
+                    `).join('') : 
+                    '<div class="record-photo" style="display: flex; align-items: center; justify-content: center; color: var(--label-tertiary);"><i class="fas fa-image"></i></div>'
+                }
+            </div>
+            <div class="record-info">
+                <div class="record-camera">${film.camera || 'Unknown Camera'}</div>
+                <div class="record-film">${film.name || 'Unknown Film'}</div>
+                <div class="record-date">
+                    <i class="fas fa-calendar"></i>
+                    ${formatDate(film.date || film.createdAt)}
+                </div>
+                ${film.city ? `
+                    <div class="record-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        ${film.city}${film.country ? `, ${getCountryName(film.country)}` : ''}
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+function getCountryName(countryCode) {
+    const country = countries.find(c => c.code === countryCode);
+    return country ? country.name : countryCode;
 }
