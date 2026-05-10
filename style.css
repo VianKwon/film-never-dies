@@ -71,9 +71,9 @@ body {
 /* ====== PAGE CONTAINER ====== */
 .page {
     display: none;
-    min-height: 100vh;
+    min-height: calc(100vh - 80px);
     width: 100%;
-    position: absolute;
+    position: relative;
     top: 0;
     left: 0;
     opacity: 0;
@@ -118,32 +118,34 @@ body {
 
 /* ====== COVER FLOW PAGE ====== */
 .coverflow-container {
-    min-height: 100vh;
+    min-height: calc(100vh - 140px); 
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: var(--spacing-xl);
+    justify-content: flex-start;
+    padding: 20px var(--spacing-xl) 80px;
     text-align: center;
+    margin-top: 20px;
 }
 
 .coverflow-header {
-    margin-bottom: var(--spacing-xl);
+    text-align: center;
+    margin-bottom: 20px;
+    margin-top: 10px;
+    padding: 0 20px;
 }
 
 .coverflow-header h1 {
-    font-size: 2.5rem;
+    font-size: 2.2rem; 
     font-weight: 800;
-    margin-bottom: var(--spacing-sm);
-    background: linear-gradient(135deg, var(--accent-color), var(--accent-secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    margin-bottom: 6px;
+    color: var(--label-primary);
 }
 
 .coverflow-header .subtitle {
+    font-size: 1rem;
     color: var(--label-tertiary);
-    font-size: 1.1rem;
+    font-weight: 500;
 }
 
 /* Cover Flow Wrapper */
@@ -236,19 +238,22 @@ body {
 
 /* Cover Flow Info */
 .coverflow-info {
-    margin-top: var(--spacing-xl);
+    margin-top: 20px; 
     text-align: center;
+    position: relative;
+    z-index: 10;
+    padding: 0 20px;
 }
 
 .info-camera {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: 600;
     color: var(--label-primary);
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: 4px; 
 }
 
 .info-film {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: var(--label-tertiary);
 }
 
@@ -739,7 +744,7 @@ body {
     right: 0;
     background: var(--system-background);
     border-top: 1px solid var(--tertiary-background);
-    display: flex;
+    display: flex !important;
     justify-content: space-around;
     padding: 16px 0;
     height: 70px;
