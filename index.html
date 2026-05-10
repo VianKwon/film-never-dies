@@ -3,402 +3,330 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎞️ Film Flow - Your Film Photography Journal</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎞️</text></svg>">
+    <title>Film Flow - Your Film Photography Journal</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎞️</text></svg>">
+    
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css">
+    
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎞️</text></svg>">
+    
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Film Flow - Your digital film photography journal">
 </head>
 <body>
-    <!-- Cover Flow Gallery (Main Page) -->
-    <div id="coverflow-page" class="page active">
-        <!-- Header -->
-        <header class="coverflow-header">
-            <div class="header-content">
-                <h1 class="app-title">Film Flow</h1>
-                <p class="app-subtitle">Your film photography journal</p>
-            </div>
-        </header>
-
-        <!-- Cover Flow Container -->
-        <div class="coverflow-wrapper">
-            <div class="coverflow-container">
+    <!-- Cover Flow Page (Home) -->
+    <div class="page active" id="coverflow-page">
+        <div class="coverflow-container">
+            <header class="coverflow-header">
+                <h1>🎞️ Film Flow</h1>
+                <p class="subtitle">Your film photography journal</p>
+            </header>
+            
+            <div class="coverflow-wrapper">
                 <div class="coverflow-track" id="coverflow-track">
-                    <!-- Film items will be inserted here by JavaScript -->
-                    <div class="coverflow-empty">
-                        <div class="empty-icon">
-                            <i class="fas fa-camera"></i>
-                        </div>
-                        <h3>No photos yet</h3>
-                        <p>Add your first film record to start the gallery</p>
-                        <button class="btn btn-primary" onclick="showListPage()">
-                            <i class="fas fa-list"></i> Go to Records
-                        </button>
-                    </div>
+                    <!-- Cover Flow items will be added here by JavaScript -->
                 </div>
                 
-                <!-- Current Photo Info -->
-                <div class="photo-info" id="photo-info">
-                    <div class="camera-info" id="camera-info">-</div>
-                    <div class="film-info" id="film-info">-</div>
+                <div class="coverflow-info">
+                    <div class="info-camera" id="camera-info">-</div>
+                    <div class="info-film" id="film-info">-</div>
                 </div>
                 
-                <!-- Navigation Hint -->
-                <div class="navigation-hint">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>Swipe to browse photos</span>
-                    <i class="fas fa-arrow-right"></i>
+                <div class="coverflow-hint">
+                    <i class="fas fa-arrows-left-right"></i>
+                    <span>Swipe or use arrow keys to navigate</span>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Records List Page -->
-    <div id="list-page" class="page">
-        <!-- Header with Back Button -->
-        <header class="page-header">
-            <button class="back-btn" onclick="showCoverflowPage()">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            <div class="header-title">
-                <h2><i class="fas fa-list"></i> All Records</h2>
-                <p class="page-description">Your film photography history</p>
-            </div>
-        </header>
-
-        <!-- Records List -->
-        <main class="list-content">
+    
+    <!-- List Page -->
+    <div class="page" id="list-page">
+        <button class="back-btn" onclick="showCoverflowPage()">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        
+        <div class="page-content">
+            <header class="page-header">
+                <h2><i class="fas fa-list"></i> Records</h2>
+                <p class="page-subtitle">All your film rolls</p>
+            </header>
+            
             <div class="records-container" id="records-container">
-                <!-- Records will be inserted here by JavaScript -->
-                <div class="empty-list">
-                    <div class="empty-icon">
-                        <i class="fas fa-film"></i>
-                    </div>
-                    <h3>No records yet</h3>
-                    <p>Add your first film record</p>
-                    <button class="btn btn-primary" onclick="showAddPage()">
-                        <i class="fas fa-plus"></i> Add First Record
-                    </button>
-                </div>
+                <!-- Records will be added here by JavaScript -->
             </div>
-        </main>
-
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <button class="nav-item active" onclick="showListPage()">
-                <div class="nav-icon">
-                    <i class="fas fa-list"></i>
-                </div>
-                <div class="nav-label">Records</div>
-            </button>
-            
-            <button class="nav-item add-btn" onclick="showAddPage()">
-                <div class="nav-icon">
-                    <i class="fas fa-plus"></i>
-                </div>
-                <div class="nav-label">Add</div>
-            </button>
-            
-            <button class="nav-item" onclick="showStatsPage()">
-                <div class="nav-icon">
-                    <i class="fas fa-chart-bar"></i>
-                </div>
-                <div class="nav-label">Stats</div>
-            </button>
-        </nav>
+        </div>
     </div>
-
-    <!-- Add Record Page -->
-    <div id="add-page" class="page">
-        <!-- Header with Back Button -->
-        <header class="page-header">
-            <button class="back-btn" onclick="showListPage()">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            <div class="header-title">
-                <h2><i class="fas fa-plus-circle"></i> New Record</h2>
-                <p class="page-description">Add a new film photography record</p>
-            </div>
-        </header>
-
-        <!-- Add Record Form -->
-        <main class="form-content">
-            <!-- Photo Upload Section -->
-            <section class="form-section">
-                <h3><i class="fas fa-images"></i> Photos (Max 3)</h3>
-                <p class="section-description">Upload photos to show film colors and lighting</p>
-                
-                <div class="photo-upload-area">
-                    <div class="upload-box" id="upload-box-1" onclick="triggerUpload(1)">
-                        <i class="fas fa-plus"></i>
-                        <span>Add Photo 1</span>
-                        <input type="file" id="photo-1" accept="image/*" style="display: none;" onchange="handlePhotoUpload(1, this)">
-                    </div>
-                    <div class="upload-box" id="upload-box-2" onclick="triggerUpload(2)">
-                        <i class="fas fa-plus"></i>
-                        <span>Add Photo 2</span>
-                        <input type="file" id="photo-2" accept="image/*" style="display: none;" onchange="handlePhotoUpload(2, this)">
-                    </div>
-                    <div class="upload-box" id="upload-box-3" onclick="triggerUpload(3)">
-                        <i class="fas fa-plus"></i>
-                        <span>Add Photo 3</span>
-                        <input type="file" id="photo-3" accept="image/*" style="display: none;" onchange="handlePhotoUpload(3, this)">
-                    </div>
-                </div>
-                
-                <div class="photo-preview" id="photo-preview">
-                    <!-- Photo previews will appear here -->
-                </div>
-            </section>
-
-            <!-- Film Details Form -->
-            <section class="form-section">
-                <h3><i class="fas fa-info-circle"></i> Film Details</h3>
-                
-                <form id="film-form">
+    
+    <!-- Add Page -->
+    <div class="page" id="add-page">
+        <button class="back-btn" onclick="showCoverflowPage()">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        
+        <div class="page-content">
+            <header class="page-header">
+                <h2><i class="fas fa-plus"></i> Add Record</h2>
+                <p class="page-subtitle">Document your film roll</p>
+            </header>
+            
+            <form id="film-form" class="film-form">
+                <!-- Film Information -->
+                <div class="form-section">
+                    <h3><i class="fas fa-film"></i> Film Information</h3>
+                    
                     <div class="form-group">
                         <label for="film-name">
-                            <i class="fas fa-film"></i> Film Name/Brand
+                            <i class="fas fa-tag"></i> Film Name *
                         </label>
                         <input type="text" id="film-name" placeholder="e.g., Kodak Portra 400" required>
                     </div>
                     
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="film-type">
-                                <i class="fas fa-layer-group"></i> Film Type
-                            </label>
-                            <select id="film-type" required>
-                                <option value="">Select type</option>
-                                <option value="35mm">35mm</option>
-                                <option value="120">120 Medium Format</option>
-                                <option value="110">110</option>
-                                <option value="4x5">4x5 Large Format</option>
-                                <option value="instant">Instant Film</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="iso">
-                                <i class="fas fa-bolt"></i> ISO Speed
-                            </label>
-                            <input type="number" id="iso" placeholder="400" min="1" max="6400">
-                        </div>
-                    </div>
-                    
                     <div class="form-group">
-                        <label for="camera">
-                            <i class="fas fa-camera"></i> Camera Used
+                        <label for="film-type">
+                            <i class="fas fa-layer-group"></i> Film Type *
                         </label>
-                        <input type="text" id="camera" placeholder="e.g., Nikon FM2, Hasselblad 500C/M">
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="date-shot">
-                                <i class="fas fa-calendar"></i> Date Shot
-                            </label>
-                            <input type="date" id="date-shot">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="country">
-                                <i class="fas fa-globe"></i> Country/Region
-                            </label>
-                            <select id="country" class="select2-search" required>
-                                <option value="">Select country</option>
-                                <!-- Countries will be loaded by JavaScript -->
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="city">
-                            <i class="fas fa-map-marker-alt"></i> City
-                        </label>
-                        <select id="city" class="select2-search" disabled required>
-                            <option value="">Select country first</option>
+                        <select id="film-type" required>
+                            <option value="">Select type</option>
+                            <option value="Color Negative">Color Negative</option>
+                            <option value="Black & White">Black & White</option>
+                            <option value="Slide Film">Slide Film</option>
+                            <option value="Instant Film">Instant Film</option>
+                            <option value="Cinema Film">Cinema Film</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
-                        <label for="notes">
-                            <i class="fas fa-sticky-note"></i> Notes
+                        <label for="iso">
+                            <i class="fas fa-sun"></i> ISO
                         </label>
-                        <textarea id="notes" rows="3" placeholder="Lighting conditions, subjects, development notes, thoughts..."></textarea>
+                        <select id="iso">
+                            <option value="">Select ISO</option>
+                            <option value="50">ISO 50</option>
+                            <option value="100">ISO 100</option>
+                            <option value="200">ISO 200</option>
+                            <option value="400">ISO 400</option>
+                            <option value="800">ISO 800</option>
+                            <option value="1600">ISO 1600</option>
+                            <option value="3200">ISO 3200</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Camera Information -->
+                <div class="form-section">
+                    <h3><i class="fas fa-camera"></i> Camera Information</h3>
+                    
+                    <div class="form-group">
+                        <label for="camera">
+                            <i class="fas fa-camera-retro"></i> Camera Model
+                        </label>
+                        <input type="text" id="camera" placeholder="e.g., Nikon FM2">
                     </div>
                     
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="showListPage()">
-                            <i class="fas fa-times"></i> Cancel
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Save Record
-                        </button>
+                    <div class="form-group">
+                        <label for="date-shot">
+                            <i class="fas fa-calendar"></i> Date Shot
+                        </label>
+                        <input type="date" id="date-shot">
                     </div>
-                </form>
-            </section>
-        </main>
-
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <button class="nav-item" onclick="showListPage()">
-                <div class="nav-icon">
-                    <i class="fas fa-list"></i>
                 </div>
-                <div class="nav-label">Records</div>
-            </button>
-            
-            <button class="nav-item add-btn active" onclick="showAddPage()">
-                <div class="nav-icon">
-                    <i class="fas fa-plus"></i>
+                
+                <!-- Location Information -->
+                <div class="form-section">
+                    <h3><i class="fas fa-map-marker-alt"></i> Location</h3>
+                    
+                    <div class="form-group">
+                        <label for="country">
+                            <i class="fas fa-globe"></i> Country/Region *
+                        </label>
+                        <select id="country" required></select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="city">
+                            <i class="fas fa-city"></i> City *
+                        </label>
+                        <select id="city" required></select>
+                    </div>
                 </div>
-                <div class="nav-label">Add</div>
-            </button>
-            
-            <button class="nav-item" onclick="showStatsPage()">
-                <div class="nav-icon">
-                    <i class="fas fa-chart-bar"></i>
-                </div>
-                <div class="nav-label">Stats</div>
-            </button>
-        </nav>
-    </div>
-
-    <!-- Statistics Page -->
-    <div id="stats-page" class="page">
-        <!-- Header with Back Button -->
-        <header class="page-header">
-            <button class="back-btn" onclick="showListPage()">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            <div class="header-title">
-                <h2><i class="fas fa-chart-bar"></i> Statistics</h2>
-                <p class="page-description">Your film photography insights</p>
-            </div>
-        </header>
-
-        <!-- Statistics Content -->
-        <main class="stats-content">
-            <!-- Overview Stats -->
-            <section class="stats-section">
-                <h3><i class="fas fa-chart-pie"></i> Overview</h3>
-                <div class="stats-overview">
-                    <div class="stat-card primary">
-                        <div class="stat-icon">
-                            <i class="fas fa-film"></i>
+                
+                <!-- Photos -->
+                <div class="form-section">
+                    <h3><i class="fas fa-images"></i> Photos (Max 3)</h3>
+                    <p class="form-hint">Upload up to 3 photos. Large images will be automatically compressed.</p>
+                    
+                    <div class="photo-upload-container">
+                        <!-- Photo Upload Boxes -->
+                        <div class="upload-row">
+                            <div class="upload-box" id="upload-box-1" onclick="triggerUpload(1)">
+                                <i class="fas fa-plus"></i>
+                                <span>Photo 1</span>
+                                <input type="file" id="photo-1" accept="image/*" onchange="handlePhotoUpload(1, this)" style="display: none;">
+                            </div>
+                            
+                            <div class="upload-box" id="upload-box-2" onclick="triggerUpload(2)">
+                                <i class="fas fa-plus"></i>
+                                <span>Photo 2</span>
+                                <input type="file" id="photo-2" accept="image/*" onchange="handlePhotoUpload(2, this)" style="display: none;">
+                            </div>
+                            
+                            <div class="upload-box" id="upload-box-3" onclick="triggerUpload(3)">
+                                <i class="fas fa-plus"></i>
+                                <span>Photo 3</span>
+                                <input type="file" id="photo-3" accept="image/*" onchange="handlePhotoUpload(3, this)" style="display: none;">
+                            </div>
                         </div>
-                        <div class="stat-content">
-                            <div class="stat-value" id="stat-total">0</div>
+                        
+                        <!-- Photo Previews -->
+                        <div class="photo-preview" id="photo-preview">
+                            <!-- Previews will be added here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Notes -->
+                <div class="form-section">
+                    <h3><i class="fas fa-sticky-note"></i> Notes</h3>
+                    
+                    <div class="form-group">
+                        <label for="notes">
+                            <i class="fas fa-edit"></i> Additional Notes
+                        </label>
+                        <textarea id="notes" rows="3" placeholder="Any additional notes about this roll..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-large">
+                        <i class="fas fa-save"></i> Save Record
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Stats Page -->
+    <div class="page" id="stats-page">
+        <button class="back-btn" onclick="showCoverflowPage()">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        
+        <div class="page-content">
+            <header class="page-header">
+                <h2><i class="fas fa-chart-bar"></i> Statistics</h2>
+                <p class="page-subtitle">Your film photography insights</p>
+            </header>
+            
+            <div class="stats-container">
+                <!-- Overview Stats -->
+                <div class="stats-section">
+                    <h3><i class="fas fa-chart-pie"></i> Overview</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-total">0</div>
                             <div class="stat-label">Total Rolls</div>
                         </div>
-                    </div>
-                    
-                    <div class="stat-card secondary">
-                        <div class="stat-icon">
-                            <i class="fas fa-camera"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-value" id="stat-cameras">0</div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-cameras">0</div>
                             <div class="stat-label">Cameras Used</div>
                         </div>
-                    </div>
-                    
-                    <div class="stat-card tertiary">
-                        <div class="stat-icon">
-                            <i class="fas fa-map-marker-alt"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-value" id="stat-cities">0</div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="stat-cities">0</div>
                             <div class="stat-label">Cities Shot</div>
                         </div>
                     </div>
                 </div>
-            </section>
-
-            <!-- Most Used Camera -->
-            <section class="stats-section">
-                <h3><i class="fas fa-camera-retro"></i> Most Used Camera</h3>
-                <div class="stat-chart" id="camera-stats">
-                    <div class="empty-stat">
-                        <i class="fas fa-camera-slash"></i>
-                        <p>No camera data yet</p>
+                
+                <!-- Camera Stats -->
+                <div class="stats-section">
+                    <h3><i class="fas fa-camera"></i> Camera Usage</h3>
+                    <div class="stats-chart" id="camera-stats">
+                        <!-- Camera stats will be added here -->
                     </div>
                 </div>
-            </section>
-            
-            <!-- Most Used Film -->
-            <section class="stats-section">
-                <h3><i class="fas fa-film"></i> Most Used Film</h3>
-                <div class="stat-chart" id="film-stats">
-                    <div class="empty-stat">
-                        <i class="fas fa-film"></i>
-                        <p>No film data yet</p>
+                
+                <!-- Film Stats -->
+                <div class="stats-section">
+                    <h3><i class="fas fa-film"></i> Film Usage</h3>
+                    <div class="stats-chart" id="film-stats">
+                        <!-- Film stats will be added here -->
                     </div>
                 </div>
-            </section>
-            
-            <!-- City Statistics -->
-            <section class="stats-section">
-                <h3><i class="fas fa-map"></i> Top Shooting Cities</h3>
-                <div class="stat-chart" id="city-stats">
-                    <div class="empty-stat">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <p>No city data yet</p>
+                
+                <!-- City Stats -->
+                <div class="stats-section">
+                    <h3><i class="fas fa-map-marker-alt"></i> City Distribution</h3>
+                    <div class="stats-chart" id="city-stats">
+                        <!-- City stats will be added here -->
                     </div>
                 </div>
-            </section>
-            
-            <!-- Film Type Distribution -->
-            <section class="stats-section">
-                <h3><i class="fas fa-chart-pie"></i> Film Type Distribution</h3>
-                <div class="stat-chart" id="type-stats">
-                    <div class="empty-stat">
-                        <i class="fas fa-chart-pie"></i>
-                        <p>No type data yet</p>
+                
+                <!-- Type Stats -->
+                <div class="stats-section">
+                    <h3><i class="fas fa-chart-pie"></i> Film Type Distribution</h3>
+                    <div class="stats-chart" id="type-stats">
+                        <!-- Type stats will be added here -->
                     </div>
                 </div>
-            </section>
-        </main>
-
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <button class="nav-item" onclick="showListPage()">
-                <div class="nav-icon">
-                    <i class="fas fa-list"></i>
+                
+                <!-- Data Management -->
+                <div class="stats-section">
+                    <h3><i class="fas fa-database"></i> Data Management</h3>
+                    <div class="data-actions">
+                        <button class="btn btn-secondary" onclick="exportData()">
+                            <i class="fas fa-download"></i> Export Data
+                        </button>
+                        <button class="btn btn-secondary" onclick="importData()">
+                            <i class="fas fa-upload"></i> Import Data
+                        </button>
+                    </div>
                 </div>
-                <div class="nav-label">Records</div>
-            </button>
-            
-            <button class="nav-item add-btn" onclick="showAddPage()">
-                <div class="nav-icon">
-                    <i class="fas fa-plus"></i>
-                </div>
-                <div class="nav-label">Add</div>
-            </button>
-            
-            <button class="nav-item active" onclick="showStatsPage()">
-                <div class="nav-icon">
-                    <i class="fas fa-chart-bar"></i>
-                </div>
-                <div class="nav-label">Stats</div>
-            </button>
-        </nav>
+            </div>
+        </div>
     </div>
-
+    
+    <!-- Bottom Navigation (only on list, add, stats pages) -->
+    <div class="bottom-nav" id="bottom-nav">
+        <button class="nav-btn" onclick="showListPage()">
+            <i class="fas fa-list"></i>
+            <span>Records</span>
+        </button>
+        <button class="nav-btn" onclick="showAddPage()">
+            <i class="fas fa-plus"></i>
+            <span>Add</span>
+        </button>
+        <button class="nav-btn" onclick="showStatsPage()">
+            <i class="fas fa-chart-bar"></i>
+            <span>Stats</span>
+        </button>
+    </div>
+    
     <!-- Toast Notification -->
-    <div id="toast" class="toast">
+    <div class="toast" id="toast">
         <div class="toast-content">
             <i class="toast-icon"></i>
             <span class="toast-message"></span>
         </div>
     </div>
-
-    <!-- Scripts -->
+    
+    <!-- External Libraries -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
