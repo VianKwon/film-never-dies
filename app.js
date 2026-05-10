@@ -123,24 +123,22 @@ function switchPage(pageId) {
         selectedPage.classList.add('active');
         selectedPage.style.display = 'block';
         
-        // 3. Handle bottom nav
+        // 3. Handle bottom nav - 修改这里！
         const bottomNav = document.getElementById('bottom-nav');
         if (bottomNav) {
-            if (pageId === 'coverflow-page') {
-                bottomNav.style.display = 'none';
-                console.log('📱 Hiding bottom navigation');
-            } else {
-                bottomNav.style.display = 'flex';
-                console.log('📱 Showing bottom navigation');
-            }
+            // 永远显示底部导航
+            bottomNav.style.display = 'flex';
+            console.log('📱 显示底部导航（所有页面）');
         }
         
         // 4. Handle back buttons
         const backButtons = document.querySelectorAll('.back-btn');
         backButtons.forEach(btn => {
             if (pageId === 'coverflow-page') {
+                // 主页不需要返回按钮
                 btn.style.display = 'none';
             } else {
+                // 其他页面显示返回按钮
                 btn.style.display = 'flex';
             }
         });
