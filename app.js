@@ -258,27 +258,84 @@ function handlePhotoUpload(boxNumber, input) {
     const file = input.files[0];
     if (!file) return;
     
-    // Check file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-        showToast('Image size should be less than 5MB', 'error');
-        return;
-    }
-    
-    // Check file type
+    // 检查文件类型
     if (!file.type.startsWith('image/')) {
-        showToast('Please upload an image file', 'error');
+        showToast('请上传图片文件', 'error');
         return;
     }
     
+    // 检查文件大小（最大50MB，压缩后会变小）
+    if (file.size > 50 * 1024 * 1024) {
+        showToast('图片大小应小于50MB', 'error');
+        return;
+    }
+    
+    // 创建Canvas进行压缩
     const reader = new FileReader();
     reader.onload = function(e) {
-        uploadedPhotos[boxNumber] = e.target.result;
-        updatePhotoPreview(boxNumber, e.target.result);
-        showToast(`Photo ${boxNumber} uploaded`, 'success');
+        const img = new Image();
+        img.onload = function() {
+            // 计算压缩尺寸 - 针对胶片照片优化
+            const maxWidth = 1920; // 最大宽度，适合4K显示
+            const maxHeight = 1920; // 最大高度
+            let width = img.width;
+            let height = img.height;
+            
+            // 计算缩放比例，保持宽高比
+            if (width > maxWidth || height > maxHeight) {
+                const ratio = Math.min(maxWidth / width, maxHeight / height);
+                width = Math.floor(width * ratio);
+                height = Math.floor(height * ratio);
+            }
+            
+            // 创建Canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            
+            // 绘制图片
+            const ctx = canvas.getContext('2d');
+            
+            // 设置高质量压缩
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            
+            // 填充白色背景（防止透明背景变黑）
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            
+            // 绘制图片
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // 压缩质量设置（针对胶片照片优化）
+            let quality = 0.75; // 75%质量，平衡画质和文件大小
+            
+            // 如果是JPEG，使用更高压缩
+            if (file.type === 'image/jpeg' || file.type === 'image/jpg') {
+                quality = 0.7; // JPEG 70%质量
+            }
+            
+            // 转换为DataURL
+            canvas.toBlob(function(blob) {
+                const compressedReader = new FileReader();
+                compressedReader.onload = function(e) {
+                    uploadedPhotos[boxNumber] = e.target.result;
+                    updatePhotoPreview(boxNumber, e.target.result);
+                    
+                    // 显示压缩信息
+                    const originalSize = (file.size / 1024 / 1024).toFixed(2);
+                    const compressedSize = (blob.size / 1024 / 1024).toFixed(2);
+                    const compressionRatio = ((1 - blob.size / file.size) * 100).toFixed(1);
+                    
+                    showToast(`照片 ${boxNumber}: ${originalSize}MB → ${compressedSize}MB (压缩${compressionRatio}%)`, 'success');
+                };
+                compressedReader.readAsDataURL(blob);
+            }, file.type, quality);
+        };
+        img.src = e.target.result;
     };
     reader.readAsDataURL(file);
 }
-
 function updatePhotoPreview(boxNumber, imageData) {
     const uploadBox = document.getElementById(`upload-box-${boxNumber}`);
     const previewContainer = document.getElementById('photo-preview');
