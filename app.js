@@ -455,7 +455,11 @@ function removePhoto(boxNumber) {
     if (previewElement) {
         previewElement.remove();
     }
-    // Film Flow - Film Photography Journal
+    
+    showToast(`Photo ${boxNumber} removed`, 'warning');
+}
+
+// Film Flow - Film Photography Journal
 // Complete Application Logic - Part 2 of 2
 
 /* ====== FORM HANDLING ====== */
@@ -1264,5 +1268,3 @@ window.exportData = exportData;
 window.importData = importData;
 
 console.log('🎉 Film Flow application loaded successfully!');
-    showToast(`Photo ${boxNumber} removed`, 'warning');
-}
