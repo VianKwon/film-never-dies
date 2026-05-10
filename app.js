@@ -66,17 +66,53 @@ let uploadedPhotos = { 1: null, 2: null, 3: null };
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🎬 Film Flow Initializing...');
     
-    // Load existing films
-    loadFilms();
+    // 移动端优化
+    if (isMobile) {
+        setupMobileEvents();
+    }
     
-    // Setup navigation
+    // 初始化Select2（需要等待jQuery加载）
+    setTimeout(() => {
+        initSelect2();
+    }, 500); // 给jQuery和Select2更多时间加载
+    
+    // 设置照片上传
+    setupPhotoUpload();
+    
+    // 设置导航
     setupNavigation();
     
-    // Show initial page
+    // 加载数据
+    loadFilms();
+    
+    // 显示初始页面
     showCoverflowPage();
     
     console.log('✅ Film Flow Ready');
 });
+// ====== COUNTRY/REGION AND CITY DATA ======
+const countriesRegions = [
+    { code: 'CN', name: 'China', type: 'country', cities: ['Beijing', 'Shanghai', 'Guangzhou', 'Shenzhen', 'Chengdu', 'Hangzhou', 'Nanjing', 'Wuhan', 'Xi\'an', 'Chongqing', 'Tianjin', 'Qingdao', 'Dalian', 'Xiamen'] },
+    { code: 'CN-HK', name: 'Hong Kong, China', type: 'region', cities: ['Hong Kong Island', 'Kowloon', 'New Territories', 'Lantau Island', 'Tsuen Wan', 'Tuen Mun', 'Yuen Long', 'North District'] },
+    { code: 'CN-TW', name: 'Taiwan, China', type: 'region', cities: ['Taipei', 'Kaohsiung', 'Taichung', 'Tainan', 'Banqiao', 'Hsinchu', 'Keelung', 'Chiayi', 'Taoyuan', 'Changhua', 'Pingtung', 'Hualien', 'Taitung'] },
+    { code: 'CN-MO', name: 'Macau, China', type: 'region', cities: ['Macau Peninsula', 'Taipa', 'Coloane', 'Cotai'] },
+    { code: 'JP', name: 'Japan', type: 'country', cities: ['Tokyo', 'Osaka', 'Kyoto', 'Yokohama', 'Nagoya', 'Sapporo', 'Fukuoka', 'Kobe', 'Hiroshima', 'Sendai', 'Kawasaki', 'Saitama', 'Chiba', 'Kitakyushu'] },
+    { code: 'US', name: 'United States', type: 'country', cities: ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia', 'San Antonio', 'San Diego', 'Dallas', 'San Jose', 'Austin', 'Jacksonville', 'Fort Worth', 'Columbus'] },
+    { code: 'GB', name: 'United Kingdom', type: 'country', cities: ['London', 'Birmingham', 'Manchester', 'Liverpool', 'Leeds', 'Sheffield', 'Bristol', 'Glasgow', 'Edinburgh', 'Cardiff', 'Belfast', 'Leicester', 'Bradford', 'Coventry'] },
+    { code: 'FR', name: 'France', type: 'country', cities: ['Paris', 'Marseille', 'Lyon', 'Toulouse', 'Nice', 'Nantes', 'Strasbourg', 'Montpellier', 'Bordeaux', 'Lille', 'Rennes', 'Reims', 'Saint-Étienne', 'Toulon'] },
+    { code: 'DE', name: 'Germany', type: 'country', cities: ['Berlin', 'Hamburg', 'Munich', 'Cologne', 'Frankfurt', 'Stuttgart', 'Düsseldorf', 'Dortmund', 'Essen', 'Leipzig', 'Bremen', 'Dresden', 'Hanover', 'Nuremberg'] },
+    { code: 'IT', name: 'Italy', type: 'country', cities: ['Rome', 'Milan', 'Naples', 'Turin', 'Palermo', 'Genoa', 'Bologna', 'Florence', 'Venice', 'Verona', 'Trieste', 'Padua', 'Taranto', 'Brescia'] },
+    { code: 'KR', name: 'South Korea', type: 'country', cities: ['Seoul', 'Busan', 'Incheon', 'Daegu', 'Daejeon', 'Gwangju', 'Suwon', 'Ulsan', 'Changwon', 'Goyang', 'Yongin', 'Bucheon', 'Ansan', 'Cheongju'] },
+    { code: 'AU', name: 'Australia', type: 'country', cities: ['Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide', 'Gold Coast', 'Canberra', 'Newcastle', 'Wollongong', 'Hobart', 'Geelong', 'Townsville', 'Cairns', 'Darwin'] },
+    { code: 'CA', name: 'Canada', type: 'country', cities: ['Toronto', 'Montreal', 'Vancouver', 'Calgary', 'Edmonton', 'Ottawa', 'Winnipeg', 'Quebec City', 'Hamilton', 'Kitchener', 'London', 'Victoria', 'Halifax', 'Oshawa'] },
+    { code: 'SG', name: 'Singapore', type: 'country', cities: ['Singapore'] },
+    { code: 'MY', name: 'Malaysia', type: 'country', cities: ['Kuala Lumpur', 'George Town', 'Johor Bahru', 'Ipoh', 'Shah Alam', 'Petaling Jaya', 'Kuching', 'Kota Kinabalu', 'Malacca City', 'Alor Setar', 'Kuala Terengganu', 'Kuantan', 'Sandakan', 'Tawau'] },
+    { code: 'TH', name: 'Thailand', type: 'country', cities: ['Bangkok', 'Chiang Mai', 'Pattaya', 'Phuket', 'Khon Kaen', 'Udon Thani', 'Hat Yai', 'Nakhon Ratchasima', 'Surat Thani', 'Nakhon Si Thammarat', 'Ubon Ratchathani', 'Songkhla', 'Pathum Thani', 'Samut Prakan'] },
+    { code: 'VN', name: 'Vietnam', type: 'country', cities: ['Hanoi', 'Ho Chi Minh City', 'Da Nang', 'Haiphong', 'Can Tho', 'Bien Hoa', 'Nha Trang', 'Hue', 'Vung Tau', 'Qui Nhon', 'Rach Gia', 'Long Xuyen', 'Thai Nguyen', 'Nam Dinh'] },
+    { code: 'PH', name: 'Philippines', type: 'country', cities: ['Manila', 'Quezon City', 'Davao City', 'Caloocan', 'Cebu City', 'Zamboanga City', 'Taguig', 'Antipolo', 'Pasig', 'Valenzuela', 'Dasmarinas', 'Parañaque', 'Bacoor', 'General Santos'] },
+    { code: 'ID', name: 'Indonesia', type: 'country', cities: ['Jakarta', 'Surabaya', 'Bandung', 'Medan', 'Semarang', 'Makassar', 'Palembang', 'Depok', 'Tangerang', 'South Tangerang', 'Semarang', 'Makassar', 'Batam', 'Pekanbaru'] },
+    { code: 'IN', name: 'India', type: 'country', cities: ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Ahmedabad', 'Chennai', 'Kolkata', 'Surat', 'Pune', 'Jaipur', 'Lucknow', 'Kanpur', 'Nagpur', 'Visakhapatnam'] }
+];
 
 // ====== PAGE NAVIGATION ======
 function showCoverflowPage() {
@@ -164,7 +200,120 @@ function setupNavigation() {
             }
         };
     });
+    // ====== SELECT2 INITIALIZATION ======
+function initSelect2() {
+    console.log('🌍 Initializing Select2...');
     
+    // 检查jQuery和Select2是否加载
+    if (typeof jQuery === 'undefined') {
+        console.error('❌ jQuery not loaded! Please check if jQuery is included in index.html');
+        return;
+    }
+    
+    if (typeof jQuery.fn.select2 === 'undefined') {
+        console.error('❌ Select2 not loaded! Please check if Select2 is included in index.html');
+        return;
+    }
+    
+    console.log('✅ jQuery and Select2 are loaded');
+    
+    // 初始化国家/地区选择
+    $('#country').select2({
+        placeholder: 'Select country/region',
+        allowClear: true,
+        width: '100%',
+        theme: 'default'
+    });
+    
+    // 初始化城市选择（初始时禁用）
+    $('#city').select2({
+        placeholder: 'Select city',
+        allowClear: true,
+        width: '100%',
+        theme: 'default',
+        disabled: true
+    });
+    
+    // 填充国家/地区数据
+    populateCountries();
+    
+    // 监听国家/地区变化
+    $('#country').on('change', function() {
+        const countryCode = $(this).val();
+        console.log('Country selected:', countryCode);
+        updateCities(countryCode);
+    });
+    
+    console.log('✅ Select2 initialized successfully');
+}
+
+function populateCountries() {
+    const countrySelect = document.getElementById('country');
+    if (!countrySelect) {
+        console.error('❌ Country select element not found');
+        return;
+    }
+    
+    // 清空现有选项
+    countrySelect.innerHTML = '';
+    
+    // 添加默认选项
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Select country/region';
+    countrySelect.appendChild(defaultOption);
+    
+    // 添加国家/地区选项
+    countriesRegions.forEach(country => {
+        const option = document.createElement('option');
+        option.value = country.code;
+        option.textContent = country.name;
+        countrySelect.appendChild(option);
+    });
+    
+    console.log(`✅ Populated ${countriesRegions.length} countries/regions`);
+}
+
+function updateCities(countryCode) {
+    const citySelect = document.getElementById('city');
+    const select2City = $('#city');
+    
+    if (!countryCode) {
+        // 禁用城市选择
+        citySelect.disabled = true;
+        select2City.prop('disabled', true);
+        select2City.empty();
+        select2City.append('<option value="">Select country/region first</option>');
+        select2City.val('').trigger('change');
+        return;
+    }
+    
+    // 查找选中的国家/地区
+    const country = countriesRegions.find(c => c.code === countryCode);
+    if (!country) {
+        console.error('❌ Country not found:', countryCode);
+        return;
+    }
+    
+    // 启用城市选择
+    citySelect.disabled = false;
+    select2City.prop('disabled', false);
+    
+    // 清空现有选项
+    select2City.empty();
+    select2City.append('<option value="">Select city</option>');
+    
+    // 添加城市选项
+    country.cities.forEach(city => {
+        const option = document.createElement('option');
+        option.value = city;
+        option.textContent = city;
+        citySelect.appendChild(option);
+    });
+    
+    select2City.val('').trigger('change');
+    console.log(`✅ Populated ${country.cities.length} cities for ${country.name}`);
+}
     // Back buttons
     const backButtons = document.querySelectorAll('.back-btn');
     backButtons.forEach(btn => {
@@ -177,6 +326,8 @@ function setupNavigation() {
     
     console.log(`✅ ${navButtons.length} nav buttons, ${backButtons.length} back buttons setup`);
 }
+
+
 
 // ====== COVER FLOW ======
 function initCoverFlow() {
