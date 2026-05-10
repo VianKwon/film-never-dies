@@ -71,7 +71,7 @@ body {
 /* ====== PAGE CONTAINER ====== */
 .page {
     display: none;
-    min-height: calc(100vh - 80px);
+    min-height: calc(100vh - 70px);
     width: 100%;
     position: relative;
     top: 0;
@@ -79,7 +79,8 @@ body {
     opacity: 0;
     transition: opacity var(--transition-normal);
     padding: var(--spacing-lg);
-    padding-bottom: 80px; /* Space for bottom nav */
+    padding-bottom: 70px;
+    overflow: hidden;
 }
 
 .page.active {
@@ -118,32 +119,33 @@ body {
 
 /* ====== COVER FLOW PAGE ====== */
 .coverflow-container {
-    min-height: calc(100vh - 140px); 
+    min-height: calc(100vh - 140px);
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    padding: 20px var(--spacing-xl) 80px;
+    justify-content: center;
+    padding: 0 var(--spacing-xl) 100px;
     text-align: center;
-    margin-top: 20px;
+    position: relative;
 }
 
 .coverflow-header {
     text-align: center;
-    margin-bottom: 20px;
-    margin-top: 10px;
+    margin-bottom: 10px; 
     padding: 0 20px;
+    position: relative;
+    z-index: 2;
 }
 
 .coverflow-header h1 {
-    font-size: 2.2rem; 
+    font-size: 2rem; 
     font-weight: 800;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     color: var(--label-primary);
 }
 
 .coverflow-header .subtitle {
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: var(--label-tertiary);
     font-weight: 500;
 }
@@ -162,6 +164,7 @@ body {
     align-items: center;
     justify-content: center;
     height: 400px;
+    margin-top: -30px;
     position: relative;
     cursor: grab;
     user-select: none;
@@ -179,7 +182,7 @@ body {
     border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: var(--shadow-lg);
-    transition: all var(--transition-slow);
+    transition: all 0.3s ease;
     transform-origin: center;
     z-index: 1;
 }
@@ -195,8 +198,8 @@ body {
 .coverflow-item.center {
     width: 400px;
     height: 400px;
-    z-index: 3;
-    transform: translateX(0) scale(1);
+    z-index: 5;
+    transform: scale(1.1);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
 }
 
@@ -238,22 +241,26 @@ body {
 
 /* Cover Flow Info */
 .coverflow-info {
-    margin-top: 20px; 
+    position: absolute; 
+    bottom: 80px;
+    left: 0;
+    right: 0;
     text-align: center;
-    position: relative;
-    z-index: 10;
     padding: 0 20px;
+    z-index: 10;
+    background: linear-gradient(to top, var(--system-background) 30%, transparent);
+    padding-top: 20px;
+    padding-bottom: 10px;
 }
-
 .info-camera {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 600;
     color: var(--label-primary);
-    margin-bottom: 4px; 
+    margin-bottom: 4px;
 }
 
 .info-film {
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: var(--label-tertiary);
 }
 
@@ -878,10 +885,34 @@ body {
     .page-content {
         padding: var(--spacing-md);
     }
+
+    .coverflow-container {
+        min-height: calc(100vh - 120px);
+        padding-bottom: 90px;
+    }
+    
+    .coverflow-header .subtitle {
+        font-size: 0.9rem;
+    }
     
     .coverflow-header h1 {
-        font-size: 2rem;
+        font-size: 1.8rem;
     }
+
+    #coverflow-track {
+        margin-top: -40px; 
+    }
+    
+    .coverflow-info {
+        bottom: 70px;
+    }
+    
+    .info-camera {
+        font-size: 1.1rem;
+    }
+    
+    .info-film {
+        font-size: 0.95rem;
     
     .coverflow-item {
         width: 250px;
@@ -951,6 +982,24 @@ body {
     .coverflow-item {
         width: 200px;
         height: 200px;
+    }
+    
+    .coverflow-container {
+        min-height: calc(100vh - 110px);
+        padding: 0 15px 85px;
+    }
+
+    .coverflow-header h1 {
+        font-size: 1.6rem;
+    }
+    
+    #coverflow-track {
+        margin-top: -50px;
+    }
+    
+    .coverflow-info {
+        bottom: 65px;
+        padding: 0 15px;
     }
     
     .coverflow-item.center {
