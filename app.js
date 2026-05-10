@@ -1,5 +1,62 @@
 // Film Flow - Clean Version
+// ====== MOBILE DETECTION & OPTIMIZATION ======
+const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|Windows Phone/i.test(navigator.userAgent);
+const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+const isAndroid = /Android/i.test(navigator.userAgent);
 
+console.log(`📱 Device Info:
+  Mobile: ${isMobile}
+  iOS: ${isIOS}
+  Android: ${isAndroid}
+  User Agent: ${navigator.userAgent.substring(0, 80)}...
+`);
+
+// 移动端优化
+if (isMobile) {
+    // 添加移动端class
+    document.documentElement.classList.add('mobile-device');
+    
+    // iOS 特殊处理
+    if (isIOS) {
+        document.documentElement.classList.add('ios-device');
+        console.log('📱 iOS device detected, applying optimizations');
+    }
+    
+    // Android 特殊处理
+    if (isAndroid) {
+        document.documentElement.classList.add('android-device');
+        console.log('📱 Android device detected, applying optimizations');
+    }
+}
+
+// 移动端事件优化
+function setupMobileEvents() {
+    if (!isMobile) return;
+    
+    console.log('📱 Setting up mobile events');
+    
+    // 防止双击缩放
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function(event) {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, false);
+    
+    // 优化按钮点击反馈
+    const buttons = document.querySelectorAll('button, .btn, .nav-btn');
+    buttons.forEach(btn => {
+        btn.addEventListener('touchstart', function() {
+            this.style.opacity = '0.8';
+        });
+        
+        btn.addEventListener('touchend', function() {
+            this.style.opacity = '1';
+        });
+    });
+}
 // ====== GLOBAL VARIABLES (ONLY ONE DECLARATION) ======
 let films = [];
 let currentCoverFlowIndex = 0;
