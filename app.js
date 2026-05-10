@@ -883,3 +883,657 @@ function getCountryName(countryCode) {
     const country = countries.find(c => c.code === countryCode);
     return country ? country.name : countryCode;
 }
+// Photo Upload Functions
+function triggerUpload(boxNumber) {
+    document.getElementById(`photo-${boxNumber}`).click();
+}
+
+function handlePhotoUpload(boxNumber, input) {
+    const file = input.files[0];
+    if (!file) return;
+    
+    // 检查文件类型
+    if (!file.type.startsWith('image/')) {
+        showToast('请上传图片文件', 'error');
+        return;
+    }
+    
+    // 检查文件大小（最大50MB，压缩后会变小）
+    if (file.size > 50 * 1024 * 1024) {
+        showToast('图片大小应小于50MB', 'error');
+        return;
+    }
+    
+    // 创建Canvas进行压缩
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+            // 计算压缩尺寸 - 针对胶片照片优化
+            const maxWidth = 1920; // 最大宽度，适合4K显示
+            const maxHeight = 1920; // 最大高度
+            let width = img.width;
+            let height = img.height;
+            
+            // 计算缩放比例，保持宽高比
+            if (width > maxWidth || height > maxHeight) {
+                const ratio = Math.min(maxWidth / width, maxHeight / height);
+                width = Math.floor(width * ratio);
+                height = Math.floor(height * ratio);
+            }
+            
+            // 创建Canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            
+            // 绘制图片
+            const ctx = canvas.getContext('2d');
+            
+            // 设置高质量压缩
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            
+            // 填充白色背景（防止透明背景变黑）
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            
+            // 绘制图片
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // 压缩质量设置（针对胶片照片优化）
+            let quality = 0.75; // 75%质量，平衡画质和文件大小
+            
+            // 如果是JPEG，使用更高压缩
+            if (file.type === 'image/jpeg' || file.type === 'image/jpg') {
+                quality = 0.7; // JPEG 70%质量
+            }
+            
+            // 转换为DataURL
+            canvas.toBlob(function(blob) {
+                const compressedReader = new FileReader();
+                compressedReader.onload = function(e) {
+                    uploadedPhotos[boxNumber] = e.target.result;
+                    updatePhotoPreview(boxNumber, e.target.result);
+                    
+                    // 显示压缩信息
+                    const originalSize = (file.size / 1024 / 1024).toFixed(2);
+                    const compressedSize = (blob.size / 1024 / 1024).toFixed(2);
+                    const compressionRatio = ((1 - blob.size / file.size) * 100).toFixed(1);
+                    
+                    showToast(`照片 ${boxNumber}: ${originalSize}MB → ${compressedSize}MB (压缩${compressionRatio}%)`, 'success');
+                };
+                compressedReader.readAsDataURL(blob);
+            }, file.type, quality);
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function updatePhotoPreview(boxNumber, imageData) {
+    const uploadBox = document.getElementById(`upload-box-${boxNumber}`);
+    const previewContainer = document.getElementById('photo-preview');
+    
+    // Hide upload box
+    uploadBox.style.display = 'none';
+    
+    // Create preview element
+    let previewElement = document.getElementById(`preview-${boxNumber}`);
+    if (!previewElement) {
+        previewElement = document.createElement('div');
+        previewElement.id = `preview-${boxNumber}`;
+        previewElement.className = 'preview-image';
+        previewContainer.appendChild(previewElement);
+    }
+    
+    previewElement.innerHTML = `
+        <img src="${imageData}" alt="Preview ${boxNumber}">
+        <button class="remove-photo" onclick="removePhoto(${boxNumber})">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+}
+
+function removePhoto(boxNumber) {
+    uploadedPhotos[boxNumber] = null;
+    
+    // Show upload box
+    const uploadBox = document.getElementById(`upload-box-${boxNumber}`);
+    uploadBox.style.display = 'flex';
+    
+    // Remove preview
+    const previewElement = document.getElementById(`preview-${boxNumber}`);
+    if (previewElement) {
+        previewElement.remove();
+    }
+    
+    showToast(`Photo ${boxNumber} removed`, 'warning');
+}
+
+// Save Film Record
+function saveFilmRecord() {
+    // Get form values
+    const filmName = document.getElementById('film-name').value.trim();
+    const filmType = document.getElementById('film-type').value;
+    const iso = document.getElementById('iso').value;
+    const camera = document.getElementById('camera').value.trim();
+    const dateShot = document.getElementById('date-shot').value;
+    const country = document.getElementById('country').value;
+    const city = document.getElementById('city').value;
+    const notes = document.getElementById('notes').value.trim();
+    
+    // Validate required fields
+    if (!filmName || !filmType) {
+        showToast('Please fill in Film Name and Film Type', 'error');
+        return;
+    }
+    
+    if (!country) {
+        showToast('Please select a country/region', 'error');
+        return;
+    }
+    
+    if (!city) {
+        showToast('Please select a city', 'error');
+        return;
+    }
+    
+    // Collect uploaded photos
+    const photos = [];
+    for (let i = 1; i <= 3; i++) {
+        if (uploadedPhotos[i]) {
+            photos.push(uploadedPhotos[i]);
+        }
+    }
+    
+    // Create film object
+    const film = {
+        id: Date.now(),
+        name: filmName,
+        type: filmType,
+        iso: iso || null,
+        camera: camera || null,
+        date: dateShot || new Date().toISOString().split('T')[0],
+        country: country,
+        city: city,
+        notes: notes || null,
+        photos: photos,
+        createdAt: new Date().toISOString()
+    };
+    
+    // Add to films array
+    films.push(film);
+    
+    // Save to localStorage
+    saveFilms();
+    
+    // Reset form
+    resetForm();
+    
+    // Show success message
+    showToast(`"${filmName}" saved successfully!`, 'success');
+    
+    // Switch to list page
+    setTimeout(() => {
+        showListPage();
+    }, 1000);
+}
+
+// Reset form
+function resetForm() {
+    document.getElementById('film-form').reset();
+    
+    // Reset photos
+    for (let i = 1; i <= 3; i++) {
+        uploadedPhotos[i] = null;
+        const uploadBox = document.getElementById(`upload-box-${i}`);
+        if (uploadBox) uploadBox.style.display = 'flex';
+    }
+    
+    // Clear previews
+    const previewContainer = document.getElementById('photo-preview');
+    previewContainer.innerHTML = '';
+    
+    // Reset city select
+    $('#city').prop('disabled', true).empty().append('<option value="">Select country first</option>').val('').trigger('change');
+}
+
+// Save films to localStorage
+function saveFilms() {
+    try {
+        localStorage.setItem('filmFlowRecords', JSON.stringify(films));
+    } catch (e) {
+        showToast('Error saving data: ' + e.message, 'error');
+    }
+}
+
+// Load films from localStorage
+function loadFilms() {
+    try {
+        const saved = localStorage.getItem('filmFlowRecords');
+        if (saved) {
+            films = JSON.parse(saved);
+            
+            // Ensure photos are properly loaded
+            films.forEach(film => {
+                if (!film.photos) film.photos = [];
+            });
+        }
+    } catch (e) {
+        showToast('Error loading data: ' + e.message, 'error');
+        films = [];
+    }
+}
+
+// Update statistics
+function updateStatistics() {
+    // Update overview stats
+    document.getElementById('stat-total').textContent = films.length;
+    
+    // Count unique cameras
+    const cameras = new Set();
+    films.forEach(film => {
+        if (film.camera) cameras.add(film.camera);
+    });
+    document.getElementById('stat-cameras').textContent = cameras.size;
+    
+    // Count unique cities
+    const cities = new Set();
+    films.forEach(film => {
+        if (film.city) cities.add(film.city);
+    });
+    document.getElementById('stat-cities').textContent = cities.size;
+    
+    // Update detailed stats
+    updateCameraStats();
+    updateFilmStats();
+    updateCityStats();
+    updateTypeStats();
+}
+
+// Update camera statistics
+function updateCameraStats() {
+    const cameraStats = document.getElementById('camera-stats');
+    
+    if (films.length === 0) {
+        cameraStats.innerHTML = `
+            <div class="empty-stat">
+                <i class="fas fa-camera-slash"></i>
+                <p>No camera data yet</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Count films by camera
+    const cameraCount = {};
+    films.forEach(film => {
+        if (film.camera) {
+            cameraCount[film.camera] = (cameraCount[film.camera] || 0) + 1;
+        }
+    });
+    
+    // Create bar chart
+    let html = '';
+    const cameras = Object.keys(cameraCount).sort((a, b) => cameraCount[b] - cameraCount[a]);
+    
+    cameras.forEach(camera => {
+        const count = cameraCount[camera];
+        const percentage = (count / films.length) * 100;
+        
+        html += `
+            <div class="bar-item">
+                <div class="bar-label">
+                    <span>${camera}</span>
+                    <span>${count} roll${count > 1 ? 's' : ''}</span>
+                </div>
+                <div class="bar-container">
+                    <div class="bar-fill" style="width: ${percentage}%"></div>
+                    <div class="bar-value">${Math.round(percentage)}%</div>
+                </div>
+            </div>
+        `;
+    });
+    
+    cameraStats.innerHTML = html;
+}
+
+// Update film statistics
+function updateFilmStats() {
+    const filmStats = document.getElementById('film-stats');
+    
+    if (films.length === 0) {
+        filmStats.innerHTML = `
+            <div class="empty-stat">
+                <i class="fas fa-film"></i>
+                <p>No film data yet</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Count films by name
+    const filmCount = {};
+    films.forEach(film => {
+        filmCount[film.name] = (filmCount[film.name] || 0) + 1;
+    });
+    
+    // Create bar chart
+    let html = '';
+    const filmNames = Object.keys(filmCount).sort((a, b) => filmCount[b] - filmCount[a]);
+    
+    filmNames.forEach(filmName => {
+        const count = filmCount[filmName];
+        const percentage = (count / films.length) * 100;
+        
+        html += `
+            <div class="bar-item">
+                <div class="bar-label">
+                    <span>${filmName}</span>
+                    <span>${count} roll${count > 1 ? 's' : ''}</span>
+                </div>
+                <div class="bar-container">
+                    <div class="bar-fill" style="width: ${percentage}%"></div>
+                    <div class="bar-value">${Math.round(percentage)}%</div>
+                </div>
+            </div>
+        `;
+    });
+    
+    filmStats.innerHTML = html;
+}
+
+// Update city statistics
+function updateCityStats() {
+    const cityStats = document.getElementById('city-stats');
+    
+    if (films.length === 0) {
+        cityStats.innerHTML = `
+            <div class="empty-stat">
+                <i class="fas fa-map-marker-alt"></i>
+                <p>No city data yet</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Count films by city
+    const cityCount = {};
+    films.forEach(film => {
+        if (film.city) {
+            cityCount[film.city] = (cityCount[film.city] || 0) + 1;
+        }
+    });
+    
+    // Create bar chart
+    let html = '';
+    const cities = Object.keys(cityCount).sort((a, b) => cityCount[b] - cityCount[a]);
+    
+    cities.forEach(city => {
+        const count = cityCount[city];
+        const percentage = (count / films.length) * 100;
+        
+        html += `
+            <div class="bar-item">
+                <div class="bar-label">
+                    <span>${city}</span>
+                    <span>${count} roll${count > 1 ? 's' : ''}</span>
+                </div>
+                <div class="bar-container">
+                    <div class="bar-fill" style="width: ${percentage}%"></div>
+                    <div class="bar-value">${Math.round(percentage)}%</div>
+                </div>
+            </div>
+        `;
+    });
+    
+    cityStats.innerHTML = html;
+}
+
+// Update film type statistics
+function updateTypeStats() {
+    const typeStats = document.getElementById('type-stats');
+    
+    if (films.length === 0) {
+        typeStats.innerHTML = `
+            <div class="empty-stat">
+                <i class="fas fa-chart-pie"></i>
+                <p>No type data yet</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Count films by type
+    const typeCount = {};
+    films.forEach(film => {
+        typeCount[film.type] = (typeCount[film.type] || 0) + 1;
+    });
+    
+    // Create pie chart (simplified)
+    let html = '<div class="pie-chart">';
+    const types = Object.keys(typeCount);
+    let startAngle = 0;
+    
+    // Colors for pie chart
+    const colors = ['#0a84ff', '#30d158', '#ff9f0a', '#ff375f', '#bf5af2', '#5e5ce6'];
+    
+    types.forEach((type, index) => {
+        const count = typeCount[type];
+        const percentage = (count / films.length) * 100;
+        const angle = (percentage / 100) * 360;
+        
+        html += `
+            <div class="pie-segment" style="
+                --start-angle: ${startAngle}deg;
+                --end-angle: ${startAngle + angle}deg;
+                --color: ${colors[index % colors.length]};
+            ">
+                <div class="segment-label">${type} (${count})</div>
+            </div>
+        `;
+        
+        startAngle += angle;
+    });
+    
+    html += '</div>';
+    typeStats.innerHTML = html;
+}
+
+// Format date
+function formatDate(dateString) {
+    if (!dateString) return 'Unknown date';
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+}
+
+// Toast notification system
+function initToast() {
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+    
+    // Create toast if it doesn't exist
+    if (!toast) {
+        const toastElement = document.createElement('div');
+        toastElement.id = 'toast';
+        toastElement.className = 'toast';
+        toastElement.innerHTML = `
+            <div class="toast-content">
+                <i class="toast-icon"></i>
+                <span class="toast-message"></span>
+            </div>
+        `;
+        document.body.appendChild(toastElement);
+    }
+}
+
+function showToast(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+    
+    // Set icon based on type
+    const iconMap = {
+        success: 'fas fa-check-circle',
+        error: 'fas fa-exclamation-circle',
+        warning: 'fas fa-exclamation-triangle',
+        info: 'fas fa-info-circle'
+    };
+    
+    const toastIcon = toast.querySelector('.toast-icon');
+    const toastMessage = toast.querySelector('.toast-message');
+    
+    toastIcon.className = `toast-icon ${iconMap[type] || iconMap.info}`;
+    toastMessage.textContent = message;
+    
+    // Show toast
+    toast.classList.add('show');
+    
+    // Hide after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+}
+
+// Add CSS for statistics and pie chart
+const statsStyle = document.createElement('style');
+statsStyle.textContent = `
+    .bar-item {
+        margin-bottom: 12px;
+    }
+    
+    .bar-label {
+        font-size: 14px;
+        margin-bottom: 4px;
+        color: var(--label-secondary);
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .bar-container {
+        height: 8px;
+        background: var(--tertiary-background);
+        border-radius: 4px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent-color), var(--accent-secondary));
+        border-radius: 4px;
+        transition: width 0.5s ease;
+    }
+    
+    .bar-value {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--label-primary);
+    }
+    
+    .pie-chart {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        position: relative;
+        margin: 0 auto;
+        background: conic-gradient(
+            var(--color1, #0a84ff) 0% 30%,
+            var(--color2, #30d158) 30% 60%,
+            var(--color3, #ff9f0a) 60% 100%
+        );
+    }
+    
+    .pie-segment {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 50% 0%);
+        transform: rotate(var(--start-angle, 0deg));
+    }
+    
+    .segment-label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+`;
+document.head.appendChild(statsStyle);
+
+// Export data function
+function exportData() {
+    const data = {
+        version: '2.0',
+        app: 'Film Flow',
+        exportedAt: new Date().toISOString(),
+        totalFilms: films.length,
+        films: films
+    };
+    
+    const jsonString = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `film-flow-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showToast('Data exported successfully!', 'success');
+}
+
+// Import data function
+function importData() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    
+    input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                
+                if (!data.films || !Array.isArray(data.films)) {
+                    throw new Error('Invalid file format');
+                }
+                
+                if (confirm(`Import ${data.films.length} film records? This will replace your current data.`)) {
+                    films = data.films;
+                    saveFilms();
+                    initCoverFlow();
+                    renderRecordsList();
+                    updateStatistics();
+                    showToast(`Imported ${data.films.length} films`, 'success');
+                }
+            } catch (error) {
+                showToast('Error importing: ' + error.message, 'error');
+            }
+        };
+        reader.readAsText(file);
+    };
+    
+    input.click();
+}
