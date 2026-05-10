@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎞️ Film Never Dies - Film Record System</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎞️</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🎞️ Film Never Dies</h1>
+            <p class="subtitle">Your digital film recording system</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Add Film Form -->
+            <section class="card">
+                <h2>📝 Add New Film</h2>
+                <form id="filmForm">
+                    <div class="form-group">
+                        <label for="filmName">Film Name/Brand</label>
+                        <input type="text" id="filmName" placeholder="e.g., Kodak Portra 400" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="filmType">Film Type</label>
+                            <select id="filmType" required>
+                                <option value="">Select type</option>
+                                <option value="35mm">35mm</option>
+                                <option value="120">120 (Medium Format)</option>
+                                <option value="110">110</option>
+                                <option value="4x5">4x5 (Large Format)</option>
+                                <option value="8mm">8mm Movie</option>
+                                <option value="16mm">16mm Movie</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="iso">ISO Speed</label>
+                            <input type="number" id="iso" placeholder="e.g., 400" min="1" max="6400">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dateLoaded">Date Loaded</label>
+                            <input type="date" id="dateLoaded">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="camera">Camera Used</label>
+                            <input type="text" id="camera" placeholder="e.g., Nikon FM2">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" rows="3" placeholder="Location, subjects, special settings..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-icon">➕</span> Add Film Record
+                    </button>
+                </form>
+            </section>
+
+            <!-- Film Records -->
+            <section class="card">
+                <div class="section-header">
+                    <h2>📋 Film Records</h2>
+                    <div class="stats">
+                        <span id="totalFilms">0 films</span>
+                        <button class="btn btn-secondary" id="clearAll">Clear All</button>
+                    </div>
+                </div>
+                
+                <div class="filters">
+                    <select id="filterType">
+                        <option value="all">All Types</option>
+                        <option value="35mm">35mm</option>
+                        <option value="120">120</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <button class="btn btn-small" id="exportBtn">Export Data</button>
+                </div>
+                
+                <div id="filmList" class="film-list">
+                    <!-- Films will be displayed here -->
+                    <div class="empty-state">
+                        <div class="empty-icon">🎞️</div>
+                        <h3>No films recorded yet</h3>
+                        <p>Add your first film record above!</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Statistics -->
+            <section class="card">
+                <h2>📊 Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="statTotal">0</div>
+                        <div class="stat-label">Total Films</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat35mm">0</div>
+                        <div class="stat-label">35mm</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat120">0</div>
+                        <div class="stat-label">120</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statThisMonth">0</div>
+                        <div class="stat-label">This Month</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Film Never Dies © 2026 • Made by VianKwon</p>
+            <p class="footer-links">
+                <a href="#" id="exportData">Export Data</a> • 
+                <a href="#" id="importData">Import Data</a> • 
+                <a href="#" id="printData">Print</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Import/Export Modal -->
+    <div id="dataModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3 id="modalTitle">Export Data</h3>
+            <div id="modalBody">
+                <textarea id="dataText" rows="10" readonly></textarea>
+                <button class="btn btn-primary" id="copyBtn">Copy to Clipboard</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
