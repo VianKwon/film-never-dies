@@ -61,7 +61,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 500);
     
     // Setup photo upload
-    setupPhotoUpload();
+    setTimeout(() => {
+        setupPhotoUpload();
+    }, 100);
     
     // Setup form submission
     setupForm();
