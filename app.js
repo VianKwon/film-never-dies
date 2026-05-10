@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Global variables
-let films = [];
 let currentCoverFlowIndex = 0;
 let uploadedPhotos = {
     1: null,
