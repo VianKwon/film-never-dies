@@ -60,9 +60,18 @@ document.addEventListener('DOMContentLoaded', function() {
         initSelect2();
     }, 500);
     
-    // Setup photo upload
+    // Setup file input change events
     setTimeout(() => {
-        setupPhotoUpload();
+        for (let i = 1; i <= 3; i++) {
+            const fileInput = document.getElementById(`photo-${i}`);
+            if (fileInput) {
+                fileInput.addEventListener('change', function(e) {
+                    console.log(`📁 File selected for box ${i}`);
+                    handlePhotoUpload(i, this);
+                });
+                console.log(`✅ File input ${i} setup complete`);
+            }
+        }
     }, 100);
     
     // Setup form submission
@@ -297,48 +306,6 @@ function updateCities(countryCode) {
 }
 
 /* ====== PHOTO UPLOAD FUNCTIONS ====== */
-function setupPhotoUpload() {
-    console.log('📸 Setting up photo upload...');
-    
-    // Setup upload for each photo box
-    for (let i = 1; i <= 3; i++) {
-        const uploadBox = document.getElementById(`upload-box-${i}`);
-        const fileInput = document.getElementById(`photo-${i}`);
-        
-        if (uploadBox && fileInput) {
-            // Click on upload box triggers file selection
-            uploadBox.addEventListener('click', function(e) {
-                e.preventDefault();
-                console.log(`📷 Upload box ${i} clicked`);
-                fileInput.click();
-            });
-            
-            // File selection changed
-            fileInput.addEventListener('change', function(e) {
-                console.log(`📁 File selected for box ${i}`);
-                handlePhotoUpload(i, this);
-            });
-            
-            // Mobile touch events
-            uploadBox.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                this.style.opacity = '0.7';
-            });
-            
-            uploadBox.addEventListener('touchend', function(e) {
-                e.preventDefault();
-                this.style.opacity = '1';
-                fileInput.click();
-            });
-            
-            console.log(`✅ Photo upload box ${i} setup complete`);
-        } else {
-            console.error(`❌ Upload box ${i} or file input not found`);
-        }
-    }
-    
-    console.log('✅ Photo upload setup complete');
-}
 
 function handlePhotoUpload(boxNumber, input) {
     const file = input.files[0];
