@@ -157,24 +157,35 @@ function showStatsPage() {
 }
 
 function switchPage(pageId) {
+    console.log('🔍 switchPage called with:', pageId);
+    
     // Hide all pages
     const pages = document.querySelectorAll('.page');
-    pages.forEach(page => {
+    console.log('Found', pages.length, 'pages');
+    
+    pages.forEach((page, index) => {
+        console.log(`Page ${index}: ${page.id}, active: ${page.classList.contains('active')}`);
         page.classList.remove('active');
+        page.style.display = 'none'; // Force hide
     });
     
     // Show selected page
     const selectedPage = document.getElementById(pageId);
+    console.log('Selected page:', selectedPage ? selectedPage.id : 'NOT FOUND');
+    
     if (selectedPage) {
         selectedPage.classList.add('active');
+        selectedPage.style.display = 'block'; // Force show
         
         // Show/hide bottom nav
         const bottomNav = document.getElementById('bottom-nav');
         if (bottomNav) {
             if (pageId === 'coverflow-page') {
-                bottomNav.style.display = 'none';  // Hide on coverflow
+                bottomNav.style.display = 'none';
+                console.log('📱 Hiding bottom nav');
             } else {
-                bottomNav.style.display = 'flex';  // Show on other pages
+                bottomNav.style.display = 'flex';
+                console.log('📱 Showing bottom nav');
             }
         }
         
@@ -182,13 +193,15 @@ function switchPage(pageId) {
         const backButtons = document.querySelectorAll('.back-btn');
         backButtons.forEach(btn => {
             if (pageId === 'coverflow-page') {
-                btn.style.display = 'none';  // Hide on coverflow
+                btn.style.display = 'none';
             } else {
-                btn.style.display = 'flex';  // Show on other pages
+                btn.style.display = 'flex';
             }
         });
         
-        showToast(`Switched to ${selectedPage.querySelector('h2')?.textContent || 'Home'}`, 'info');
+        console.log('✅ Page switched to:', pageId);
+    } else {
+        console.error('❌ Page not found:', pageId);
     }
 }
 
