@@ -484,3 +484,119 @@ window.showStatsPage = showStatsPage;
 window.switchPage = switchPage;
 
 console.log('Film Flow initialized');
+
+    /* ====== MOBILE SPECIFIC FIXES ====== */
+
+/* iPhone 安全区域支持 */
+@supports (padding: max(0px)) {
+    .page {
+        padding-left: max(env(safe-area-inset-left), 20px);
+        padding-right: max(env(safe-area-inset-right), 20px);
+        padding-top: max(env(safe-area-inset-top), 20px);
+        padding-bottom: max(env(safe-area-inset-bottom), 80px);
+    }
+    
+    .bottom-nav {
+        padding-bottom: max(env(safe-area-inset-bottom), 16px);
+        height: auto;
+        min-height: 70px;
+    }
+}
+
+/* 移动端触摸优化 */
+@media (hover: none) and (pointer: coarse) {
+    .btn, .nav-btn, .back-btn {
+        min-height: 44px; /* Apple Human Interface Guidelines 最小触摸尺寸 */
+    }
+    
+    .nav-btn {
+        min-width: 90px;
+        padding: 12px 8px;
+    }
+    
+    .nav-btn i {
+        font-size: 26px;
+    }
+    
+    .nav-btn span {
+        font-size: 13px;
+        font-weight: 600;
+    }
+    
+    /* 提高触摸区域 */
+    .btn {
+        padding: 16px 32px;
+    }
+    
+    /* 防止触摸时缩放 */
+    * {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+    }
+    
+    /* 优化滚动体验 */
+    body {
+        -webkit-overflow-scrolling: touch;
+        overflow-scrolling: touch;
+    }
+}
+
+/* 小屏幕手机优化 */
+@media (max-width: 375px) {
+    .coverflow-header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .coverflow-header .subtitle {
+        font-size: 1rem;
+    }
+    
+    .nav-btn {
+        min-width: 80px;
+        padding: 10px 6px;
+    }
+    
+    .nav-btn i {
+        font-size: 24px;
+    }
+    
+    .nav-btn span {
+        font-size: 12px;
+    }
+}
+
+/* 横屏模式优化 */
+@media (orientation: landscape) and (max-height: 500px) {
+    .coverflow-container {
+        padding-top: 60px;
+        padding-bottom: 60px;
+    }
+    
+    .bottom-nav {
+        height: 60px;
+    }
+    
+    .nav-btn {
+        min-width: 70px;
+    }
+}
+
+/* 防止移动端缩放 */
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+/* 移动端加载优化 */
+@media (max-width: 768px) {
+    /* 延迟加载非关键CSS */
+    .page:not(.active) {
+        display: none !important;
+    }
+    
+    /* 优化字体渲染 */
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
