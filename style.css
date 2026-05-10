@@ -1,4 +1,55 @@
-/* Film Flow - Simplified CSS */
+/* Film Flow - Film Photography Journal */
+/* Part 1 of 2 */
+
+/* ====== CSS VARIABLES ====== */
+:root {
+    /* Apple-like Color Palette */
+    --system-background: #000000;
+    --secondary-background: #1c1c1e;
+    --tertiary-background: #2c2c2e;
+    --label-primary: #ffffff;
+    --label-secondary: #ebebf5;
+    --label-tertiary: #8e8e93;
+    --label-quaternary: #48484a;
+    
+    /* System Colors */
+    --system-blue: #0a84ff;
+    --system-green: #30d158;
+    --system-orange: #ff9f0a;
+    --system-red: #ff375f;
+    --system-purple: #bf5af2;
+    --system-indigo: #5e5ce6;
+    
+    /* Accent Colors */
+    --accent-color: #0a84ff;
+    --accent-secondary: #5ac8fa;
+    
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-full: 9999px;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+    
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-normal: 250ms ease;
+    --transition-slow: 350ms ease;
+}
+
+/* ====== RESET & BASE STYLES ====== */
 * {
     margin: 0;
     padding: 0;
@@ -6,13 +57,18 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #000000;
-    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background: var(--system-background);
+    color: var(--label-primary);
+    line-height: 1.5;
+    overflow-x: hidden;
     min-height: 100vh;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-/* Page Container - IMPORTANT FIX */
+/* ====== PAGE CONTAINER ====== */
 .page {
     display: none;
     min-height: 100vh;
@@ -21,9 +77,9 @@ body {
     top: 0;
     left: 0;
     opacity: 0;
-    transition: opacity 0.3s ease;
-    padding: 20px;
-    padding-bottom: 80px;
+    transition: opacity var(--transition-normal);
+    padding: var(--spacing-lg);
+    padding-bottom: 80px; /* Space for bottom nav */
 }
 
 .page.active {
@@ -33,117 +89,629 @@ body {
     z-index: 1;
 }
 
-/* Ensure coverflow page is visible */
-#coverflow-page.active {
-    display: flex !important;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+.page-content {
+    max-width: 800px;
+    margin: 0 auto;
 }
 
-/* Cover Flow Page */
+/* ====== PAGE HEADER ====== */
+.page-header {
+    margin-bottom: var(--spacing-xl);
+    text-align: center;
+    padding-top: 20px;
+}
+
+.page-header h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+}
+
+.page-subtitle {
+    color: var(--label-tertiary);
+    font-size: 0.95rem;
+}
+
+/* ====== COVER FLOW PAGE ====== */
 .coverflow-container {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: var(--spacing-xl);
     text-align: center;
-    padding: 20px;
+}
+
+.coverflow-header {
+    margin-bottom: var(--spacing-xl);
 }
 
 .coverflow-header h1 {
     font-size: 2.5rem;
     font-weight: 800;
-    margin-bottom: 10px;
-    color: #0a84ff;
+    margin-bottom: var(--spacing-sm);
+    background: linear-gradient(135deg, var(--accent-color), var(--accent-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .coverflow-header .subtitle {
-    color: #8e8e93;
+    color: var(--label-tertiary);
     font-size: 1.1rem;
-    margin-bottom: 40px;
 }
 
+/* Cover Flow Wrapper */
+.coverflow-wrapper {
+    width: 100%;
+    max-width: 1200px;
+    position: relative;
+    margin: var(--spacing-xl) 0;
+}
+
+/* Cover Flow Track */
 .coverflow-track {
-    min-height: 300px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 40px 0;
+    height: 400px;
+    position: relative;
+    cursor: grab;
+    user-select: none;
 }
 
+.coverflow-track:active {
+    cursor: grabbing;
+}
+
+/* Cover Flow Items */
+.coverflow-item {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    transition: all var(--transition-slow);
+    transform-origin: center;
+    z-index: 1;
+}
+
+.coverflow-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+}
+
+/* Cover Flow Positions */
+.coverflow-item.center {
+    width: 400px;
+    height: 400px;
+    z-index: 3;
+    transform: translateX(0) scale(1);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+.coverflow-item.left-1 {
+    transform: translateX(-200px) scale(0.85);
+    opacity: 0.9;
+    z-index: 2;
+}
+
+.coverflow-item.left-2 {
+    transform: translateX(-350px) scale(0.7);
+    opacity: 0.7;
+    z-index: 1;
+}
+
+.coverflow-item.left-3 {
+    transform: translateX(-450px) scale(0.6);
+    opacity: 0.5;
+    z-index: 0;
+}
+
+.coverflow-item.right-1 {
+    transform: translateX(200px) scale(0.85);
+    opacity: 0.9;
+    z-index: 2;
+}
+
+.coverflow-item.right-2 {
+    transform: translateX(350px) scale(0.7);
+    opacity: 0.7;
+    z-index: 1;
+}
+
+.coverflow-item.right-3 {
+    transform: translateX(450px) scale(0.6);
+    opacity: 0.5;
+    z-index: 0;
+}
+
+/* Cover Flow Info */
+.coverflow-info {
+    margin-top: var(--spacing-xl);
+    text-align: center;
+}
+
+.info-camera {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--label-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.info-film {
+    font-size: 1.2rem;
+    color: var(--label-tertiary);
+}
+
+/* Cover Flow Hint */
+.coverflow-hint {
+    margin-top: var(--spacing-lg);
+    color: var(--label-quaternary);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+}
+
+/* Empty State */
 .coverflow-empty {
     text-align: center;
-    padding: 40px;
+    padding: var(--spacing-xl);
 }
 
 .empty-icon {
-    font-size: 60px;
-    color: #8e8e93;
-    margin-bottom: 20px;
+    font-size: 4rem;
+    color: var(--label-quaternary);
+    margin-bottom: var(--spacing-lg);
 }
 
 .coverflow-empty h3 {
-    font-size: 24px;
-    margin-bottom: 10px;
-    color: #ffffff;
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-sm);
+    color: var(--label-primary);
 }
 
 .coverflow-empty p {
-    color: #8e8e93;
-    margin-bottom: 30px;
-    font-size: 16px;
+    color: var(--label-tertiary);
+    margin-bottom: var(--spacing-lg);
 }
 
-/* Bottom Navigation - FIXED SIZE */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: #000000;
-    border-top: 1px solid #2c2c2e;
+/* ====== RECORDS LIST ====== */
+.records-container {
     display: flex;
-    justify-content: space-around;
-    padding: 16px 0;
-    height: 70px;
-    z-index: 1000;
+    flex-direction: column;
+    gap: var(--spacing-md);
 }
 
-.nav-btn {
+.record-item {
+    background: var(--secondary-background);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    transition: all var(--transition-normal);
+    border: 1px solid transparent;
+}
+
+.record-item:hover {
+    border-color: var(--tertiary-background);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.record-photos {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.record-photo {
+    flex: 1;
+    aspect-ratio: 1;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--tertiary-background);
+}
+
+.record-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.record-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.record-camera {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--label-primary);
+}
+
+.record-film {
+    font-size: 1rem;
+    color: var(--label-secondary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.record-date,
+.record-location {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    color: var(--label-tertiary);
+    font-size: 0.9rem;
+}
+
+.record-date i,
+.record-location i {
+    width: 16px;
+    text-align: center;
+}
+
+/* Empty List */
+.empty-list {
+    text-align: center;
+    padding: var(--spacing-xl);
+}
+
+.empty-list .empty-icon {
+    font-size: 3rem;
+}
+
+.empty-list h3 {
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+.empty-list p {
+    color: var(--label-tertiary);
+    margin-bottom: var(--spacing-lg);
+}
+
+/* ====== FORM STYLES ====== */
+.film-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+}
+
+.form-section {
+    background: var(--secondary-background);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+}
+
+.form-section h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-lg);
+    color: var(--label-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.form-group {
+    margin-bottom: var(--spacing-lg);
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--label-secondary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.form-group label i {
+    width: 20px;
+    text-align: center;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: var(--spacing-md);
+    background: var(--tertiary-background);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    color: var(--label-primary);
+    font-size: 1rem;
+    transition: all var(--transition-fast);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    background: var(--secondary-background);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: var(--label-quaternary);
+}
+
+.form-hint {
+    color: var(--label-tertiary);
+    font-size: 0.9rem;
+    margin-top: var(--spacing-xs);
+    margin-bottom: var(--spacing-md);
+}
+
+/* ====== PHOTO UPLOAD ====== */
+.photo-upload-container {
+    margin-top: var(--spacing-md);
+}
+
+.upload-row {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.upload-box {
+    flex: 1;
+    aspect-ratio: 1;
+    background: var(--tertiary-background);
+    border: 2px dashed var(--label-quaternary);
+    border-radius: var(--radius-md);
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: none;
-    border: none;
-    color: #8e8e93;
-    font-size: 14px;
-    gap: 6px;
+    justify-content: center;
     cursor: pointer;
-    padding: 10px 20px;
-    min-width: 80px;
-    transition: all 0.2s ease;
+    transition: all var(--transition-fast);
+    color: var(--label-tertiary);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
 }
 
-.nav-btn:hover {
-    color: #ffffff;
+.upload-box:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    background: var(--secondary-background);
 }
 
-.nav-btn i {
-    font-size: 24px;
+.upload-box:active {
+    transform: scale(0.98);
 }
 
-.nav-btn span {
+.upload-box i {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+.upload-box span {
+    font-size: 0.9rem;
     font-weight: 500;
 }
 
-/* Back Button */
-.back-btn {
+.photo-preview {
+    display: flex;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.preview-image {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.preview-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.remove-photo {
     position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    background: rgba(0, 0, 0, 0.7);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    transition: all var(--transition-fast);
+}
+
+.remove-photo:hover {
+    background: var(--system-red);
+    transform: scale(1.1);
+}
+/* Film Flow - Film Photography Journal */
+/* Part 2 of 2 */
+
+/* ====== FORM ACTIONS ====== */
+.form-actions {
+    text-align: center;
+    margin-top: var(--spacing-xl);
+}
+
+/* ====== STATISTICS ====== */
+.stats-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.stat-card {
+    background: var(--secondary-background);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    text-align: center;
+    transition: all var(--transition-normal);
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--accent-color);
+    margin-bottom: var(--spacing-xs);
+}
+
+.stat-label {
+    color: var(--label-tertiary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.stats-chart {
+    background: var(--secondary-background);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    min-height: 200px;
+}
+
+/* Bar Chart Styles */
+.bar-item {
+    margin-bottom: 12px;
+}
+
+.bar-label {
+    font-size: 14px;
+    margin-bottom: 4px;
+    color: var(--label-secondary);
+    display: flex;
+    justify-content: space-between;
+}
+
+.bar-container {
+    height: 8px;
+    background: var(--tertiary-background);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-color), var(--accent-secondary));
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.bar-value {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--label-primary);
+}
+
+.empty-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    color: var(--label-tertiary);
+}
+
+.empty-stat i {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-md);
+}
+
+/* Data Actions */
+.data-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+}
+
+/* ====== BUTTONS ====== */
+.btn {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+}
+
+.btn-primary {
+    background: var(--accent-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-secondary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background: var(--tertiary-background);
+    color: var(--label-primary);
+}
+
+.btn-secondary:hover {
+    background: var(--secondary-background);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-large {
+    padding: var(--spacing-lg) var(--spacing-xl);
+    font-size: 1.1rem;
+}
+
+/* ====== BACK BUTTON ====== */
+.back-btn {
+    position: fixed;
     top: 20px;
     left: 20px;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.3);
     border: none;
     color: white;
     width: 44px;
@@ -154,87 +722,214 @@ body {
     justify-content: center;
     cursor: pointer;
     z-index: 100;
-    font-size: 18px;
+    backdrop-filter: blur(10px);
+    transition: all var(--transition-fast);
 }
 
 .back-btn:hover {
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.5);
+    transform: scale(1.1);
 }
 
-/* Buttons */
-.btn {
-    padding: 14px 28px;
-    background: #0a84ff;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    display: inline-flex;
+/* ====== BOTTOM NAVIGATION ====== */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--system-background);
+    border-top: 1px solid var(--tertiary-background);
+    display: flex;
+    justify-content: space-around;
+    padding: 16px 0;
+    height: 70px;
+    z-index: 1000;
+    backdrop-filter: blur(20px);
+}
+
+.nav-btn {
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--label-secondary);
+    font-size: 14px;
+    gap: 6px;
+    cursor: pointer;
+    padding: 10px 20px;
+    min-width: 90px;
+    border-radius: 8px;
+    transition: all var(--transition-fast);
+}
+
+.nav-btn:hover {
+    background: var(--secondary-background);
+    color: var(--label-primary);
+}
+
+.nav-btn i {
+    font-size: 24px;
+}
+
+/* ====== TOAST NOTIFICATION ====== */
+.toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: var(--secondary-background);
+    color: var(--label-primary);
+    padding: 12px 20px;
+    border-radius: 10px;
+    box-shadow: var(--shadow-lg);
+    z-index: 2000;
+    opacity: 0;
+    transition: all var(--transition-normal);
+    display: flex;
+    align-items: center;
     gap: 10px;
-    transition: all 0.2s ease;
+    max-width: 80%;
 }
 
-.btn:hover {
-    background: #5ac8fa;
-    transform: translateY(-2px);
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
 }
 
-.btn-primary {
-    background: #0a84ff;
-}
-
-.btn i {
+.toast-icon {
     font-size: 18px;
 }
 
-/* Page Headers */
-.page-header {
-    text-align: center;
-    margin-bottom: 40px;
-    padding-top: 60px;
+.toast-icon.fa-check-circle {
+    color: var(--system-green);
 }
 
-.page-header h2 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+.toast-icon.fa-exclamation-circle {
+    color: var(--system-red);
 }
 
-.page-subtitle {
-    color: #8e8e93;
-    font-size: 1rem;
+.toast-icon.fa-exclamation-triangle {
+    color: var(--system-orange);
 }
 
-/* Page Content */
-.page-content {
-    max-width: 800px;
-    margin: 0 auto;
+.toast-icon.fa-info-circle {
+    color: var(--system-blue);
 }
 
-/* Ensure visibility */
-#coverflow-page.active {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+/* ====== SELECT2 CUSTOMIZATION ====== */
+.select2-container--default .select2-selection--single {
+    background: var(--tertiary-background) !important;
+    border: 1px solid transparent !important;
+    border-radius: var(--radius-md) !important;
+    height: 48px !important;
+    display: flex !important;
+    align-items: center !important;
 }
 
-/* Responsive */
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: var(--label-primary) !important;
+    line-height: 48px !important;
+    padding-left: var(--spacing-md) !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 48px !important;
+    right: var(--spacing-md) !important;
+}
+
+.select2-container--default.select2-container--open .select2-selection--single {
+    border-color: var(--accent-color) !important;
+    background: var(--secondary-background) !important;
+}
+
+.select2-dropdown {
+    background: var(--secondary-background) !important;
+    border: 1px solid var(--tertiary-background) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-lg) !important;
+    z-index: 10000 !important;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background: var(--accent-color) !important;
+    color: white !important;
+}
+
+.select2-container--default .select2-results__option[aria-selected=true] {
+    background: var(--tertiary-background) !important;
+    color: var(--label-primary) !important;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    background: var(--tertiary-background) !important;
+    border: 1px solid var(--tertiary-background) !important;
+    color: var(--label-primary) !important;
+    border-radius: var(--radius-sm) !important;
+}
+
+/* ====== RESPONSIVE DESIGN ====== */
 @media (max-width: 768px) {
+    .page-content {
+        padding: var(--spacing-md);
+    }
+    
     .coverflow-header h1 {
         font-size: 2rem;
     }
     
+    .coverflow-item {
+        width: 250px;
+        height: 250px;
+    }
+    
+    .coverflow-item.center {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .coverflow-item.left-1 {
+        transform: translateX(-150px) scale(0.85);
+    }
+    
+    .coverflow-item.left-2 {
+        transform: translateX(-250px) scale(0.7);
+    }
+    
+    .coverflow-item.left-3 {
+        transform: translateX(-320px) scale(0.6);
+    }
+    
+    .coverflow-item.right-1 {
+        transform: translateX(150px) scale(0.85);
+    }
+    
+    .coverflow-item.right-2 {
+        transform: translateX(250px) scale(0.7);
+    }
+    
+    .coverflow-item.right-3 {
+        transform: translateX(320px) scale(0.6);
+    }
+    
+    .upload-row {
+        flex-direction: column;
+    }
+    
+    .upload-box {
+        aspect-ratio: 16/9;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .data-actions {
+        flex-direction: column;
+    }
+    
     .nav-btn {
-        min-width: 70px;
+        min-width: 80px;
         padding: 8px 16px;
     }
     
@@ -247,246 +942,64 @@ body {
     }
 }
 
-第二步：修复 app.js - 简化版本
-在GitHub上编辑 app.js 文件，删除所有内容，粘贴这个简化版本：
-
-// Film Flow - Simplified JavaScript
-console.log('Film Flow loading...');
-
-// Global variables - ONLY ONE DECLARATION
-let films = [];
-let currentCoverFlowIndex = 0;
-
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded');
+@media (max-width: 480px) {
+    .coverflow-item {
+        width: 200px;
+        height: 200px;
+    }
     
-    // Load existing films
-    loadFilms();
+    .coverflow-item.center {
+        width: 250px;
+        height: 250px;
+    }
     
-    // Initialize Cover Flow
-    initCoverFlow();
+    .coverflow-item.left-1 {
+        transform: translateX(-120px) scale(0.85);
+    }
     
-    // Setup navigation
-    setupNavigation();
+    .coverflow-item.left-2 {
+        transform: translateX(-200px) scale(0.7);
+    }
     
-    // Show initial page
-    showCoverflowPage();
-});
-
-// Page Navigation Functions
-function showCoverflowPage() {
-    console.log('Showing coverflow page');
-    switchPage('coverflow-page');
-    initCoverFlow();
-}
-
-function showListPage() {
-    console.log('Showing list page');
-    switchPage('list-page');
-    renderRecordsList();
-}
-
-function showAddPage() {
-    console.log('Showing add page');
-    switchPage('add-page');
-}
-
-function showStatsPage() {
-    console.log('Showing stats page');
-    switchPage('stats-page');
-    updateStatistics();
-}
-
-function switchPage(pageId) {
-    console.log('Switching to page:', pageId);
+    .coverflow-item.left-3 {
+        transform: translateX(-250px) scale(0.6);
+    }
     
-    // Hide all pages
-    const pages = document.querySelectorAll('.page');
-    pages.forEach(page => {
-        page.classList.remove('active');
-    });
+    .coverflow-item.right-1 {
+        transform: translateX(120px) scale(0.85);
+    }
     
-    // Show selected page
-    const selectedPage = document.getElementById(pageId);
-    if (selectedPage) {
-        selectedPage.classList.add('active');
-        console.log('Page shown:', pageId);
-        
-        // Show/hide bottom nav
-        const bottomNav = document.getElementById('bottom-nav');
-        if (bottomNav) {
-            if (pageId === 'coverflow-page') {
-                bottomNav.style.display = 'none';
-                console.log('Hiding bottom nav');
-            } else {
-                bottomNav.style.display = 'flex';
-                console.log('Showing bottom nav');
-            }
-        }
-        
-        // Show/hide back buttons
-        const backButtons = document.querySelectorAll('.back-btn');
-        backButtons.forEach(btn => {
-            if (pageId === 'coverflow-page') {
-                btn.style.display = 'none';
-            } else {
-                btn.style.display = 'flex';
-            }
-        });
+    .coverflow-item.right-2 {
+        transform: translateX(200px) scale(0.7);
+    }
+    
+    .coverflow-item.right-3 {
+        transform: translateX(250px) scale(0.6);
+    }
+    
+    .record-photos {
+        flex-direction: column;
+    }
+    
+    .record-photo {
+        aspect-ratio: 16/9;
+    }
+    
+    .nav-btn {
+        min-width: 70px;
+        padding: 6px 12px;
+    }
+    
+    .nav-btn i {
+        font-size: 20px;
+    }
+    
+    .nav-btn span {
+        font-size: 11px;
     }
 }
 
-function setupNavigation() {
-    console.log('Setting up navigation');
-    
-    // Setup bottom nav buttons
-    const navRecords = document.querySelector('.nav-btn:nth-child(1)');
-    const navAdd = document.querySelector('.nav-btn:nth-child(2)');
-    const navStats = document.querySelector('.nav-btn:nth-child(3)');
-    
-    if (navRecords) {
-        navRecords.onclick = function() {
-            console.log('Records button clicked');
-            showListPage();
-        };
-    }
-    
-    if (navAdd) {
-        navAdd.onclick = function() {
-            console.log('Add button clicked');
-            showAddPage();
-        };
-    }
-    
-    if (navStats) {
-        navStats.onclick = function() {
-            console.log('Stats button clicked');
-            showStatsPage();
-        };
-    }
-    
-    // Setup back buttons
-    const backButtons = document.querySelectorAll('.back-btn');
-    backButtons.forEach(btn => {
-        btn.onclick = function() {
-            console.log('Back button clicked');
-            showCoverflowPage();
-        };
-    });
-    
-    // Setup "Go to Records" button in coverflow empty state
-    const goToRecordsBtn = document.querySelector('.coverflow-empty .btn');
-    if (goToRecordsBtn) {
-        goToRecordsBtn.onclick = function() {
-            console.log('Go to Records button clicked');
-            showListPage();
-        };
-    }
-}
-
-// Cover Flow Functions
-function initCoverFlow() {
-    console.log('Initializing cover flow');
-    const track = document.getElementById('coverflow-track');
-    
-    if (!track) {
-        console.error('Cover flow track not found');
-        return;
-    }
-    
-    // Check if we have films with photos
-    const hasPhotos = films.some(film => film.photos && film.photos.length > 0);
-    
-    if (!hasPhotos) {
-        track.innerHTML = `
-            <div class="coverflow-empty">
-                <div class="empty-icon">
-                    <i class="fas fa-camera"></i>
-                </div>
-                <h3>No photos yet</h3>
-                <p>Add your first film record to start the gallery</p>
-                <button class="btn btn-primary">
-                    <i class="fas fa-list"></i> Go to Records
-                </button>
-            </div>
-        `;
-        
-        // Re-attach event listener for the new button
-        setTimeout(() => {
-            const newBtn = track.querySelector('.btn');
-            if (newBtn) {
-                newBtn.onclick = showListPage;
-            }
-        }, 100);
-    }
-}
-
-// Load films from localStorage
-function loadFilms() {
-    try {
-        const saved = localStorage.getItem('filmFlowRecords');
-        if (saved) {
-            films = JSON.parse(saved);
-            console.log('Loaded', films.length, 'films');
-        }
-    } catch (e) {
-        console.error('Error loading films:', e);
-    }
-}
-
-// Basic placeholder functions
-function renderRecordsList() {
-    const container = document.getElementById('records-container');
-    if (container) {
-        if (films.length === 0) {
-            container.innerHTML = `
-                <div class="empty-list">
-                    <div class="empty-icon">
-                        <i class="fas fa-film"></i>
-                    </div>
-                    <h3>No records yet</h3>
-                    <p>Add your first film record</p>
-                    <button class="btn btn-primary" onclick="showAddPage()">
-                        <i class="fas fa-plus"></i> Add First Record
-                    </button>
-                </div>
-            `;
-        } else {
-            container.innerHTML = `
-                <div style="text-align: center; padding: 40px;">
-                    <h3>${films.length} Film Records</h3>
-                    <p>Full records list will be implemented soon</p>
-                </div>
-            `;
-        }
-    }
-}
-
-function updateStatistics() {
-    const container = document.getElementById('stats-page');
-    if (container) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 40px;">
-                <h3>Statistics</h3>
-                <p>Statistics page will be implemented soon</p>
-                <p>Total films: ${films.length}</p>
-            </div>
-        `;
-    }
-}
-
-// Make functions available globally
-window.showCoverflowPage = showCoverflowPage;
-window.showListPage = showListPage;
-window.showAddPage = showAddPage;
-window.showStatsPage = showStatsPage;
-window.switchPage = switchPage;
-
-console.log('Film Flow initialized');
-
-    /* ====== MOBILE SPECIFIC FIXES ====== */
-
+/* ====== MOBILE SPECIFIC FIXES ====== */
 /* iPhone 安全区域支持 */
 @supports (padding: max(0px)) {
     .page {
@@ -505,8 +1018,24 @@ console.log('Film Flow initialized');
 
 /* 移动端触摸优化 */
 @media (hover: none) and (pointer: coarse) {
-    .btn, .nav-btn, .back-btn {
+    .btn, .nav-btn, .back-btn, .upload-box {
         min-height: 44px; /* Apple Human Interface Guidelines 最小触摸尺寸 */
+    }
+    
+    .upload-box {
+        min-height: 120px;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .upload-box i {
+        font-size: 40px !important;
+    }
+    
+    .upload-box span {
+        font-size: 16px !important;
+        font-weight: 600;
     }
     
     .nav-btn {
@@ -585,18 +1114,4 @@ console.log('Film Flow initialized');
 html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
-}
-
-/* 移动端加载优化 */
-@media (max-width: 768px) {
-    /* 延迟加载非关键CSS */
-    .page:not(.active) {
-        display: none !important;
-    }
-    
-    /* 优化字体渲染 */
-    body {
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-    }
 }
