@@ -1,52 +1,4 @@
-/* Film Flow - Film Photography Journal */
-:root {
-    /* Apple-like Color Palette */
-    --system-background: #000000;
-    --secondary-background: #1c1c1e;
-    --tertiary-background: #2c2c2e;
-    --label-primary: #ffffff;
-    --label-secondary: #ebebf5;
-    --label-tertiary: #8e8e93;
-    --label-quaternary: #48484a;
-    
-    /* System Colors */
-    --system-blue: #0a84ff;
-    --system-green: #30d158;
-    --system-orange: #ff9f0a;
-    --system-red: #ff375f;
-    --system-purple: #bf5af2;
-    --system-indigo: #5e5ce6;
-    
-    /* Accent Colors */
-    --accent-color: #0a84ff;
-    --accent-secondary: #5ac8fa;
-    
-    /* Spacing */
-    --spacing-xs: 4px;
-    --spacing-sm: 8px;
-    --spacing-md: 16px;
-    --spacing-lg: 24px;
-    --spacing-xl: 32px;
-    
-    /* Border Radius */
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 16px;
-    --radius-xl: 24px;
-    --radius-full: 9999px;
-    
-    /* Shadows */
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
-    
-    /* Transitions */
-    --transition-fast: 150ms ease;
-    --transition-normal: 250ms ease;
-    --transition-slow: 350ms ease;
-}
-
-/* Reset & Base Styles */
+/* Film Flow - Simplified CSS */
 * {
     margin: 0;
     padding: 0;
@@ -54,51 +6,22 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-    background: var(--system-background);
-    color: var(--label-primary);
-    line-height: 1.5;
-    overflow-x: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #000000;
+    color: #ffffff;
     min-height: 100vh;
-    position: relative;
 }
 
 /* Page Container */
 .page {
     display: none;
     min-height: 100vh;
+    padding: 20px;
     padding-bottom: 80px; /* Space for bottom nav */
 }
 
 .page.active {
     display: block;
-}
-
-.page-content {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: var(--spacing-lg);
-}
-
-/* Page Header */
-.page-header {
-    margin-bottom: var(--spacing-xl);
-    text-align: center;
-}
-
-.page-header h2 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: var(--spacing-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-sm);
-}
-
-.page-subtitle {
-    color: var(--label-tertiary);
-    font-size: 0.95rem;
 }
 
 /* Cover Flow Page */
@@ -108,783 +31,439 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: var(--spacing-xl);
     text-align: center;
-}
-
-.coverflow-header {
-    margin-bottom: var(--spacing-xl);
+    padding: 20px;
 }
 
 .coverflow-header h1 {
     font-size: 2.5rem;
     font-weight: 800;
-    margin-bottom: var(--spacing-sm);
-    background: linear-gradient(135deg, var(--accent-color), var(--accent-secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    margin-bottom: 10px;
+    color: #0a84ff;
 }
 
 .coverflow-header .subtitle {
-    color: var(--label-tertiary);
+    color: #8e8e93;
     font-size: 1.1rem;
+    margin-bottom: 40px;
 }
 
-/* Cover Flow Wrapper */
-.coverflow-wrapper {
-    width: 100%;
-    max-width: 1200px;
-    position: relative;
-    margin: var(--spacing-xl) 0;
-}
-
-/* Cover Flow Track */
 .coverflow-track {
+    min-height: 300px;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 400px;
-    position: relative;
-    cursor: grab;
-    user-select: none;
+    margin: 40px 0;
 }
 
-.coverflow-track:active {
-    cursor: grabbing;
-}
-
-/* Cover Flow Items */
-.coverflow-item {
-    position: absolute;
-    width: 300px;
-    height: 300px;
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    box-shadow: var(--shadow-lg);
-    transition: all var(--transition-slow);
-    transform-origin: center;
-    z-index: 1;
-}
-
-.coverflow-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: var(--radius-lg);
-}
-
-/* Cover Flow Positions */
-.coverflow-item.center {
-    width: 400px;
-    height: 400px;
-    z-index: 3;
-    transform: translateX(0) scale(1);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-}
-
-.coverflow-item.left-1 {
-    transform: translateX(-200px) scale(0.85);
-    opacity: 0.9;
-    z-index: 2;
-}
-
-.coverflow-item.left-2 {
-    transform: translateX(-350px) scale(0.7);
-    opacity: 0.7;
-    z-index: 1;
-}
-
-.coverflow-item.left-3 {
-    transform: translateX(-450px) scale(0.6);
-    opacity: 0.5;
-    z-index: 0;
-}
-
-.coverflow-item.right-1 {
-    transform: translateX(200px) scale(0.85);
-    opacity: 0.9;
-    z-index: 2;
-}
-
-.coverflow-item.right-2 {
-    transform: translateX(350px) scale(0.7);
-    opacity: 0.7;
-    z-index: 1;
-}
-
-.coverflow-item.right-3 {
-    transform: translateX(450px) scale(0.6);
-    opacity: 0.5;
-    z-index: 0;
-}
-
-/* Cover Flow Info */
-.coverflow-info {
-    margin-top: var(--spacing-xl);
-    text-align: center;
-}
-
-.info-camera {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--label-primary);
-    margin-bottom: var(--spacing-xs);
-}
-
-.info-film {
-    font-size: 1.2rem;
-    color: var(--label-tertiary);
-}
-
-/* Cover Flow Hint */
-.coverflow-hint {
-    margin-top: var(--spacing-lg);
-    color: var(--label-quaternary);
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-sm);
-}
-
-/* Empty State */
 .coverflow-empty {
     text-align: center;
-    padding: var(--spacing-xl);
+    padding: 40px;
 }
 
 .empty-icon {
-    font-size: 4rem;
-    color: var(--label-quaternary);
-    margin-bottom: var(--spacing-lg);
+    font-size: 60px;
+    color: #8e8e93;
+    margin-bottom: 20px;
 }
 
 .coverflow-empty h3 {
-    font-size: 1.5rem;
-    margin-bottom: var(--spacing-sm);
-    color: var(--label-primary);
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #ffffff;
 }
 
 .coverflow-empty p {
-    color: var(--label-tertiary);
-    margin-bottom: var(--spacing-lg);
+    color: #8e8e93;
+    margin-bottom: 30px;
+    font-size: 16px;
 }
 
-/* Records List */
-.records-container {
+/* Bottom Navigation - FIXED SIZE */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #000000;
+    border-top: 1px solid #2c2c2e;
+    display: flex;
+    justify-content: space-around;
+    padding: 16px 0;
+    height: 70px;
+    z-index: 1000;
+}
+
+.nav-btn {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
-}
-
-.record-item {
-    background: var(--secondary-background);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-    transition: all var(--transition-normal);
-    border: 1px solid transparent;
-}
-
-.record-item:hover {
-    border-color: var(--tertiary-background);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.record-photos {
-    display: flex;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-md);
-}
-
-.record-photo {
-    flex: 1;
-    aspect-ratio: 1;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    background: var(--tertiary-background);
-}
-
-.record-photo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.record-info {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-}
-
-.record-camera {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--label-primary);
-}
-
-.record-film {
-    font-size: 1rem;
-    color: var(--label-secondary);
-    margin-bottom: var(--spacing-sm);
-}
-
-.record-date,
-.record-location {
-    display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    color: var(--label-tertiary);
-    font-size: 0.9rem;
+    background: none;
+    border: none;
+    color: #8e8e93;
+    font-size: 14px;
+    gap: 6px;
+    cursor: pointer;
+    padding: 10px 20px;
+    min-width: 80px;
+    transition: all 0.2s ease;
 }
 
-.record-date i,
-.record-location i {
-    width: 16px;
-    text-align: center;
+.nav-btn:hover {
+    color: #ffffff;
 }
 
-/* Empty List */
-.empty-list {
-    text-align: center;
-    padding: var(--spacing-xl);
+.nav-btn i {
+    font-size: 24px;
 }
 
-.empty-list .empty-icon {
-    font-size: 3rem;
-}
-
-.empty-list h3 {
-    font-size: 1.5rem;
-    margin-bottom: var(--spacing-sm);
-}
-
-.empty-list p {
-    color: var(--label-tertiary);
-    margin-bottom: var(--spacing-lg);
-}
-
-/* Form Styles */
-.film-form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xl);
-}
-
-.form-section {
-    background: var(--secondary-background);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-}
-
-.form-section h3 {
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin-bottom: var(--spacing-lg);
-    color: var(--label-primary);
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-}
-
-.form-group {
-    margin-bottom: var(--spacing-lg);
-}
-
-.form-group:last-child {
-    margin-bottom: 0;
-}
-
-.form-group label {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    font-size: 0.95rem;
+.nav-btn span {
     font-weight: 500;
-    color: var(--label-secondary);
-    margin-bottom: var(--spacing-sm);
 }
 
-.form-group label i {
-    width: 20px;
-    text-align: center;
+/* Back Button */
+.back-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    color: white;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    font-size: 18px;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
-    width: 100%;
-    padding: var(--spacing-md);
-    background: var(--tertiary-background);
-    border: 1px solid transparent;
-    border-radius: var(--radius-md);
-    color: var(--label-primary);
-    font-size: 1rem;
-    transition: all var(--transition-fast);
+.back-btn:hover {
+    background: rgba(0, 0, 0, 0.7);
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: var(--accent-color);
-    background: var(--secondary-background);
+/* Buttons */
+.btn {
+    padding: 14px 28px;
+    background: #0a84ff;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.2s ease;
 }
 
-.form-group input::placeholder,
-.form-group textarea::placeholder {
-    color: var(--label-quaternary);
+.btn:hover {
+    background: #5ac8fa;
+    transform: translateY(-2px);
 }
 
-.form-hint {
-    color: var(--label-tertiary);
-    font-size: 0.9rem;
-    margin-top: var(--spacing-xs);
-    margin-bottom: var(--spacing-md);
-}
-/* Film Flow - Film Photography Journal */
-:root {
-    /* Apple-like Color Palette */
-    --system-background: #000000;
-    --secondary-background: #1c1c1e;
-    --tertiary-background: #2c2c2e;
-    --label-primary: #ffffff;
-    --label-secondary: #ebebf5;
-    --label-tertiary: #8e8e93;
-    --label-quaternary: #48484a;
-    
-    /* System Colors */
-    --system-blue: #0a84ff;
-    --system-green: #30d158;
-    --system-orange: #ff9f0a;
-    --system-red: #ff375f;
-    --system-purple: #bf5af2;
-    --system-indigo: #5e5ce6;
-    
-    /* Accent Colors */
-    --accent-color: #0a84ff;
-    --accent-secondary: #5ac8fa;
-    
-    /* Spacing */
-    --spacing-xs: 4px;
-    --spacing-sm: 8px;
-    --spacing-md: 16px;
-    --spacing-lg: 24px;
-    --spacing-xl: 32px;
-    
-    /* Border Radius */
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 16px;
-    --radius-xl: 24px;
-    --radius-full: 9999px;
-    
-    /* Shadows */
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
-    
-    /* Transitions */
-    --transition-fast: 150ms ease;
-    --transition-normal: 250ms ease;
-    --transition-slow: 350ms ease;
+.btn-primary {
+    background: #0a84ff;
 }
 
-/* Reset & Base Styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+.btn i {
+    font-size: 18px;
 }
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-    background: var(--system-background);
-    color: var(--label-primary);
-    line-height: 1.5;
-    overflow-x: hidden;
-    min-height: 100vh;
-    position: relative;
-}
-
-/* Page Container */
-.page {
-    display: none;
-    min-height: 100vh;
-    padding-bottom: 80px; /* Space for bottom nav */
-}
-
-.page.active {
-    display: block;
-}
-
-.page-content {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: var(--spacing-lg);
-}
-
-/* Page Header */
+/* Page Headers */
 .page-header {
-    margin-bottom: var(--spacing-xl);
     text-align: center;
+    margin-bottom: 40px;
+    padding-top: 60px;
 }
 
 .page-header h2 {
     font-size: 2rem;
     font-weight: 700;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-sm);
+    gap: 10px;
 }
 
 .page-subtitle {
-    color: var(--label-tertiary);
-    font-size: 0.95rem;
-}
-
-/* Cover Flow Page */
-.coverflow-container {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--spacing-xl);
-    text-align: center;
-}
-
-.coverflow-header {
-    margin-bottom: var(--spacing-xl);
-}
-
-.coverflow-header h1 {
-    font-size: 2.5rem;
-    font-weight: 800;
-    margin-bottom: var(--spacing-sm);
-    background: linear-gradient(135deg, var(--accent-color), var(--accent-secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.coverflow-header .subtitle {
-    color: var(--label-tertiary);
-    font-size: 1.1rem;
-}
-
-/* Cover Flow Wrapper */
-.coverflow-wrapper {
-    width: 100%;
-    max-width: 1200px;
-    position: relative;
-    margin: var(--spacing-xl) 0;
-}
-
-/* Cover Flow Track */
-.coverflow-track {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 400px;
-    position: relative;
-    cursor: grab;
-    user-select: none;
-}
-
-.coverflow-track:active {
-    cursor: grabbing;
-}
-
-/* Cover Flow Items */
-.coverflow-item {
-    position: absolute;
-    width: 300px;
-    height: 300px;
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    box-shadow: var(--shadow-lg);
-    transition: all var(--transition-slow);
-    transform-origin: center;
-    z-index: 1;
-}
-
-.coverflow-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: var(--radius-lg);
-}
-
-/* Cover Flow Positions */
-.coverflow-item.center {
-    width: 400px;
-    height: 400px;
-    z-index: 3;
-    transform: translateX(0) scale(1);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-}
-
-.coverflow-item.left-1 {
-    transform: translateX(-200px) scale(0.85);
-    opacity: 0.9;
-    z-index: 2;
-}
-
-.coverflow-item.left-2 {
-    transform: translateX(-350px) scale(0.7);
-    opacity: 0.7;
-    z-index: 1;
-}
-
-.coverflow-item.left-3 {
-    transform: translateX(-450px) scale(0.6);
-    opacity: 0.5;
-    z-index: 0;
-}
-
-.coverflow-item.right-1 {
-    transform: translateX(200px) scale(0.85);
-    opacity: 0.9;
-    z-index: 2;
-}
-
-.coverflow-item.right-2 {
-    transform: translateX(350px) scale(0.7);
-    opacity: 0.7;
-    z-index: 1;
-}
-
-.coverflow-item.right-3 {
-    transform: translateX(450px) scale(0.6);
-    opacity: 0.5;
-    z-index: 0;
-}
-
-/* Cover Flow Info */
-.coverflow-info {
-    margin-top: var(--spacing-xl);
-    text-align: center;
-}
-
-.info-camera {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--label-primary);
-    margin-bottom: var(--spacing-xs);
-}
-
-.info-film {
-    font-size: 1.2rem;
-    color: var(--label-tertiary);
-}
-
-/* Cover Flow Hint */
-.coverflow-hint {
-    margin-top: var(--spacing-lg);
-    color: var(--label-quaternary);
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-sm);
-}
-
-/* Empty State */
-.coverflow-empty {
-    text-align: center;
-    padding: var(--spacing-xl);
-}
-
-.empty-icon {
-    font-size: 4rem;
-    color: var(--label-quaternary);
-    margin-bottom: var(--spacing-lg);
-}
-
-.coverflow-empty h3 {
-    font-size: 1.5rem;
-    margin-bottom: var(--spacing-sm);
-    color: var(--label-primary);
-}
-
-.coverflow-empty p {
-    color: var(--label-tertiary);
-    margin-bottom: var(--spacing-lg);
-}
-
-/* Records List */
-.records-container {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-}
-
-.record-item {
-    background: var(--secondary-background);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-    transition: all var(--transition-normal);
-    border: 1px solid transparent;
-}
-
-.record-item:hover {
-    border-color: var(--tertiary-background);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.record-photos {
-    display: flex;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-md);
-}
-
-.record-photo {
-    flex: 1;
-    aspect-ratio: 1;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    background: var(--tertiary-background);
-}
-
-.record-photo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.record-info {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-}
-
-.record-camera {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--label-primary);
-}
-
-.record-film {
+    color: #8e8e93;
     font-size: 1rem;
-    color: var(--label-secondary);
-    margin-bottom: var(--spacing-sm);
 }
 
-.record-date,
-.record-location {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    color: var(--label-tertiary);
-    font-size: 0.9rem;
+/* Page Content */
+.page-content {
+    max-width: 800px;
+    margin: 0 auto;
 }
 
-.record-date i,
-.record-location i {
-    width: 16px;
-    text-align: center;
-}
-
-/* Empty List */
-.empty-list {
-    text-align: center;
-    padding: var(--spacing-xl);
-}
-
-.empty-list .empty-icon {
-    font-size: 3rem;
-}
-
-.empty-list h3 {
-    font-size: 1.5rem;
-    margin-bottom: var(--spacing-sm);
-}
-
-.empty-list p {
-    color: var(--label-tertiary);
-    margin-bottom: var(--spacing-lg);
-}
-
-/* Form Styles */
-.film-form {
+/* Ensure visibility */
+#coverflow-page.active {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-xl);
-}
-
-.form-section {
-    background: var(--secondary-background);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-}
-
-.form-section h3 {
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin-bottom: var(--spacing-lg);
-    color: var(--label-primary);
-    display: flex;
+    justify-content: center;
     align-items: center;
-    gap: var(--spacing-sm);
 }
 
-.form-group {
-    margin-bottom: var(--spacing-lg);
+/* Responsive */
+@media (max-width: 768px) {
+    .coverflow-header h1 {
+        font-size: 2rem;
+    }
+    
+    .nav-btn {
+        min-width: 70px;
+        padding: 8px 16px;
+    }
+    
+    .nav-btn i {
+        font-size: 22px;
+    }
+    
+    .nav-btn span {
+        font-size: 12px;
+    }
 }
 
-.form-group:last-child {
-    margin-bottom: 0;
+第二步：修复 app.js - 简化版本
+在GitHub上编辑 app.js 文件，删除所有内容，粘贴这个简化版本：
+
+// Film Flow - Simplified JavaScript
+console.log('Film Flow loading...');
+
+// Global variables - ONLY ONE DECLARATION
+let films = [];
+let currentCoverFlowIndex = 0;
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded');
+    
+    // Load existing films
+    loadFilms();
+    
+    // Initialize Cover Flow
+    initCoverFlow();
+    
+    // Setup navigation
+    setupNavigation();
+    
+    // Show initial page
+    showCoverflowPage();
+});
+
+// Page Navigation Functions
+function showCoverflowPage() {
+    console.log('Showing coverflow page');
+    switchPage('coverflow-page');
+    initCoverFlow();
 }
 
-.form-group label {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: var(--label-secondary);
-    margin-bottom: var(--spacing-sm);
+function showListPage() {
+    console.log('Showing list page');
+    switchPage('list-page');
+    renderRecordsList();
 }
 
-.form-group label i {
-    width: 20px;
-    text-align: center;
+function showAddPage() {
+    console.log('Showing add page');
+    switchPage('add-page');
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
-    width: 100%;
-    padding: var(--spacing-md);
-    background: var(--tertiary-background);
-    border: 1px solid transparent;
-    border-radius: var(--radius-md);
-    color: var(--label-primary);
-    font-size: 1rem;
-    transition: all var(--transition-fast);
+function showStatsPage() {
+    console.log('Showing stats page');
+    switchPage('stats-page');
+    updateStatistics();
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: var(--accent-color);
-    background: var(--secondary-background);
+function switchPage(pageId) {
+    console.log('Switching to page:', pageId);
+    
+    // Hide all pages
+    const pages = document.querySelectorAll('.page');
+    pages.forEach(page => {
+        page.classList.remove('active');
+    });
+    
+    // Show selected page
+    const selectedPage = document.getElementById(pageId);
+    if (selectedPage) {
+        selectedPage.classList.add('active');
+        console.log('Page shown:', pageId);
+        
+        // Show/hide bottom nav
+        const bottomNav = document.getElementById('bottom-nav');
+        if (bottomNav) {
+            if (pageId === 'coverflow-page') {
+                bottomNav.style.display = 'none';
+                console.log('Hiding bottom nav');
+            } else {
+                bottomNav.style.display = 'flex';
+                console.log('Showing bottom nav');
+            }
+        }
+        
+        // Show/hide back buttons
+        const backButtons = document.querySelectorAll('.back-btn');
+        backButtons.forEach(btn => {
+            if (pageId === 'coverflow-page') {
+                btn.style.display = 'none';
+            } else {
+                btn.style.display = 'flex';
+            }
+        });
+    }
 }
 
-.form-group input::placeholder,
-.form-group textarea::placeholder {
-    color: var(--label-quaternary);
+function setupNavigation() {
+    console.log('Setting up navigation');
+    
+    // Setup bottom nav buttons
+    const navRecords = document.querySelector('.nav-btn:nth-child(1)');
+    const navAdd = document.querySelector('.nav-btn:nth-child(2)');
+    const navStats = document.querySelector('.nav-btn:nth-child(3)');
+    
+    if (navRecords) {
+        navRecords.onclick = function() {
+            console.log('Records button clicked');
+            showListPage();
+        };
+    }
+    
+    if (navAdd) {
+        navAdd.onclick = function() {
+            console.log('Add button clicked');
+            showAddPage();
+        };
+    }
+    
+    if (navStats) {
+        navStats.onclick = function() {
+            console.log('Stats button clicked');
+            showStatsPage();
+        };
+    }
+    
+    // Setup back buttons
+    const backButtons = document.querySelectorAll('.back-btn');
+    backButtons.forEach(btn => {
+        btn.onclick = function() {
+            console.log('Back button clicked');
+            showCoverflowPage();
+        };
+    });
+    
+    // Setup "Go to Records" button in coverflow empty state
+    const goToRecordsBtn = document.querySelector('.coverflow-empty .btn');
+    if (goToRecordsBtn) {
+        goToRecordsBtn.onclick = function() {
+            console.log('Go to Records button clicked');
+            showListPage();
+        };
+    }
 }
 
-.form-hint {
-    color: var(--label-tertiary);
-    font-size: 0.9rem;
-    margin-top: var(--spacing-xs);
-    margin-bottom: var(--spacing-md);
+// Cover Flow Functions
+function initCoverFlow() {
+    console.log('Initializing cover flow');
+    const track = document.getElementById('coverflow-track');
+    
+    if (!track) {
+        console.error('Cover flow track not found');
+        return;
+    }
+    
+    // Check if we have films with photos
+    const hasPhotos = films.some(film => film.photos && film.photos.length > 0);
+    
+    if (!hasPhotos) {
+        track.innerHTML = `
+            <div class="coverflow-empty">
+                <div class="empty-icon">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <h3>No photos yet</h3>
+                <p>Add your first film record to start the gallery</p>
+                <button class="btn btn-primary">
+                    <i class="fas fa-list"></i> Go to Records
+                </button>
+            </div>
+        `;
+        
+        // Re-attach event listener for the new button
+        setTimeout(() => {
+            const newBtn = track.querySelector('.btn');
+            if (newBtn) {
+                newBtn.onclick = showListPage;
+            }
+        }, 100);
+    }
 }
+
+// Load films from localStorage
+function loadFilms() {
+    try {
+        const saved = localStorage.getItem('filmFlowRecords');
+        if (saved) {
+            films = JSON.parse(saved);
+            console.log('Loaded', films.length, 'films');
+        }
+    } catch (e) {
+        console.error('Error loading films:', e);
+    }
+}
+
+// Basic placeholder functions
+function renderRecordsList() {
+    const container = document.getElementById('records-container');
+    if (container) {
+        if (films.length === 0) {
+            container.innerHTML = `
+                <div class="empty-list">
+                    <div class="empty-icon">
+                        <i class="fas fa-film"></i>
+                    </div>
+                    <h3>No records yet</h3>
+                    <p>Add your first film record</p>
+                    <button class="btn btn-primary" onclick="showAddPage()">
+                        <i class="fas fa-plus"></i> Add First Record
+                    </button>
+                </div>
+            `;
+        } else {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <h3>${films.length} Film Records</h3>
+                    <p>Full records list will be implemented soon</p>
+                </div>
+            `;
+        }
+    }
+}
+
+function updateStatistics() {
+    const container = document.getElementById('stats-page');
+    if (container) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px;">
+                <h3>Statistics</h3>
+                <p>Statistics page will be implemented soon</p>
+                <p>Total films: ${films.length}</p>
+            </div>
+        `;
+    }
+}
+
+// Make functions available globally
+window.showCoverflowPage = showCoverflowPage;
+window.showListPage = showListPage;
+window.showAddPage = showAddPage;
+window.showStatsPage = showStatsPage;
+window.switchPage = switchPage;
+
+console.log('Film Flow initialized');
