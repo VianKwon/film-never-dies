@@ -9,6 +9,7 @@ let uploadedPhotos = {
     2: null,
     3: null
 };
+let coverflowPhotos = [];
 
 /* ====== LOCAL STORAGE KEYS ====== */
 const STORAGE_KEYS = {
@@ -119,8 +120,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Setup navigation
     setupNavigation();
 
-    // Setup coverflow nav buttons (keep swipe + buttons)
-    setupCoverflowNavButtons();
+    // Setup coverflow buttons (keep swipe + buttons)
+    setupCoverflowControls();
     
     // Initialize Select2 (wait for jQuery to load)
     setTimeout(() => {
@@ -151,8 +152,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function setupCoverflowNavButtons() {
+function setupCoverflowControls() {
     const prevBtn = document.getElementById('coverflow-prev');
     const nextBtn = document.getElementById('coverflow-next');
+    const shuffleBtn = document.getElementById('coverflow-shuffle');
     if (prevBtn) {
         prevBtn.onclick = function(e) {
             e.preventDefault();
@@ -163,6 +166,14 @@ function setupCoverflowNavButtons() {
         nextBtn.onclick = function(e) {
             e.preventDefault();
             navigateCoverFlow(1);
+        };
+    }
+    if (shuffleBtn) {
+        shuffleBtn.onclick = function(e) {
+            e.preventDefault();
+            if (!coverflowPhotos || coverflowPhotos.length === 0) return;
+            currentCoverFlowIndex = Math.floor(Math.random() * coverflowPhotos.length);
+            updateCoverFlow();
         };
     }
 }
@@ -207,24 +218,10 @@ function switchPage(pageId) {
         selectedPage.classList.add('active');
         selectedPage.style.display = 'block';
         
-        // 3. Handle bottom nav - 修改这里！
-        const bottomNav = document.getElementById('bottom-nav');
-        if (bottomNav) {
-            // 永远显示底部导航
-            bottomNav.style.display = 'flex';
-            console.log('📱 显示底部导航（所有页面）');
-        }
-        
-        // 4. Handle back buttons
-        const backButtons = document.querySelectorAll('.back-btn');
-        backButtons.forEach(btn => {
-            if (pageId === 'coverflow-page') {
-                // 主页不需要返回按钮
-                btn.style.display = 'none';
-            } else {
-                // 其他页面显示返回按钮
-                btn.style.display = 'flex';
-            }
+        // 3. Update bottom nav active state
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.target === pageId);
         });
         
         console.log(`✅ Page ${pageId} is now visible`);
@@ -237,35 +234,20 @@ function switchPage(pageId) {
 function setupNavigation() {
     console.log('🔗 Setting up navigation...');
     
-    // Bottom navigation buttons
-    const navButtons = document.querySelectorAll('.nav-btn');
-    console.log(`Found ${navButtons.length} navigation buttons`);
-    
-    navButtons.forEach((btn, index) => {
-        const text = btn.querySelector('span').textContent;
-        console.log(`Button ${index + 1}: ${text}`);
-        
-        btn.onclick = function(e) {
+    // Bottom navigation tabs (demo-like)
+    const tabs = document.querySelectorAll('.tab');
+    console.log(`Found ${tabs.length} bottom tabs`);
+    tabs.forEach(tab => {
+        tab.onclick = function(e) {
             e.preventDefault();
-            console.log(`🔘 ${text} button clicked`);
-            
-            if (text === 'Records') {
-                showListPage();
-            } else if (text === 'Add') {
-                showAddPage();
-            } else if (text === 'Stats') {
-                showStatsPage();
-            }
-        };
-    });
-    
-    // Back buttons
-    const backButtons = document.querySelectorAll('.back-btn');
-    backButtons.forEach(btn => {
-        btn.onclick = function(e) {
-            e.preventDefault();
-            console.log('🔙 Back button clicked');
-            showCoverflowPage();
+            const target = this.dataset.target;
+            if (!target) return;
+            console.log(`🔘 Tab clicked -> ${target}`);
+            if (target === 'coverflow-page') showCoverflowPage();
+            else if (target === 'list-page') showListPage();
+            else if (target === 'add-page') showAddPage();
+            else if (target === 'stats-page') showStatsPage();
+            else switchPage(target);
         };
     });
     
@@ -763,11 +745,11 @@ function initCoverFlow() {
         return;
     }
     
-    // Create array of all photos with film info
-    let allPhotos = [];
+    // Create array of all photos with film info (store globally for shuffle & click)
+    coverflowPhotos = [];
     filmsWithPhotos.forEach(film => {
         film.photos.forEach((photo, photoIndex) => {
-            allPhotos.push({
+            coverflowPhotos.push({
                 image: photo,
                 film: film,
                 photoIndex: photoIndex
@@ -779,7 +761,7 @@ function initCoverFlow() {
     track.innerHTML = '';
     
     // Create cover flow items
-    allPhotos.forEach((item, index) => {
+    coverflowPhotos.forEach((item, index) => {
         const itemElement = document.createElement('div');
         itemElement.className = 'coverflow-item';
         itemElement.dataset.index = index;
@@ -787,12 +769,16 @@ function initCoverFlow() {
         itemElement.innerHTML = `
             <img src="${item.image}" alt="Film photo ${index + 1}">
         `;
+        itemElement.addEventListener('click', () => {
+            currentCoverFlowIndex = index;
+            updateCoverFlow();
+        });
         
         track.appendChild(itemElement);
     });
     
     // Set initial position (show the newest photo by default)
-    currentCoverFlowIndex = Math.max(0, allPhotos.length - 1);
+    currentCoverFlowIndex = Math.max(0, coverflowPhotos.length - 1);
     updateCoverFlow();
     
     // Setup swipe events
@@ -806,26 +792,15 @@ function updateCoverFlow() {
     const totalItems = items.length;
     
     if (totalItems === 0) return;
-    
-    // Get current photo info
-    const filmsWithPhotos = films.filter(film => film.photos && film.photos.length > 0);
-    let photoCount = 0;
-    let currentFilm = null;
-    let currentPhotoIndex = 0;
-    
-    for (const film of filmsWithPhotos) {
-        if (currentCoverFlowIndex < photoCount + film.photos.length) {
-            currentFilm = film;
-            currentPhotoIndex = currentCoverFlowIndex - photoCount;
-            break;
-        }
-        photoCount += film.photos.length;
-    }
-    
-    // Update photo info
-    if (currentFilm) {
-        document.getElementById('camera-info').textContent = currentFilm.camera || 'Unknown Camera';
-        document.getElementById('film-info').textContent = currentFilm.name || 'Unknown Film';
+
+    // Update photo info (demo requirement: only keep camera model + film name)
+    const current = coverflowPhotos[currentCoverFlowIndex];
+    if (current && current.film) {
+        document.getElementById('camera-info').textContent = current.film.camera || 'Unknown Camera';
+        document.getElementById('film-info').textContent = current.film.name || 'Unknown Film';
+    } else {
+        document.getElementById('camera-info').textContent = '-';
+        document.getElementById('film-info').textContent = '-';
     }
     
     // Update item positions
@@ -1077,29 +1052,27 @@ function updateCameraStats() {
             cameraCount[film.camera] = (cameraCount[film.camera] || 0) + 1;
         }
     });
-    
-    // Create bar chart
-    let html = '';
-    const cameras = Object.keys(cameraCount).sort((a, b) => cameraCount[b] - cameraCount[a]);
-    
-    cameras.forEach(camera => {
-        const count = cameraCount[camera];
-        const percentage = (count / films.length) * 100;
-        
-        html += `
-            <div class="bar-item">
-                <div class="bar-label">
-                    <span>${camera}</span>
-                    <span>${count} roll${count > 1 ? 's' : ''}</span>
-                </div>
-                <div class="bar-container">
-                    <div class="bar-fill" style="width: ${percentage}%"></div>
-                    <div class="bar-value">${Math.round(percentage)}%</div>
-                </div>
+
+    const cameras = Object.keys(cameraCount).sort((a, b) => cameraCount[b] - cameraCount[a]).slice(0, 5);
+    if (cameras.length === 0) {
+        cameraStats.innerHTML = `
+            <div class="empty-stat">
+                <i class="fas fa-camera-slash"></i>
+                <p>No camera data yet</p>
             </div>
         `;
+        return;
+    }
+
+    let html = '';
+    cameras.forEach(camera => {
+        const count = cameraCount[camera];
+        const pct = films.length ? Math.round((count / films.length) * 100) : 0;
+        html += `
+            <div class="top-row"><div>${camera}</div><div>${count} (${pct}%)</div></div>
+            <div class="bar"><div style="width:${pct}%"></div></div>
+        `;
     });
-    
     cameraStats.innerHTML = html;
 }
 
@@ -1120,31 +1093,31 @@ function updateFilmStats() {
     // Count films by name
     const filmCount = {};
     films.forEach(film => {
-        filmCount[film.name] = (filmCount[film.name] || 0) + 1;
+        if (film.name) {
+            filmCount[film.name] = (filmCount[film.name] || 0) + 1;
+        }
     });
-    
-    // Create bar chart
-    let html = '';
-    const filmNames = Object.keys(filmCount).sort((a, b) => filmCount[b] - filmCount[a]);
-    
-    filmNames.forEach(filmName => {
-        const count = filmCount[filmName];
-        const percentage = (count / films.length) * 100;
-        
-        html += `
-            <div class="bar-item">
-                <div class="bar-label">
-                    <span>${filmName}</span>
-                    <span>${count} roll${count > 1 ? 's' : ''}</span>
-                </div>
-                <div class="bar-container">
-                    <div class="bar-fill" style="width: ${percentage}%"></div>
-                    <div class="bar-value">${Math.round(percentage)}%</div>
-                </div>
+
+    const filmNames = Object.keys(filmCount).sort((a, b) => filmCount[b] - filmCount[a]).slice(0, 5);
+    if (filmNames.length === 0) {
+        filmStats.innerHTML = `
+            <div class="empty-stat">
+                <i class="fas fa-film"></i>
+                <p>No film data yet</p>
             </div>
         `;
+        return;
+    }
+
+    let html = '';
+    filmNames.forEach(filmName => {
+        const count = filmCount[filmName];
+        const pct = films.length ? Math.round((count / films.length) * 100) : 0;
+        html += `
+            <div class="top-row"><div>${filmName}</div><div>${count} (${pct}%)</div></div>
+            <div class="bar"><div style="width:${pct}%"></div></div>
+        `;
     });
-    
     filmStats.innerHTML = html;
 }
 

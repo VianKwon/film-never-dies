@@ -27,56 +27,50 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
-    <!-- Back Buttons (for non-coverflow pages) -->
-    <button class="back-btn" id="back-btn-list" style="display: none;">
-        <i class="fas fa-arrow-left"></i>
-    </button>
-    <button class="back-btn" id="back-btn-add" style="display: none;">
-        <i class="fas fa-arrow-left"></i>
-    </button>
-    <button class="back-btn" id="back-btn-stats" style="display: none;">
-        <i class="fas fa-arrow-left"></i>
-    </button>
-    
     <!-- ====== COVER FLOW PAGE (Home) ====== -->
     <div class="page active" id="coverflow-page">
-        <div class="coverflow-container">
-            <div class="coverflow-header">
+        <div class="container">
+            <div class="header">
                 <h1>Film Flow</h1>
-                <div class="subtitle">Your film photography journal</div>
+                <div class="sub">Your film photography journal</div>
             </div>
-            
-            <!-- Cover Flow Gallery -->
-            <div class="coverflow-wrapper">
+
+            <div class="coverflow-wrap">
+                <!-- Cover Flow Gallery -->
                 <div class="coverflow-track" id="coverflow-track">
                     <!-- Cover flow items will be inserted here by JavaScript -->
                 </div>
-                <!-- Cover Flow Nav Buttons (keep both swipe + buttons) -->
-                <button class="coverflow-nav coverflow-nav-left" id="coverflow-prev" aria-label="Previous photo">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button class="coverflow-nav coverflow-nav-right" id="coverflow-next" aria-label="Next photo">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
-            
-            <!-- Photo Info -->
-            <div class="coverflow-info">
-                <div class="info-camera" id="camera-info">-</div>
-                <div class="info-film" id="film-info">-</div>
-            </div>
-            
-            <!-- Hint -->
-            <div class="coverflow-hint">
-                <i class="fas fa-arrows-left-right"></i>
-                <span>Swipe, click, or use arrow keys to navigate</span>
+
+                <!-- Info -->
+                <div class="cf-info">
+                    <div class="line1" id="camera-info">-</div>
+                    <div class="line2" id="film-info">-</div>
+                </div>
+
+                <!-- Actions: keep both swipe + buttons -->
+                <div class="cf-actions">
+                    <button class="btn" id="coverflow-prev" aria-label="Previous photo">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="btn primary" id="coverflow-shuffle" aria-label="Shuffle">
+                        Shuffle
+                    </button>
+                    <button class="btn" id="coverflow-next" aria-label="Next photo">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <div class="cf-hint">
+                    <i class="fas fa-arrows-left-right"></i>
+                    <span>Swipe, drag, click, or use arrow keys</span>
+                </div>
             </div>
         </div>
     </div>
     
     <!-- ====== RECORDS LIST PAGE ====== -->
     <div class="page" id="list-page">
-        <div class="page-content">
+        <div class="container">
             <div class="page-header">
                 <h2><i class="fas fa-list"></i> Records</h2>
                 <div class="page-subtitle">All your film photography records</div>
@@ -90,7 +84,7 @@
     
     <!-- ====== ADD RECORD PAGE ====== -->
     <div class="page" id="add-page">
-        <div class="page-content">
+        <div class="container">
             <div class="page-header">
                 <h2><i class="fas fa-plus"></i> Add Record</h2>
                 <div class="page-subtitle">Document your film photography</div>
@@ -208,7 +202,7 @@
                         <div class="photo-preview" id="photo-preview">
                             <!-- Previews will be inserted here -->
                         </div>
-                    </div>
+        </div>
                 </div>
                 
                 <!-- Notes -->
@@ -232,89 +226,67 @@
     
     <!-- ====== STATISTICS PAGE ====== -->
     <div class="page" id="stats-page">
-        <div class="page-content">
+        <div class="container">
             <div class="page-header">
                 <h2><i class="fas fa-chart-bar"></i> Statistics</h2>
                 <div class="page-subtitle">Your film photography analytics</div>
             </div>
             
-            <div class="stats-container">
-                <!-- Overview Stats -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number" id="stat-total">0</div>
-                        <div class="stat-label">Total Films</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="stat-cameras">0</div>
-                        <div class="stat-label">Cameras Used</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="stat-cities">0</div>
-                        <div class="stat-label">Cities Shot In</div>
-                    </div>
+            <div class="stats-grid">
+                <div class="stat">
+                    <div class="num" id="stat-total">0</div>
+                    <div class="lab">Total rolls</div>
                 </div>
-                
-                <!-- Camera Stats -->
-                <div class="stats-chart">
-                    <h3><i class="fas fa-camera"></i> Camera Usage</h3>
-                    <div id="camera-stats">
-                        <!-- Camera stats will be inserted here -->
-                    </div>
+                <div class="stat">
+                    <div class="num" id="stat-cameras">0</div>
+                    <div class="lab">Cameras used</div>
                 </div>
-                
-                <!-- Film Stats -->
-                <div class="stats-chart">
-                    <h3><i class="fas fa-film"></i> Film Usage</h3>
-                    <div id="film-stats">
-                        <!-- Film stats will be inserted here -->
-                    </div>
+                <div class="stat">
+                    <div class="num" id="stat-cities">0</div>
+                    <div class="lab">Cities shot in</div>
                 </div>
-                
-                <!-- City Stats -->
-                <div class="stats-chart">
-                    <h3><i class="fas fa-map-marker-alt"></i> City Statistics</h3>
-                    <div id="city-stats">
-                        <!-- City stats will be inserted here -->
-                    </div>
-                </div>
-                
-                <!-- Type Stats -->
-                <div class="stats-chart">
-                    <h3><i class="fas fa-chart-pie"></i> Film Type Distribution</h3>
-                    <div id="type-stats">
-                        <!-- Type stats will be inserted here -->
-                    </div>
-                </div>
-                
-                <!-- Data Actions -->
-                <div class="data-actions">
-                    <button class="btn btn-secondary" onclick="exportData()">
-                        <i class="fas fa-download"></i> Export Data
-                    </button>
-                    <button class="btn btn-secondary" onclick="importData()">
-                        <i class="fas fa-upload"></i> Import Data
-                    </button>
-                </div>
+            </div>
+
+            <div class="card top-card">
+                <div class="top-title">Top cameras</div>
+                <div id="camera-stats"><!-- filled by JS --></div>
+            </div>
+
+            <div class="card top-card">
+                <div class="top-title">Top films</div>
+                <div id="film-stats"><!-- filled by JS --></div>
+            </div>
+
+            <div class="data-actions">
+                <button class="btn" onclick="exportData()">
+                    <i class="fas fa-download"></i> Export
+                </button>
+                <button class="btn" onclick="importData()">
+                    <i class="fas fa-upload"></i> Import
+                </button>
             </div>
         </div>
     </div>
     
     <!-- ====== BOTTOM NAVIGATION ====== -->
-    <div class="bottom-nav" id="bottom-nav" style="display: none;">
-        <button class="nav-btn">
+    <nav class="nav" id="bottom-nav">
+        <button class="tab active" data-target="coverflow-page" id="tab-home">
+            <i class="fas fa-images"></i>
+            <div>Home</div>
+        </button>
+        <button class="tab" data-target="list-page" id="tab-list">
             <i class="fas fa-list"></i>
-            <span>Records</span>
+            <div>Records</div>
         </button>
-        <button class="nav-btn">
+        <button class="tab" data-target="add-page" id="tab-add">
             <i class="fas fa-plus"></i>
-            <span>Add</span>
+            <div>Add</div>
         </button>
-        <button class="nav-btn">
-            <i class="fas fa-chart-bar"></i>
-            <span>Stats</span>
+        <button class="tab" data-target="stats-page" id="tab-stats">
+            <i class="fas fa-chart-column"></i>
+            <div>Stats</div>
         </button>
-    </div>
+    </nav>
     
     <!-- ====== TOAST NOTIFICATION ====== -->
     <div id="toast" class="toast">
