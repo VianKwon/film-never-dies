@@ -151,7 +151,6 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ Film Flow initialization complete!');
 });
 
-function setupCoverflowNavButtons() {
 function setupCoverflowControls() {
     const prevBtn = document.getElementById('coverflow-prev');
     const nextBtn = document.getElementById('coverflow-next');
