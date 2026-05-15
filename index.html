@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Film Flow - Your Film Photography Journal</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎞️</text></svg>">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎞️</text></svg>">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+    <!-- ====== COVER FLOW PAGE (Home) ====== -->
+    <div class="page active" id="coverflow-page">
+        <div class="container">
+            <div class="header">
+                <h1>Film Flow</h1>
+                <div class="sub">Your film photography journal</div>
+            </div>
+
+            <div class="coverflow-wrap">
+                <!-- Cover Flow Gallery -->
+                <div class="coverflow-track" id="coverflow-track">
+                    <!-- Cover flow items will be inserted here by JavaScript -->
+                </div>
+
+                <!-- Info -->
+                <div class="cf-info">
+                    <div class="line1" id="camera-info">-</div>
+                    <div class="line2" id="film-info">-</div>
+                </div>
+
+                <!-- Actions: keep both swipe + buttons -->
+                <div class="cf-actions">
+                    <button class="btn" id="coverflow-prev" aria-label="Previous photo">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="btn primary" id="coverflow-shuffle" aria-label="Shuffle">
+                        Shuffle
+                    </button>
+                    <button class="btn" id="coverflow-next" aria-label="Next photo">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <div class="cf-hint">
+                    <i class="fas fa-arrows-left-right"></i>
+                    <span>Swipe, drag, click, or use arrow keys</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ====== RECORDS LIST PAGE ====== -->
+    <div class="page" id="list-page">
+        <div class="container">
+            <div class="page-header">
+                <h2><i class="fas fa-list"></i> Records</h2>
+                <div class="page-subtitle">All your film photography records</div>
+            </div>
+            
+            <div class="records-container" id="records-container">
+                <!-- Records will be inserted here by JavaScript -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- ====== ADD RECORD PAGE ====== -->
+    <div class="page" id="add-page">
+        <div class="container">
+            <div class="page-header">
+                <h2><i class="fas fa-plus"></i> Add Record</h2>
+                <div class="page-subtitle">Document your film photography</div>
+            </div>
+            
+            <form id="film-form" class="film-form">
+                <!-- Film Information -->
+                <div class="form-section">
+                    <h3><i class="fas fa-film"></i> Film Information</h3>
+                    
+                    <div class="form-group">
+                        <label for="film-name"><i class="fas fa-tag"></i> Film Name *</label>
+                        <!-- Select2 tags: choose from history or type new -->
+                        <select id="film-name" required>
+                            <option value=""></option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="film-type"><i class="fas fa-layer-group"></i> Film Type *</label>
+                        <select id="film-type" required>
+                            <option value="">Select film type</option>
+                            <option value="Color Negative">Color Negative</option>
+                            <option value="Black & White">Black & White</option>
+                            <option value="Slide">Slide (E6)</option>
+                            <option value="Instant">Instant</option>
+                            <option value="Cine">Cine Film</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="iso"><i class="fas fa-sun"></i> ISO</label>
+                        <select id="iso">
+                            <option value="">Select ISO</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="200">200</option>
+                            <option value="400">400</option>
+                            <option value="800">800</option>
+                            <option value="1600">1600</option>
+                            <option value="3200">3200</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Camera & Date -->
+                <div class="form-section">
+                    <h3><i class="fas fa-camera"></i> Camera & Date</h3>
+                    
+                    <div class="form-group">
+                        <label for="camera"><i class="fas fa-camera-retro"></i> Camera Model</label>
+                        <!-- Select2 tags: choose from history or type new -->
+                        <select id="camera">
+                            <option value=""></option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="date-shot"><i class="fas fa-calendar"></i> Date Shot</label>
+                        <input type="date" id="date-shot">
+                        <div class="form-hint">Leave empty for today</div>
+                    </div>
+                </div>
+                
+                <!-- Location -->
+                <div class="form-section">
+                    <h3><i class="fas fa-map-marker-alt"></i> Location</h3>
+                    
+                    <div class="form-group">
+                        <label for="country"><i class="fas fa-globe"></i> Country/Region *</label>
+                        <select id="country" required>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="city"><i class="fas fa-city"></i> City *</label>
+                        <select id="city" required>
+                            <option value=""></option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Photos -->
+                <div class="form-section">
+                    <h3><i class="fas fa-images"></i> Photos (Max 3)</h3>
+                    <div class="form-hint">Upload up to 3 photos. Images will be automatically compressed.</div>
+                    
+                    <!-- Upload Boxes -->
+                    
+                    <div class="photo-upload-container">
+                        <div class="upload-row">
+                            <label for="photo-1" class="upload-box" id="upload-box-1">
+                                <i class="fas fa-camera"></i>
+                                <span>Photo 1</span>
+                            </label>
+                            <input type="file" id="photo-1" accept="image/*" style="display: none;">
+                            
+                            <label for="photo-2" class="upload-box" id="upload-box-2">
+                                <i class="fas fa-camera"></i>
+                                <span>Photo 2</span>
+                            </label>
+                            <input type="file" id="photo-2" accept="image/*" style="display: none;">    
+
+                             <label for="photo-3" class="upload-box" id="upload-box-3">
+                                <i class="fas fa-camera"></i>
+                                <span>Photo 3</span>
+                            </label>
+                            <input type="file" id="photo-3" accept="image/*" style="display: none;">
+                        </div>
+                    </div>
+                        
+                        <!-- Photo Preview -->
+                        <div class="photo-preview" id="photo-preview">
+                            <!-- Previews will be inserted here -->
+                        </div>
+        </div>
+                </div>
+                
+                <!-- Notes -->
+                <div class="form-section">
+                    <h3><i class="fas fa-sticky-note"></i> Notes</h3>
+                    <div class="form-group">
+                        <label for="notes"><i class="fas fa-edit"></i> Additional Notes</label>
+                        <textarea id="notes" rows="4" placeholder="Any additional notes about this roll..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-large">
+                        <i class="fas fa-save"></i> Save Film Record
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- ====== STATISTICS PAGE ====== -->
+    <div class="page" id="stats-page">
+        <div class="container">
+            <div class="page-header">
+                <h2><i class="fas fa-chart-bar"></i> Statistics</h2>
+                <div class="page-subtitle">Your film photography analytics</div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat">
+                    <div class="num" id="stat-total">0</div>
+                    <div class="lab">Total rolls</div>
+                </div>
+                <div class="stat">
+                    <div class="num" id="stat-cameras">0</div>
+                    <div class="lab">Cameras used</div>
+                </div>
+                <div class="stat">
+                    <div class="num" id="stat-cities">0</div>
+                    <div class="lab">Cities shot in</div>
+                </div>
+            </div>
+
+            <div class="card top-card">
+                <div class="top-title">Top cameras</div>
+                <div id="camera-stats"><!-- filled by JS --></div>
+            </div>
+
+            <div class="card top-card">
+                <div class="top-title">Top films</div>
+                <div id="film-stats"><!-- filled by JS --></div>
+            </div>
+
+            <div class="data-actions">
+                <button class="btn" onclick="exportData()">
+                    <i class="fas fa-download"></i> Export
+                </button>
+                <button class="btn" onclick="importData()">
+                    <i class="fas fa-upload"></i> Import
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ====== BOTTOM NAVIGATION ====== -->
+    <nav class="nav" id="bottom-nav">
+        <button class="tab active" data-target="coverflow-page" id="tab-home">
+            <i class="fas fa-images"></i>
+            <div>Home</div>
+        </button>
+        <button class="tab" data-target="list-page" id="tab-list">
+            <i class="fas fa-list"></i>
+            <div>Records</div>
+        </button>
+        <button class="tab" data-target="add-page" id="tab-add">
+            <i class="fas fa-plus"></i>
+            <div>Add</div>
+        </button>
+        <button class="tab" data-target="stats-page" id="tab-stats">
+            <i class="fas fa-chart-column"></i>
+            <div>Stats</div>
+        </button>
+    </nav>
+    
+    <!-- ====== TOAST NOTIFICATION ====== -->
+    <div id="toast" class="toast">
+        <div class="toast-content">
+            <i class="toast-icon"></i>
+            <span class="toast-message"></span>
+        </div>
+    </div>
+    
+    <!-- ====== SCRIPTS ====== -->
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Select2 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="app.js"></script>
+</body>
+</html>
