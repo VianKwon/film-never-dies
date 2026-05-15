@@ -201,6 +201,12 @@ function showStatsPage() {
     updateStatistics();
 }
 
+function showMyPage() {
+    console.log('📱 Switching to My page');
+    switchPage('my-page');
+    initMyPage();
+}
+
 function switchPage(pageId) {
     console.log(`🔄 Switching to page: ${pageId}`);
     
@@ -245,6 +251,7 @@ function setupNavigation() {
             if (target === 'coverflow-page') showCoverflowPage();
             else if (target === 'list-page') showListPage();
             else if (target === 'add-page') showAddPage();
+            else if (target === 'my-page') showMyPage();
             else if (target === 'stats-page') showStatsPage();
             else switchPage(target);
         };
@@ -602,6 +609,11 @@ function saveFilmRecord() {
         return;
     }
     
+    if (!camera) {
+        showToast('Please fill in Camera Model', 'error');
+        return;
+    }
+    
     if (!country) {
         showToast('Please select a country/region', 'error');
         return;
@@ -627,7 +639,7 @@ function saveFilmRecord() {
         type: filmType,
         iso: iso || null,
         camera: camera || null,
-        date: dateShot || new Date().toISOString().split('T')[0],
+        date: dateShot || new Date().toISOString().substring(0, 7),
         country: country,
         city: city,
         notes: notes || null,
@@ -1042,7 +1054,7 @@ function renderRecordsList() {
                 ${film.city ? `
                     <div class="record-location">
                         <i class="fas fa-map-marker-alt"></i>
-                        ${film.city}${film.country ? `, ${getCountryName(film.country)}` : ''}
+                        ${film.city}
                     </div>
                 ` : ''}
             </div>
@@ -1272,6 +1284,18 @@ function updateTypeStats() {
 function formatDate(dateString) {
     if (!dateString) return 'Unknown date';
     
+    // Check if it's YYYY-MM format
+    if (dateString.length === 7 && dateString.includes('-')) {
+        const date = new Date(dateString + '-01'); // Add day to make it a valid date
+        if (isNaN(date.getTime())) return dateString;
+        
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short'
+        });
+    }
+    
+    // Original date format
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return dateString;
     
@@ -1400,15 +1424,215 @@ function importData() {
     input.click();
 }
 
+/* ====== MY PAGE LOGIC ====== */
+function initMyPage() {
+    console.log('⚙️ Initializing My page');
+    
+    renderCamerasList();
+    renderFilmsList();
+    
+    // 添加相机按钮
+    const addCameraBtn = document.getElementById('add-camera-btn');
+    if (addCameraBtn) {
+        addCameraBtn.onclick = function() {
+            const input = document.getElementById('new-camera-input');
+            const value = normalizeText(input.value);
+            if (value) {
+                addCamera(value);
+                input.value = '';
+            }
+        };
+    }
+    
+    // 添加胶片按钮
+    const addFilmBtn = document.getElementById('add-film-btn');
+    if (addFilmBtn) {
+        addFilmBtn.onclick = function() {
+            const input = document.getElementById('new-film-input');
+            const value = normalizeText(input.value);
+            if (value) {
+                addFilmStock(value);
+                input.value = '';
+            }
+        };
+    }
+    
+    // 输入框回车事件
+    const cameraInput = document.getElementById('new-camera-input');
+    if (cameraInput) {
+        cameraInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const value = normalizeText(this.value);
+                if (value) {
+                    addCamera(value);
+                    this.value = '';
+                }
+            }
+        });
+    }
+    
+    const filmInput = document.getElementById('new-film-input');
+    if (filmInput) {
+        filmInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const value = normalizeText(this.value);
+                if (value) {
+                    addFilmStock(value);
+                    this.value = '';
+                }
+            }
+        });
+    }
+}
+
+function addCamera(name) {
+    const cameraName = normalizeText(name);
+    if (!cameraName) return;
+    
+    let cameras = loadStringArray(STORAGE_KEYS.cameras);
+    
+    // 检查是否已存在（不区分大小写）
+    const exists = cameras.some(c => normalizeText(c).toLowerCase() === cameraName.toLowerCase());
+    if (exists) {
+        showToast('Camera already exists', 'warning');
+        return;
+    }
+    
+    cameras.unshift(cameraName);
+    saveStringArray(STORAGE_KEYS.cameras, cameras);
+    
+    showToast('Camera added', 'success');
+    renderCamerasList();
+    
+    // 更新 Add 页面的选项
+    populateFilmAndCameraHistory();
+}
+
+function deleteCamera(name) {
+    if (confirm(`Delete camera "${name}"?`)) {
+        let cameras = loadStringArray(STORAGE_KEYS.cameras);
+        cameras = cameras.filter(c => normalizeText(c) !== normalizeText(name));
+        saveStringArray(STORAGE_KEYS.cameras, cameras);
+        
+        showToast('Camera deleted', 'success');
+        renderCamerasList();
+        
+        // 更新 Add 页面的选项
+        populateFilmAndCameraHistory();
+    }
+}
+
+function addFilmStock(name) {
+    const filmName = normalizeText(name);
+    if (!filmName) return;
+    
+    let films = loadStringArray(STORAGE_KEYS.filmNames);
+    
+    // 检查是否已存在（不区分大小写）
+    const exists = films.some(f => normalizeText(f).toLowerCase() === filmName.toLowerCase());
+    if (exists) {
+        showToast('Film already exists', 'warning');
+        return;
+    }
+    
+    films.unshift(filmName);
+    saveStringArray(STORAGE_KEYS.filmNames, films);
+    
+    showToast('Film added', 'success');
+    renderFilmsList();
+    
+    // 更新 Add 页面的选项
+    populateFilmAndCameraHistory();
+}
+
+function deleteFilmStock(name) {
+    if (confirm(`Delete film "${name}"?`)) {
+        let films = loadStringArray(STORAGE_KEYS.filmNames);
+        films = films.filter(f => normalizeText(f) !== normalizeText(name));
+        saveStringArray(STORAGE_KEYS.filmNames, films);
+        
+        showToast('Film deleted', 'success');
+        renderFilmsList();
+        
+        // 更新 Add 页面的选项
+        populateFilmAndCameraHistory();
+    }
+}
+
+function renderCamerasList() {
+    const container = document.getElementById('cameras-list');
+    if (!container) return;
+    
+    const cameras = loadStringArray(STORAGE_KEYS.cameras);
+    
+    if (cameras.length === 0) {
+        container.innerHTML = `
+            <div class="empty-list-message">
+                <i class="fas fa-camera" style="margin-right: 6px;"></i>
+                No cameras added yet
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = cameras.map(camera => `
+        <div class="item-card">
+            <span class="item-name">${escapeHtml(camera)}</span>
+            <button class="delete-btn" onclick="deleteCamera('${escapeHtmlForJs(camera)}')">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `).join('');
+}
+
+function renderFilmsList() {
+    const container = document.getElementById('films-list');
+    if (!container) return;
+    
+    const films = loadStringArray(STORAGE_KEYS.filmNames);
+    
+    if (films.length === 0) {
+        container.innerHTML = `
+            <div class="empty-list-message">
+                <i class="fas fa-film" style="margin-right: 6px;"></i>
+                No films added yet
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = films.map(film => `
+        <div class="item-card">
+            <span class="item-name">${escapeHtml(film)}</span>
+            <button class="delete-btn" onclick="deleteFilmStock('${escapeHtmlForJs(film)}')">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `).join('');
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function escapeHtmlForJs(text) {
+    return text.replace(/'/g, "\\'").replace(/"/g, '\\"');
+}
+
 /* ====== GLOBAL EXPORT ====== */
 // Make functions available globally for HTML onclick attributes
 window.showCoverflowPage = showCoverflowPage;
 window.showListPage = showListPage;
 window.showAddPage = showAddPage;
+window.showMyPage = showMyPage;
 window.showStatsPage = showStatsPage;
 window.switchPage = switchPage;
 window.removePhoto = removePhoto;
 window.exportData = exportData;
 window.importData = importData;
+window.deleteCamera = deleteCamera;
+window.deleteFilmStock = deleteFilmStock;
 
 console.log('🎉 Film Flow application loaded successfully!');
