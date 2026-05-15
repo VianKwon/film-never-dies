@@ -190,7 +190,7 @@ body{
 }
 .record-item{
   display:flex;
-  gap: 12px;
+  gap: 2px;
   background: var(--panel);
   border-radius: 18px;
   padding: 12px;
@@ -198,7 +198,7 @@ body{
   align-items: center;
 }
 .record-photos{
-  flex: 3;
+  flex: 2;
   display:flex;
   gap: 6px;
   align-items: stretch;
@@ -227,6 +227,7 @@ body{
   flex-direction:column;
   justify-content:center;
   gap: 6px;
+  padding-left: 10px;
 }
 .record-camera,.record-film,.record-date,.record-location{
   display:flex;
