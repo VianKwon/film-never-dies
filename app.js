@@ -123,10 +123,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Setup coverflow buttons (keep swipe + buttons)
     setupCoverflowControls();
     
-    // Initialize Select2 (wait for jQuery to load)
-    setTimeout(() => {
-        initSelect2();
-    }, 500);
+    // Populate countries and film/camera history, and setup hybrid select
+    populateCountries();
+    populateFilmAndCameraHistory();
+    initCountryCityHybrid();
     
     // Setup file input change events
     setTimeout(() => {
@@ -262,20 +262,7 @@ function setupNavigation() {
 
 /* ====== SELECT2 INITIALIZATION ====== */
 function initSelect2() {
-    console.log('🌍 Initializing Select2...');
-    
-    // Check if jQuery and Select2 are loaded
-    if (typeof jQuery === 'undefined') {
-        console.error('❌ jQuery not loaded! Please check index.html');
-        return;
-    }
-    
-    if (typeof jQuery.fn.select2 === 'undefined') {
-        console.error('❌ Select2 not loaded! Please check index.html');
-        return;
-    }
-    
-    console.log('✅ jQuery and Select2 are loaded');
+    console.log('🌍 Initializing select elements...');
     
     // 1. First populate countries
     populateCountries();
@@ -283,52 +270,17 @@ function initSelect2() {
     // 2. Then populate film and camera history
     populateFilmAndCameraHistory();
     
-    // 3. Initialize all Select2 elements
-    
-    // Film name
-    $('#film-name').select2({
-        placeholder: 'Select or type film name',
-        allowClear: true,
-        width: '100%',
-        theme: 'default',
-        tags: true
-    });
-    
-    // Camera model
-    $('#camera').select2({
-        placeholder: 'Select or type camera model',
-        allowClear: true,
-        width: '100%',
-        theme: 'default',
-        tags: true
-    });
-    
-    // Country/region
-    $('#country').select2({
-        placeholder: 'Select country/region',
-        allowClear: true,
-        width: '100%',
-        theme: 'default',
-        tags: true
-    });
-    
-    // City
-    $('#city').select2({
-        placeholder: 'Select or type city',
-        allowClear: true,
-        width: '100%',
-        theme: 'default',
-        tags: true
-    });
-    
     // Listen for country/region changes
-    $('#country').on('change', function() {
-        const countryCode = $(this).val();
-        console.log('Country/region selected:', countryCode);
-        updateCities(countryCode);
-    });
+    const countrySelect = document.getElementById('country');
+    if (countrySelect) {
+        countrySelect.addEventListener('change', function() {
+            const countryCode = this.value;
+            console.log('Country/region selected:', countryCode);
+            updateCities(countryCode);
+        });
+    }
     
-    console.log('✅ Select2 initialized successfully');
+    console.log('✅ Select elements initialized successfully');
 }
 
 function populateFilmAndCameraHistory() {
@@ -347,17 +299,25 @@ function populateFilmAndCameraHistory() {
         // 添加空选项
         const emptyOption = document.createElement('option');
         emptyOption.value = '';
+        emptyOption.textContent = 'Select film name';
         filmSelect.appendChild(emptyOption);
-        // 添加历史选项（去重）
+        // 添加历史选项（去重并排序）
         const seenFilmNames = new Set();
+        const uniqueFilmNames = [];
         filmNames.forEach(v => {
             if (!seenFilmNames.has(v.toLowerCase())) {
                 seenFilmNames.add(v.toLowerCase());
-                const option = document.createElement('option');
-                option.value = v;
-                option.textContent = v;
-                filmSelect.appendChild(option);
+                uniqueFilmNames.push(v);
             }
+        });
+        // 按字母顺序排序
+        uniqueFilmNames.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+        // 添加选项
+        uniqueFilmNames.forEach(v => {
+            const option = document.createElement('option');
+            option.value = v;
+            option.textContent = v;
+            filmSelect.appendChild(option);
         });
     }
     
@@ -369,17 +329,25 @@ function populateFilmAndCameraHistory() {
         // 添加空选项
         const emptyOption = document.createElement('option');
         emptyOption.value = '';
+        emptyOption.textContent = 'Select camera model';
         cameraSelect.appendChild(emptyOption);
-        // 添加历史选项（去重）
+        // 添加历史选项（去重并排序）
         const seenCameras = new Set();
+        const uniqueCameras = [];
         cameras.forEach(v => {
             if (!seenCameras.has(v.toLowerCase())) {
                 seenCameras.add(v.toLowerCase());
-                const option = document.createElement('option');
-                option.value = v;
-                option.textContent = v;
-                cameraSelect.appendChild(option);
+                uniqueCameras.push(v);
             }
+        });
+        // 按字母顺序排序
+        uniqueCameras.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+        // 添加选项
+        uniqueCameras.forEach(v => {
+            const option = document.createElement('option');
+            option.value = v;
+            option.textContent = v;
+            cameraSelect.appendChild(option);
         });
     }
 }
@@ -400,8 +368,10 @@ function populateCountries() {
     defaultOption.textContent = 'Select country/region';
     countrySelect.appendChild(defaultOption);
     
-    // Add popular countries/regions (user can still type custom with tags)
+    // Add popular countries/regions (sorted alphabetically)
     const popularCountries = countriesRegions.filter(c => POPULAR_COUNTRY_CODES.includes(c.code));
+    // 按字母顺序排序
+    popularCountries.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
     popularCountries.forEach(country => {
         const option = document.createElement('option');
         option.value = country.code;
@@ -409,40 +379,111 @@ function populateCountries() {
         countrySelect.appendChild(option);
     });
     
+    // Add Other / Custom option
+    const otherOption = document.createElement('option');
+    otherOption.value = 'other';
+    otherOption.textContent = 'Other / Custom';
+    countrySelect.appendChild(otherOption);
+    
     console.log(`✅ Populated ${popularCountries.length} popular countries/regions`);
 }
 
 function updateCities(countryCode) {
     const citySelect = document.getElementById('city');
-    const select2City = $('#city');
+    const cityCustomWrapper = document.getElementById('city-custom-wrapper');
+    const cityCustomInput = document.getElementById('city-custom-input');
     
-    // Always allow city input (tags mode); if country matches our preset list, we give suggestions.
+    if (!citySelect) {
+        console.error('❌ City select element not found');
+        return;
+    }
     
     // Find selected country/region
     const country = countriesRegions.find(c => c.code === countryCode);
     // Enable city select
     citySelect.disabled = false;
-    select2City.prop('disabled', false);
     
     // Clear existing options
-    select2City.empty();
-    select2City.append('<option value=""></option>');
+    citySelect.innerHTML = '';
+    
+    // Add default option
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Select city';
+    citySelect.appendChild(defaultOption);
     
     if (country && Array.isArray(country.cities)) {
-        // Add cities (suggestions)
-        country.cities.forEach(city => {
+        // Add cities (sorted alphabetically)
+        const sortedCities = [...country.cities].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+        sortedCities.forEach(city => {
             const option = document.createElement('option');
             option.value = city;
             option.textContent = city;
             citySelect.appendChild(option);
         });
-        console.log(`✅ Populated ${country.cities.length} cities for ${country.name}`);
-    } else {
-        // Country is custom typed (tags); no preset cities
-        console.log('ℹ️ Custom country/region selected; city suggestions skipped');
+        console.log(`✅ Populated ${sortedCities.length} cities for ${country.name}`);
     }
+    
+    // Add Other / Custom option
+    const otherOption = document.createElement('option');
+    otherOption.value = 'other';
+    otherOption.textContent = 'Other / Custom';
+    citySelect.appendChild(otherOption);
+    
+    // Hide custom input when country changes
+    if (cityCustomWrapper) cityCustomWrapper.classList.remove('show');
+    if (cityCustomInput) cityCustomInput.value = '';
+}
 
-    select2City.val('').trigger('change');
+function initCountryCityHybrid() {
+    const countrySelect = document.getElementById('country');
+    const countryCustomWrapper = document.getElementById('country-custom-wrapper');
+    const countryCustomInput = document.getElementById('country-custom-input');
+    
+    const citySelect = document.getElementById('city');
+    const cityCustomWrapper = document.getElementById('city-custom-wrapper');
+    const cityCustomInput = document.getElementById('city-custom-input');
+    
+    if (!countrySelect || !citySelect) {
+        console.error('❌ Country or City select elements not found');
+        return;
+    }
+    
+    // Country change handler
+    countrySelect.addEventListener('change', function() {
+        if (this.value === 'other') {
+            countryCustomWrapper.classList.add('show');
+            countryCustomInput.focus();
+            // Reset city - only show Other option
+            citySelect.innerHTML = '';
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Select city';
+            citySelect.appendChild(defaultOption);
+            const otherOption = document.createElement('option');
+            otherOption.value = 'other';
+            otherOption.textContent = 'Other / Custom';
+            citySelect.appendChild(otherOption);
+            cityCustomWrapper.classList.remove('show');
+            cityCustomInput.value = '';
+        } else {
+            countryCustomWrapper.classList.remove('show');
+            countryCustomInput.value = '';
+            // Update cities normally
+            updateCities(this.value);
+        }
+    });
+    
+    // City change handler
+    citySelect.addEventListener('change', function() {
+        if (this.value === 'other') {
+            cityCustomWrapper.classList.add('show');
+            cityCustomInput.focus();
+        } else {
+            cityCustomWrapper.classList.remove('show');
+            cityCustomInput.value = '';
+        }
+    });
 }
 
 /* ====== PHOTO UPLOAD FUNCTIONS ====== */
@@ -599,8 +640,35 @@ function saveFilmRecord() {
     const iso = document.getElementById('iso').value;
     const camera = normalizeText(document.getElementById('camera').value);
     const dateShot = document.getElementById('date-shot').value;
-    const country = normalizeText(document.getElementById('country').value);
-    const city = normalizeText(document.getElementById('city').value);
+    
+    // Handle country - check if it's custom
+    let country = normalizeText(document.getElementById('country').value);
+    const countryCustomInput = document.getElementById('country-custom-input');
+    if (country === 'other') {
+        country = normalizeText(countryCustomInput.value);
+        if (!country) {
+            showToast('Please enter your country/region', 'error');
+            countryCustomInput.focus();
+            return;
+        }
+    } else {
+        // Convert country code to country name
+        const countryObj = countriesRegions.find(c => c.code === country);
+        if (countryObj) country = countryObj.name;
+    }
+    
+    // Handle city - check if it's custom
+    let city = normalizeText(document.getElementById('city').value);
+    const cityCustomInput = document.getElementById('city-custom-input');
+    if (city === 'other') {
+        city = normalizeText(cityCustomInput.value);
+        if (!city) {
+            showToast('Please enter your city', 'error');
+            cityCustomInput.focus();
+            return;
+        }
+    }
+    
     const notes = normalizeText(document.getElementById('notes').value);
     
     // Validate required fields
@@ -615,12 +683,12 @@ function saveFilmRecord() {
     }
     
     if (!country) {
-        showToast('Please select a country/region', 'error');
+        showToast('Please select or enter a country/region', 'error');
         return;
     }
     
     if (!city) {
-        showToast('Please select a city', 'error');
+        showToast('Please select or enter a city', 'error');
         return;
     }
     
@@ -652,22 +720,6 @@ function saveFilmRecord() {
     
     // Save to localStorage
     saveFilms();
-
-    // Update input histories (camera + film name) to reduce repetitive typing & avoid stats splitting
-    if (camera) {
-        let cameras = loadStringArray(STORAGE_KEYS.cameras);
-        console.log('📷 Before adding camera - history:', cameras);
-        cameras = upsertHistoryValue(cameras, camera);
-        saveStringArray(STORAGE_KEYS.cameras, cameras);
-        console.log('📷 After adding camera - history:', cameras);
-    }
-    if (filmName) {
-        let filmNames = loadStringArray(STORAGE_KEYS.filmNames);
-        console.log('🎞️ Before adding film - history:', filmNames);
-        filmNames = upsertHistoryValue(filmNames, filmName);
-        saveStringArray(STORAGE_KEYS.filmNames, filmNames);
-        console.log('🎞️ After adding film - history:', filmNames);
-    }
     
     // Reset form
     resetForm();
@@ -688,14 +740,17 @@ function resetForm() {
     if (filmForm) {
         filmForm.reset();
     }
-
-    // Reset Select2 fields
-    if (typeof jQuery !== 'undefined' && typeof jQuery.fn.select2 !== 'undefined') {
-        $('#film-name').val(null).trigger('change');
-        $('#camera').val(null).trigger('change');
-        $('#country').val(null).trigger('change');
-        $('#city').val(null).trigger('change');
-    }
+    
+    // Reset custom country/city inputs and hide wrappers
+    const countryCustomWrapper = document.getElementById('country-custom-wrapper');
+    const countryCustomInput = document.getElementById('country-custom-input');
+    if (countryCustomWrapper) countryCustomWrapper.classList.remove('show');
+    if (countryCustomInput) countryCustomInput.value = '';
+    
+    const cityCustomWrapper = document.getElementById('city-custom-wrapper');
+    const cityCustomInput = document.getElementById('city-custom-input');
+    if (cityCustomWrapper) cityCustomWrapper.classList.remove('show');
+    if (cityCustomInput) cityCustomInput.value = '';
     
     // Reset photos
     for (let i = 1; i <= 3; i++) {
@@ -1045,8 +1100,14 @@ function renderRecordsList() {
                 }
             </div>
             <div class="record-info">
-                <div class="record-camera">${film.camera || 'Unknown Camera'}</div>
-                <div class="record-film">${film.name || 'Unknown Film'}</div>
+                <div class="record-camera">
+                    <i class="fas fa-camera"></i>
+                    ${film.camera || 'Unknown Camera'}
+                </div>
+                <div class="record-film">
+                    <i class="fas fa-film"></i>
+                    ${film.name || 'Unknown Film'}
+                </div>
                 <div class="record-date">
                     <i class="fas fa-calendar"></i>
                     ${formatDate(film.date || film.createdAt)}
@@ -1575,7 +1636,10 @@ function renderCamerasList() {
         return;
     }
     
-    container.innerHTML = cameras.map(camera => `
+    // 按字母顺序排序
+    const sortedCameras = [...cameras].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+    
+    container.innerHTML = sortedCameras.map(camera => `
         <div class="item-card">
             <span class="item-name">${escapeHtml(camera)}</span>
             <button class="delete-btn" onclick="deleteCamera('${escapeHtmlForJs(camera)}')">
@@ -1601,7 +1665,10 @@ function renderFilmsList() {
         return;
     }
     
-    container.innerHTML = films.map(film => `
+    // 按字母顺序排序
+    const sortedFilms = [...films].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+    
+    container.innerHTML = sortedFilms.map(film => `
         <div class="item-card">
             <span class="item-name">${escapeHtml(film)}</span>
             <button class="delete-btn" onclick="deleteFilmStock('${escapeHtmlForJs(film)}')">
