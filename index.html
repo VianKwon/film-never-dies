@@ -29,7 +29,7 @@
 <body>
     <!-- ====== COVER FLOW PAGE (Home) ====== -->
     <div class="page active" id="coverflow-page">
-        <div class="container">
+        <div class="container home-page-container">
             <div class="header">
                 <h1>Film Flow</h1>
                 <div class="sub">Your film photography journal</div>
@@ -227,31 +227,33 @@
                 <div class="page-subtitle">Manage your cameras and films</div>
             </div>
             
-            <!-- Cameras Section -->
-            <div class="form-section">
-                <h3><i class="fas fa-camera-retro"></i> My Cameras</h3>
-                <div class="add-item-row">
-                    <input type="text" id="new-camera-input" placeholder="Add camera model (e.g. Canon AE-1)">
-                    <button class="btn btn-primary" id="add-camera-btn">
-                        <i class="fas fa-plus"></i>
-                    </button>
+            <div class="my-page-container">
+                <!-- Cameras Section -->
+                <div class="form-section">
+                    <h3><i class="fas fa-camera-retro"></i> My Cameras</h3>
+                    <div class="add-item-row">
+                        <input type="text" id="new-camera-input" placeholder="Add camera model (e.g. Canon AE-1)">
+                        <button class="btn btn-primary" id="add-camera-btn">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div id="cameras-list" class="items-list">
+                        <!-- Cameras will be inserted here -->
+                    </div>
                 </div>
-                <div id="cameras-list" class="items-list">
-                    <!-- Cameras will be inserted here -->
-                </div>
-            </div>
-            
-            <!-- Films Section -->
-            <div class="form-section">
-                <h3><i class="fas fa-film"></i> My Films</h3>
-                <div class="add-item-row">
-                    <input type="text" id="new-film-input" placeholder="Add film name (e.g. Kodak Gold 200)">
-                    <button class="btn btn-primary" id="add-film-btn">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                </div>
-                <div id="films-list" class="items-list">
-                    <!-- Films will be inserted here -->
+                
+                <!-- Films Section -->
+                <div class="form-section">
+                    <h3><i class="fas fa-film"></i> My Films</h3>
+                    <div class="add-item-row">
+                        <input type="text" id="new-film-input" placeholder="Add film name (e.g. Kodak Gold 200)">
+                        <button class="btn btn-primary" id="add-film-btn">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div id="films-list" class="items-list">
+                        <!-- Films will be inserted here -->
+                    </div>
                 </div>
             </div>
         </div>
