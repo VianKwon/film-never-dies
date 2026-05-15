@@ -192,17 +192,18 @@ body{
   border-radius: 18px;
   padding: 10px;
   border: 1px solid rgba(255,255,255,.06);
+  align-items: center;
 }
 .record-photos{
   flex: 2;
   display:flex;
   gap: 6px;
-  align-items: stretch;
+  align-items: center;
   min-width: 0;
 }
 .record-photo{
   flex: 1;
-  height: 78px;
+  height: 92px;
   border-radius: 12px;
   overflow: hidden;
   background: #111;
@@ -221,6 +222,7 @@ body{
   flex-direction:column;
   justify-content:center;
   gap: 6px;
+  padding-left: 4px;
 }
 .record-camera{
   font-weight: 900;
@@ -283,28 +285,100 @@ body{
 .form-group label i{ width: 18px; text-align:center; }
 .form-group input,
 .form-group select,
-.form-group textarea{
-  width:100%;
-  padding: 12px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,.07);
-  background: var(--panel2);
-  color: var(--text);
-  outline:none;
-  font-size: 14px;
-  box-sizing: border-box;
+.form-group textarea {
+    width:100%;
+    padding: 12px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.07);
+    background: var(--panel2);
+    color: var(--text);
+    outline:none;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+/* 确保日期和月份选择器在所有设备上都正确显示且高度一致 */
+.form-group input[type="date"],
+.form-group input[type="month"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    min-height: 44px;
+    height: 44px;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* My Page 样式 */
+.add-item-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.add-item-row input {
+    flex: 1;
+    padding: 12px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.07);
+    background: var(--panel2);
+    color: var(--text);
+    outline: none;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.item-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: var(--panel2);
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.05);
+}
+
+.item-name {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.delete-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    border: none;
+    background: rgba(255,55,95,0.2);
+    color: var(--danger);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+    background: var(--danger);
+    color: white;
+}
+
+.empty-list-message {
+    text-align: center;
+    color: var(--muted);
+    padding: 20px;
+    font-size: 13px;
 }
 .form-group textarea{ min-height: 88px; resize: vertical; }
 .form-hint{
   color: var(--muted);
   font-size: 12px;
   margin-top: 6px;
-}
-/* Ensure date picker displays correctly */
-.form-group input[type="date"] {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
 }
 /* Upload */
 .photo-upload-container{ margin-top: 8px; }
@@ -314,7 +388,7 @@ body{
 }
 .upload-box-wrapper{
   flex: 1;
-  aspect-ratio: 1/1; /* force square */
+  aspect-ratio: 1/1; /* 强制正方形 */
   position: relative;
 }
 .upload-box{
@@ -336,7 +410,8 @@ body{
 }
 .upload-box i{ font-size: 24px; }
 .upload-box span{ font-size: 12px; font-weight: 800; }
-/* Preview image styles */
+
+/* 预览图片样式 */
 .preview-image{
   width: 100%;
   height: 100%;
@@ -366,15 +441,10 @@ body{
   z-index: 10;
 }
 .remove-photo:hover{ background: var(--danger); }
-/* Responsive adjustments */
+
+/* 响应式调整 */
 @media (max-width: 480px){
-  .upload-row{ flex-direction: row; } /* Keep horizontal */
-  .coverflow-item{ width: 220px; height: 220px; }
-  .coverflow-item.center{ transform: translateX(-50%) scale(1.20); }
-  .coverflow-track{ height: 320px; }
-  .stats-grid{ grid-template-columns: 1fr; }
-  .tab{ width: 98px; }
-  .record-photo{ height: 70px; }
+  .upload-row{ flex-direction: row; } /* 保持横向排列 */
 }
 .form-actions{ margin-top: 2px; }
 /* ===== Stats ===== */
@@ -496,7 +566,7 @@ body{
   color: var(--text) !important;
   border-radius: 10px !important;
 }
-/* ===== Bottom navigation (4 tabs) ===== */
+/* ===== Bottom navigation (5 tabs now) ===== */
 .nav{
   position: fixed;
   left: 0;
@@ -512,21 +582,39 @@ body{
   z-index: 1000;
 }
 .tab{
-  width: 110px;
+  width: 20%;
+  max-width: 100px;
   border: none;
   background: transparent;
   color: rgba(255,255,255,.68);
   border-radius: 12px;
-  padding: 8px 10px;
+  padding: 8px 6px;
   display:flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
   cursor: pointer;
   font-weight: 750;
+  font-size: 11px;
 }
 .tab i{ font-size: 20px; }
 .tab.active{
   color: #fff;
   background: rgba(255,255,255,.06);
+}
+/* ===== Responsive ===== */
+@media (max-width: 480px){
+  .coverflow-item{ width: 220px; height: 220px; }
+  .coverflow-item.center{ transform: translateX(-50%) scale(1.20); }
+  .coverflow-track{ height: 320px; }
+  /* 移动端保持横向正方形排列，不换行 */
+  .upload-row{ flex-direction: row; }
+  .upload-box-wrapper{ flex: 1; }
+  .stats-grid{ grid-template-columns: 1fr; }
+  .tab{ 
+    padding: 8px 4px;
+    font-size: 10px;
+  }
+  .tab i{ font-size: 18px; }
+  .record-photo{ height: 70px; }
 }
