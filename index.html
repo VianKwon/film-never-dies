@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Film Flow - Your Film Photography Journal</title>
+    <title>Film Flow — Your Film Photography Journal</title>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎞️</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -22,7 +22,7 @@
     <meta name="theme-color" content="#000000">
     
     <!-- Apple Touch Icon -->
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎞️</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
@@ -34,19 +34,16 @@
                 <h1>Film Flow</h1>
                 <div class="sub">Your film photography journal</div>
             </div>
-
             <div class="coverflow-wrap">
-                <!-- Cover Flow Gallery -->
+                <!-- Coverflow Gallery -->
                 <div class="coverflow-track" id="coverflow-track">
-                    <!-- Cover flow items will be inserted here by JavaScript -->
+                    <!-- Coverflow items will be inserted here by JavaScript -->
                 </div>
-
                 <!-- Info -->
                 <div class="cf-info">
                     <div class="line1" id="camera-info">-</div>
                     <div class="line2" id="film-info">-</div>
                 </div>
-
                 <!-- Actions: keep both swipe + buttons -->
                 <div class="cf-actions">
                     <button class="btn" id="coverflow-prev" aria-label="Previous photo">
@@ -59,7 +56,6 @@
                         <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
-
                 <div class="cf-hint">
                     <i class="fas fa-arrows-left-right"></i>
                     <span>Swipe, drag, click, or use arrow keys</span>
@@ -175,34 +171,33 @@
                     <div class="form-hint">Upload up to 3 photos. Images will be automatically compressed.</div>
                     
                     <!-- Upload Boxes -->
-                    
                     <div class="photo-upload-container">
                         <div class="upload-row">
-                            <label for="photo-1" class="upload-box" id="upload-box-1">
-                                <i class="fas fa-camera"></i>
-                                <span>Photo 1</span>
-                            </label>
-                            <input type="file" id="photo-1" accept="image/*" style="display: none;">
+                            <div class="upload-box-wrapper" id="upload-wrapper-1">
+                                <label for="photo-1" class="upload-box" id="upload-box-1">
+                                    <i class="fas fa-camera"></i>
+                                    <span>Photo 1</span>
+                                </label>
+                                <input type="file" id="photo-1" accept="image/*" style="display: none;">
+                            </div>
                             
-                            <label for="photo-2" class="upload-box" id="upload-box-2">
-                                <i class="fas fa-camera"></i>
-                                <span>Photo 2</span>
-                            </label>
-                            <input type="file" id="photo-2" accept="image/*" style="display: none;">    
-
-                             <label for="photo-3" class="upload-box" id="upload-box-3">
-                                <i class="fas fa-camera"></i>
-                                <span>Photo 3</span>
-                            </label>
-                            <input type="file" id="photo-3" accept="image/*" style="display: none;">
+                            <div class="upload-box-wrapper" id="upload-wrapper-2">
+                                <label for="photo-2" class="upload-box" id="upload-box-2">
+                                    <i class="fas fa-camera"></i>
+                                    <span>Photo 2</span>
+                                </label>
+                                <input type="file" id="photo-2" accept="image/*" style="display: none;">    
+                            </div>
+                            
+                            <div class="upload-box-wrapper" id="upload-wrapper-3">
+                                <label for="photo-3" class="upload-box" id="upload-box-3">
+                                    <i class="fas fa-camera"></i>
+                                    <span>Photo 3</span>
+                                </label>
+                                <input type="file" id="photo-3" accept="image/*" style="display: none;">
+                            </div>
                         </div>
                     </div>
-                        
-                        <!-- Photo Preview -->
-                        <div class="photo-preview" id="photo-preview">
-                            <!-- Previews will be inserted here -->
-                        </div>
-        </div>
                 </div>
                 
                 <!-- Notes -->
@@ -246,17 +241,14 @@
                     <div class="lab">Cities shot in</div>
                 </div>
             </div>
-
             <div class="card top-card">
                 <div class="top-title">Top cameras</div>
                 <div id="camera-stats"><!-- filled by JS --></div>
             </div>
-
             <div class="card top-card">
                 <div class="top-title">Top films</div>
                 <div id="film-stats"><!-- filled by JS --></div>
             </div>
-
             <div class="data-actions">
                 <button class="btn" onclick="exportData()">
                     <i class="fas fa-download"></i> Export
