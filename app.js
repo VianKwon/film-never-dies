@@ -10,6 +10,62 @@ let uploadedPhotos = {
     3: null
 };
 
+/* ====== LOCAL STORAGE KEYS ====== */
+const STORAGE_KEYS = {
+    records: 'filmFlowRecords',
+    cameras: 'filmFlowCameras',
+    filmNames: 'filmFlowFilmNames'
+};
+
+/* ====== HELPERS ====== */
+function normalizeText(value) {
+    if (value === null || value === undefined) return '';
+    return String(value).trim().replace(/\s+/g, ' ');
+}
+
+function loadStringArray(key) {
+    try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return [];
+        const arr = JSON.parse(raw);
+        if (!Array.isArray(arr)) return [];
+        return arr.map(normalizeText).filter(Boolean);
+    } catch (e) {
+        return [];
+    }
+}
+
+function saveStringArray(key, arr) {
+    try {
+        localStorage.setItem(key, JSON.stringify(arr));
+    } catch (e) {
+        console.error('❌ Error saving list:', key, e);
+    }
+}
+
+function upsertHistoryValue(arr, value, max = 30) {
+    const v = normalizeText(value);
+    if (!v) return arr;
+    const lower = v.toLowerCase();
+    const filtered = arr.filter(x => normalizeText(x).toLowerCase() !== lower);
+    filtered.unshift(v);
+    return filtered.slice(0, max);
+}
+
+function addOptionIfMissing(selectId, value) {
+    const v = normalizeText(value);
+    if (!v) return;
+    const el = document.getElementById(selectId);
+    if (!el) return;
+    const exists = Array.from(el.options).some(opt => normalizeText(opt.value).toLowerCase() === v.toLowerCase());
+    if (!exists) {
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        el.appendChild(opt);
+    }
+}
+
 /* ====== COUNTRY/REGION AND CITY DATA ====== */
 const countriesRegions = [
     { code: 'CN', name: 'China', type: 'country', cities: ['Beijing', 'Shanghai', 'Guangzhou', 'Shenzhen', 'Chengdu', 'Hangzhou', 'Nanjing', 'Wuhan', 'Xi\'an', 'Chongqing', 'Tianjin', 'Qingdao', 'Dalian', 'Xiamen'] },
@@ -39,6 +95,14 @@ const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|Windows Phone/i.test
 const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 const isAndroid = /Android/i.test(navigator.userAgent);
 
+/* Popular countries/regions shown in dropdown (still supports free input via tags) */
+const POPULAR_COUNTRY_CODES = [
+    'CN', 'CN-HK', 'CN-TW',
+    'JP', 'KR', 'SG', 'TH',
+    'US', 'GB', 'FR', 'DE', 'IT',
+    'AU', 'CA'
+];
+
 /* ====== INITIALIZATION ====== */
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🎬 Film Flow: DOM loaded, starting initialization...');
@@ -54,6 +118,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Setup navigation
     setupNavigation();
+
+    // Setup coverflow nav buttons (keep swipe + buttons)
+    setupCoverflowNavButtons();
     
     // Initialize Select2 (wait for jQuery to load)
     setTimeout(() => {
@@ -82,6 +149,23 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('✅ Film Flow initialization complete!');
 });
+
+function setupCoverflowNavButtons() {
+    const prevBtn = document.getElementById('coverflow-prev');
+    const nextBtn = document.getElementById('coverflow-next');
+    if (prevBtn) {
+        prevBtn.onclick = function(e) {
+            e.preventDefault();
+            navigateCoverFlow(-1);
+        };
+    }
+    if (nextBtn) {
+        nextBtn.onclick = function(e) {
+            e.preventDefault();
+            navigateCoverFlow(1);
+        };
+    }
+}
 
 /* ====== PAGE NAVIGATION FUNCTIONS ====== */
 function showCoverflowPage() {
@@ -204,22 +288,44 @@ function initSelect2() {
     }
     
     console.log('✅ jQuery and Select2 are loaded');
+
+    // Film name (history + free input)
+    $('#film-name').select2({
+        placeholder: 'Select or type film name',
+        allowClear: true,
+        width: '100%',
+        theme: 'default',
+        tags: true
+    });
+
+    // Camera model (history + free input)
+    $('#camera').select2({
+        placeholder: 'Select or type camera model',
+        allowClear: true,
+        width: '100%',
+        theme: 'default',
+        tags: true
+    });
+
+    // Populate camera/film history options
+    populateFilmAndCameraHistory();
     
     // Initialize country/region select
     $('#country').select2({
         placeholder: 'Select country/region',
         allowClear: true,
         width: '100%',
-        theme: 'default'
+        theme: 'default',
+        tags: true
     });
     
-    // Initialize city select (disabled initially)
+    // Initialize city select (supports free input)
     $('#city').select2({
-        placeholder: 'Select city',
+        placeholder: 'Select or type city',
         allowClear: true,
         width: '100%',
         theme: 'default',
-        disabled: true
+        tags: true
     });
     
     // Populate countries/regions
@@ -233,6 +339,22 @@ function initSelect2() {
     });
     
     console.log('✅ Select2 initialized successfully');
+}
+
+function populateFilmAndCameraHistory() {
+    // Read from localStorage history lists
+    const cameras = loadStringArray(STORAGE_KEYS.cameras);
+    const filmNames = loadStringArray(STORAGE_KEYS.filmNames);
+
+    // Ensure current selects contain these options
+    filmNames.forEach(v => addOptionIfMissing('film-name', v));
+    cameras.forEach(v => addOptionIfMissing('camera', v));
+
+    // Let Select2 refresh
+    if (typeof jQuery !== 'undefined') {
+        $('#film-name').trigger('change.select2');
+        $('#camera').trigger('change.select2');
+    }
 }
 
 function populateCountries() {
@@ -251,56 +373,49 @@ function populateCountries() {
     defaultOption.textContent = 'Select country/region';
     countrySelect.appendChild(defaultOption);
     
-    // Add all countries/regions
-    countriesRegions.forEach(country => {
+    // Add popular countries/regions (user can still type custom with tags)
+    const popularCountries = countriesRegions.filter(c => POPULAR_COUNTRY_CODES.includes(c.code));
+    popularCountries.forEach(country => {
         const option = document.createElement('option');
         option.value = country.code;
         option.textContent = country.name;
         countrySelect.appendChild(option);
     });
     
-    console.log(`✅ Populated ${countriesRegions.length} countries/regions`);
+    console.log(`✅ Populated ${popularCountries.length} popular countries/regions`);
 }
 
 function updateCities(countryCode) {
     const citySelect = document.getElementById('city');
     const select2City = $('#city');
     
-    if (!countryCode) {
-        // Disable city select
-        citySelect.disabled = true;
-        select2City.prop('disabled', true);
-        select2City.empty();
-        select2City.append('<option value="">Select country/region first</option>');
-        select2City.val('').trigger('change');
-        return;
-    }
+    // Always allow city input (tags mode); if country matches our preset list, we give suggestions.
     
     // Find selected country/region
     const country = countriesRegions.find(c => c.code === countryCode);
-    if (!country) {
-        console.error('❌ Country/region not found:', countryCode);
-        return;
-    }
-    
     // Enable city select
     citySelect.disabled = false;
     select2City.prop('disabled', false);
     
     // Clear existing options
     select2City.empty();
-    select2City.append('<option value="">Select city</option>');
+    select2City.append('<option value=""></option>');
     
-    // Add cities
-    country.cities.forEach(city => {
-        const option = document.createElement('option');
-        option.value = city;
-        option.textContent = city;
-        citySelect.appendChild(option);
-    });
-    
+    if (country && Array.isArray(country.cities)) {
+        // Add cities (suggestions)
+        country.cities.forEach(city => {
+            const option = document.createElement('option');
+            option.value = city;
+            option.textContent = city;
+            citySelect.appendChild(option);
+        });
+        console.log(`✅ Populated ${country.cities.length} cities for ${country.name}`);
+    } else {
+        // Country is custom typed (tags); no preset cities
+        console.log('ℹ️ Custom country/region selected; city suggestions skipped');
+    }
+
     select2City.val('').trigger('change');
-    console.log(`✅ Populated ${country.cities.length} cities for ${country.name}`);
 }
 
 /* ====== PHOTO UPLOAD FUNCTIONS ====== */
@@ -387,6 +502,7 @@ function handlePhotoUpload(boxNumber, input) {
 function updatePhotoPreview(boxNumber, imageData) {
     const uploadBox = document.getElementById(`upload-box-${boxNumber}`);
     const previewContainer = document.getElementById('photo-preview');
+    if (!uploadBox || !previewContainer) return;
     
     // Hide upload box
     uploadBox.style.display = 'none';
@@ -445,14 +561,14 @@ function saveFilmRecord() {
     console.log('💾 Saving film record...');
     
     // Get form values
-    const filmName = document.getElementById('film-name').value.trim();
+    const filmName = normalizeText(document.getElementById('film-name').value);
     const filmType = document.getElementById('film-type').value;
     const iso = document.getElementById('iso').value;
-    const camera = document.getElementById('camera').value.trim();
+    const camera = normalizeText(document.getElementById('camera').value);
     const dateShot = document.getElementById('date-shot').value;
-    const country = document.getElementById('country').value;
-    const city = document.getElementById('city').value;
-    const notes = document.getElementById('notes').value.trim();
+    const country = normalizeText(document.getElementById('country').value);
+    const city = normalizeText(document.getElementById('city').value);
+    const notes = normalizeText(document.getElementById('notes').value);
     
     // Validate required fields
     if (!filmName || !filmType) {
@@ -498,6 +614,20 @@ function saveFilmRecord() {
     
     // Save to localStorage
     saveFilms();
+
+    // Update input histories (camera + film name) to reduce repetitive typing & avoid stats splitting
+    if (camera) {
+        let cameras = loadStringArray(STORAGE_KEYS.cameras);
+        cameras = upsertHistoryValue(cameras, camera);
+        saveStringArray(STORAGE_KEYS.cameras, cameras);
+        addOptionIfMissing('camera', camera);
+    }
+    if (filmName) {
+        let filmNames = loadStringArray(STORAGE_KEYS.filmNames);
+        filmNames = upsertHistoryValue(filmNames, filmName);
+        saveStringArray(STORAGE_KEYS.filmNames, filmNames);
+        addOptionIfMissing('film-name', filmName);
+    }
     
     // Reset form
     resetForm();
@@ -518,6 +648,14 @@ function resetForm() {
     if (filmForm) {
         filmForm.reset();
     }
+
+    // Reset Select2 fields
+    if (typeof jQuery !== 'undefined' && typeof jQuery.fn.select2 !== 'undefined') {
+        $('#film-name').val(null).trigger('change');
+        $('#camera').val(null).trigger('change');
+        $('#country').val(null).trigger('change');
+        $('#city').val(null).trigger('change');
+    }
     
     // Reset photos
     for (let i = 1; i <= 3; i++) {
@@ -532,18 +670,13 @@ function resetForm() {
         previewContainer.innerHTML = '';
     }
     
-    // Reset city select
-    if (typeof jQuery !== 'undefined') {
-        $('#city').prop('disabled', true).empty().append('<option value="">Select country/region first</option>').val('').trigger('change');
-    }
-    
     console.log('✅ Form reset complete');
 }
 
 /* ====== DATA STORAGE ====== */
 function saveFilms() {
     try {
-        localStorage.setItem('filmFlowRecords', JSON.stringify(films));
+        localStorage.setItem(STORAGE_KEYS.records, JSON.stringify(films));
         console.log(`💾 Saved ${films.length} films to localStorage`);
     } catch (e) {
         console.error('❌ Error saving data:', e);
@@ -553,16 +686,32 @@ function saveFilms() {
 
 function loadFilms() {
     try {
-        const saved = localStorage.getItem('filmFlowRecords');
+        const saved = localStorage.getItem(STORAGE_KEYS.records);
         if (saved) {
             films = JSON.parse(saved);
             
             // Ensure photos are properly loaded
             films.forEach(film => {
                 if (!film.photos) film.photos = [];
+                // Normalize key fields to avoid stats splitting due to whitespace differences
+                film.name = normalizeText(film.name);
+                film.camera = film.camera ? normalizeText(film.camera) : null;
+                film.country = film.country ? normalizeText(film.country) : '';
+                film.city = film.city ? normalizeText(film.city) : '';
+                film.notes = film.notes ? normalizeText(film.notes) : null;
             });
             
             console.log(`📂 Loaded ${films.length} films from localStorage`);
+
+            // Backfill histories from existing records
+            let cameras = loadStringArray(STORAGE_KEYS.cameras);
+            let filmNames = loadStringArray(STORAGE_KEYS.filmNames);
+            films.forEach(f => {
+                if (f.camera) cameras = upsertHistoryValue(cameras, f.camera);
+                if (f.name) filmNames = upsertHistoryValue(filmNames, f.name);
+            });
+            saveStringArray(STORAGE_KEYS.cameras, cameras);
+            saveStringArray(STORAGE_KEYS.filmNames, filmNames);
         } else {
             console.log('📂 No saved films found, starting fresh');
         }
@@ -642,8 +791,8 @@ function initCoverFlow() {
         track.appendChild(itemElement);
     });
     
-    // Set initial position
-    currentCoverFlowIndex = Math.floor(allPhotos.length / 2);
+    // Set initial position (show the newest photo by default)
+    currentCoverFlowIndex = Math.max(0, allPhotos.length - 1);
     updateCoverFlow();
     
     // Setup swipe events
@@ -681,6 +830,8 @@ function updateCoverFlow() {
     
     // Update item positions
     items.forEach((item, index) => {
+        // Always reset display first (fixes "only a few photos show after many records")
+        item.style.display = 'block';
         // Remove all position classes
         item.classList.remove('center', 'left-1', 'left-2', 'left-3', 'right-1', 'right-2', 'right-3');
         
@@ -704,8 +855,6 @@ function updateCoverFlow() {
             item.style.display = 'none';
         } else if (distance > 3) {
             item.style.display = 'none';
-        } else {
-            item.style.display = 'block';
         }
     });
 }
@@ -713,6 +862,8 @@ function updateCoverFlow() {
 function setupSwipeEvents() {
     const track = document.getElementById('coverflow-track');
     if (!track) return;
+    if (track.dataset.swipeBound === '1') return;
+    track.dataset.swipeBound = '1';
     
     let startX = 0;
     let isDragging = false;
@@ -784,16 +935,19 @@ function setupSwipeEvents() {
         isDragging = false;
     });
     
-    // Keyboard events
-    document.addEventListener('keydown', (e) => {
-        if (document.getElementById('coverflow-page').classList.contains('active')) {
-            if (e.key === 'ArrowLeft') {
-                navigateCoverFlow(-1);
-            } else if (e.key === 'ArrowRight') {
-                navigateCoverFlow(1);
+    // Keyboard events (bind once)
+    if (!window.__filmFlowCoverflowKeyboardBound) {
+        window.__filmFlowCoverflowKeyboardBound = true;
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('coverflow-page').classList.contains('active')) {
+                if (e.key === 'ArrowLeft') {
+                    navigateCoverFlow(-1);
+                } else if (e.key === 'ArrowRight') {
+                    navigateCoverFlow(1);
+                }
             }
-        }
-    });
+        });
+    }
 }
 
 function navigateCoverFlow(direction) {

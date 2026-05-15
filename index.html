@@ -51,6 +51,13 @@
                 <div class="coverflow-track" id="coverflow-track">
                     <!-- Cover flow items will be inserted here by JavaScript -->
                 </div>
+                <!-- Cover Flow Nav Buttons (keep both swipe + buttons) -->
+                <button class="coverflow-nav coverflow-nav-left" id="coverflow-prev" aria-label="Previous photo">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="coverflow-nav coverflow-nav-right" id="coverflow-next" aria-label="Next photo">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
             </div>
             
             <!-- Photo Info -->
@@ -96,7 +103,10 @@
                     
                     <div class="form-group">
                         <label for="film-name"><i class="fas fa-tag"></i> Film Name *</label>
-                        <input type="text" id="film-name" placeholder="e.g., Kodak Portra 400" required>
+                        <!-- Select2 tags: choose from history or type new -->
+                        <select id="film-name" required>
+                            <option value=""></option>
+                        </select>
                     </div>
                     
                     <div class="form-group">
@@ -133,7 +143,10 @@
                     
                     <div class="form-group">
                         <label for="camera"><i class="fas fa-camera-retro"></i> Camera Model</label>
-                        <input type="text" id="camera" placeholder="e.g., Nikon F3, Leica M6">
+                        <!-- Select2 tags: choose from history or type new -->
+                        <select id="camera">
+                            <option value=""></option>
+                        </select>
                     </div>
                     
                     <div class="form-group">
@@ -156,8 +169,8 @@
                     
                     <div class="form-group">
                         <label for="city"><i class="fas fa-city"></i> City *</label>
-                        <select id="city" required disabled>
-                            <option value="">Select country/region first</option>
+                        <select id="city" required>
+                            <option value=""></option>
                         </select>
                     </div>
                 </div>
@@ -171,19 +184,19 @@
                     
                     <div class="photo-upload-container">
                         <div class="upload-row">
-                            <label for="photo-1" class="upload-box">
+                            <label for="photo-1" class="upload-box" id="upload-box-1">
                                 <i class="fas fa-camera"></i>
                                 <span>Photo 1</span>
                             </label>
                             <input type="file" id="photo-1" accept="image/*" style="display: none;">
                             
-                            <label for="photo-2" class="upload-box">
+                            <label for="photo-2" class="upload-box" id="upload-box-2">
                                 <i class="fas fa-camera"></i>
                                 <span>Photo 2</span>
                             </label>
                             <input type="file" id="photo-2" accept="image/*" style="display: none;">    
 
-                             <label for="photo-3" class="upload-box">
+                             <label for="photo-3" class="upload-box" id="upload-box-3">
                                 <i class="fas fa-camera"></i>
                                 <span>Photo 3</span>
                             </label>
