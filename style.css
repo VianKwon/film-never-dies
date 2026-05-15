@@ -48,6 +48,12 @@ body{
   color: var(--muted);
   font-size: 14px;
 }
+.home-page-container{
+  min-height: calc(100vh - 92px - env(safe-area-inset-bottom) - 18px);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
 .page-header{
   text-align:center;
   padding-top: 6px;
@@ -93,20 +99,17 @@ body{
 /* ===== Coverflow (Home) ===== */
 .coverflow-wrap{
   margin-top: 8px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0));
   border-radius: 24px;
   padding: 18px 12px 14px;
   overflow: hidden;
   position: relative;
-  box-shadow: var(--shadow);
-  border: 1px solid rgba(255,255,255,.06);
 }
 .coverflow-track{
   height: 360px;
   position: relative;
   user-select: none;
   cursor: grab;
-  touch-action: pan-y;
+  touch-action: none;
 }
 .coverflow-track:active{ cursor: grabbing; }
 .coverflow-item{
@@ -190,20 +193,21 @@ body{
   gap: 12px;
   background: var(--panel);
   border-radius: 18px;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid rgba(255,255,255,.06);
   align-items: center;
 }
 .record-photos{
-  flex: 2;
+  flex: 3;
   display:flex;
   gap: 6px;
-  align-items: center;
+  align-items: stretch;
   min-width: 0;
 }
 .record-photo{
   flex: 1;
-  height: 100px;
+  height: 83.79px;
+  min-height: 83.79px;
   border-radius: 12px;
   overflow: hidden;
   background: #111;
@@ -211,7 +215,8 @@ body{
 }
 .record-photo img{
   width: 100%;
-  height: 100%;
+  height: 83.79px;
+  min-height: 83.79px;
   object-fit: cover;
   display:block;
 }
@@ -222,7 +227,6 @@ body{
   flex-direction:column;
   justify-content:center;
   gap: 6px;
-  padding-left: 8px;
 }
 .record-camera{
   font-weight: 900;
@@ -307,6 +311,7 @@ body{
     height: 44px;
     padding-top: 0;
     padding-bottom: 0;
+    text-align: left;
 }
 
 /* My Page 样式 */
@@ -368,11 +373,16 @@ body{
     color: white;
 }
 
-.empty-list-message {
-    text-align: center;
-    color: var(--muted);
-    padding: 20px;
-    font-size: 13px;
+.empty-list-message{
+  text-align: center;
+  color: var(--muted);
+  padding: 20px;
+  font-size: 13px;
+}
+.my-page-container{
+  display:flex;
+  flex-direction:column;
+  gap: 12px;
 }
 .form-group textarea{ min-height: 88px; resize: vertical; }
 .form-hint{
