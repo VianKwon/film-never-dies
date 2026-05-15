@@ -269,8 +269,16 @@ function initSelect2() {
     }
     
     console.log('✅ jQuery and Select2 are loaded');
-
-    // Film name (history + free input)
+    
+    // 1. First populate countries
+    populateCountries();
+    
+    // 2. Then populate film and camera history
+    populateFilmAndCameraHistory();
+    
+    // 3. Initialize all Select2 elements
+    
+    // Film name
     $('#film-name').select2({
         placeholder: 'Select or type film name',
         allowClear: true,
@@ -278,8 +286,8 @@ function initSelect2() {
         theme: 'default',
         tags: true
     });
-
-    // Camera model (history + free input)
+    
+    // Camera model
     $('#camera').select2({
         placeholder: 'Select or type camera model',
         allowClear: true,
@@ -287,11 +295,8 @@ function initSelect2() {
         theme: 'default',
         tags: true
     });
-
-    // Populate camera/film history options
-    populateFilmAndCameraHistory();
     
-    // Initialize country/region select
+    // Country/region
     $('#country').select2({
         placeholder: 'Select country/region',
         allowClear: true,
@@ -300,7 +305,7 @@ function initSelect2() {
         tags: true
     });
     
-    // Initialize city select (supports free input)
+    // City
     $('#city').select2({
         placeholder: 'Select or type city',
         allowClear: true,
@@ -308,9 +313,6 @@ function initSelect2() {
         theme: 'default',
         tags: true
     });
-    
-    // Populate countries/regions
-    populateCountries();
     
     // Listen for country/region changes
     $('#country').on('change', function() {
@@ -326,15 +328,52 @@ function populateFilmAndCameraHistory() {
     // Read from localStorage history lists
     const cameras = loadStringArray(STORAGE_KEYS.cameras);
     const filmNames = loadStringArray(STORAGE_KEYS.filmNames);
-
-    // Ensure current selects contain these options
-    filmNames.forEach(v => addOptionIfMissing('film-name', v));
-    cameras.forEach(v => addOptionIfMissing('camera', v));
-
-    // Let Select2 refresh
-    if (typeof jQuery !== 'undefined') {
-        $('#film-name').trigger('change.select2');
-        $('#camera').trigger('change.select2');
+    
+    console.log('📋 Populating history - Cameras:', cameras);
+    console.log('📋 Populating history - Film names:', filmNames);
+    
+    // Clean and repopulate film names
+    const filmSelect = document.getElementById('film-name');
+    if (filmSelect) {
+        // 清空所有选项
+        filmSelect.innerHTML = '';
+        // 添加空选项
+        const emptyOption = document.createElement('option');
+        emptyOption.value = '';
+        filmSelect.appendChild(emptyOption);
+        // 添加历史选项（去重）
+        const seenFilmNames = new Set();
+        filmNames.forEach(v => {
+            if (!seenFilmNames.has(v.toLowerCase())) {
+                seenFilmNames.add(v.toLowerCase());
+                const option = document.createElement('option');
+                option.value = v;
+                option.textContent = v;
+                filmSelect.appendChild(option);
+            }
+        });
+    }
+    
+    // Clean and repopulate cameras
+    const cameraSelect = document.getElementById('camera');
+    if (cameraSelect) {
+        // 清空所有选项
+        cameraSelect.innerHTML = '';
+        // 添加空选项
+        const emptyOption = document.createElement('option');
+        emptyOption.value = '';
+        cameraSelect.appendChild(emptyOption);
+        // 添加历史选项（去重）
+        const seenCameras = new Set();
+        cameras.forEach(v => {
+            if (!seenCameras.has(v.toLowerCase())) {
+                seenCameras.add(v.toLowerCase());
+                const option = document.createElement('option');
+                option.value = v;
+                option.textContent = v;
+                cameraSelect.appendChild(option);
+            }
+        });
     }
 }
 
@@ -481,20 +520,20 @@ function handlePhotoUpload(boxNumber, input) {
 }
 
 function updatePhotoPreview(boxNumber, imageData) {
+    const uploadWrapper = document.getElementById(`upload-wrapper-${boxNumber}`);
     const uploadBox = document.getElementById(`upload-box-${boxNumber}`);
-    const previewContainer = document.getElementById('photo-preview');
-    if (!uploadBox || !previewContainer) return;
+    if (!uploadWrapper || !uploadBox) return;
     
     // Hide upload box
     uploadBox.style.display = 'none';
     
-    // Create or update preview element
+    // Create or update preview element directly in the wrapper
     let previewElement = document.getElementById(`preview-${boxNumber}`);
     if (!previewElement) {
         previewElement = document.createElement('div');
         previewElement.id = `preview-${boxNumber}`;
         previewElement.className = 'preview-image';
-        previewContainer.appendChild(previewElement);
+        uploadWrapper.appendChild(previewElement);
     }
     
     previewElement.innerHTML = `
@@ -518,6 +557,12 @@ function removePhoto(boxNumber) {
     const previewElement = document.getElementById(`preview-${boxNumber}`);
     if (previewElement) {
         previewElement.remove();
+    }
+    
+    // Reset file input
+    const fileInput = document.getElementById(`photo-${boxNumber}`);
+    if (fileInput) {
+        fileInput.value = '';
     }
     
     showToast(`Photo ${boxNumber} removed`, 'warning');
@@ -599,15 +644,17 @@ function saveFilmRecord() {
     // Update input histories (camera + film name) to reduce repetitive typing & avoid stats splitting
     if (camera) {
         let cameras = loadStringArray(STORAGE_KEYS.cameras);
+        console.log('📷 Before adding camera - history:', cameras);
         cameras = upsertHistoryValue(cameras, camera);
         saveStringArray(STORAGE_KEYS.cameras, cameras);
-        addOptionIfMissing('camera', camera);
+        console.log('📷 After adding camera - history:', cameras);
     }
     if (filmName) {
         let filmNames = loadStringArray(STORAGE_KEYS.filmNames);
+        console.log('🎞️ Before adding film - history:', filmNames);
         filmNames = upsertHistoryValue(filmNames, filmName);
         saveStringArray(STORAGE_KEYS.filmNames, filmNames);
-        addOptionIfMissing('film-name', filmName);
+        console.log('🎞️ After adding film - history:', filmNames);
     }
     
     // Reset form
@@ -643,12 +690,16 @@ function resetForm() {
         uploadedPhotos[i] = null;
         const uploadBox = document.getElementById(`upload-box-${i}`);
         if (uploadBox) uploadBox.style.display = 'flex';
-    }
-    
-    // Clear previews
-    const previewContainer = document.getElementById('photo-preview');
-    if (previewContainer) {
-        previewContainer.innerHTML = '';
+        
+        const previewElement = document.getElementById(`preview-${i}`);
+        if (previewElement) {
+            previewElement.remove();
+        }
+        
+        const fileInput = document.getElementById(`photo-${i}`);
+        if (fileInput) {
+            fileInput.value = '';
+        }
     }
     
     console.log('✅ Form reset complete');
