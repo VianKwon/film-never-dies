@@ -98,9 +98,9 @@ body{
 .btn-large{ padding: 14px 14px; border-radius: 14px; width: 100%; }
 /* ===== Coverflow (Home) ===== */
 .coverflow-wrap{
-  margin-top: 10px;
+  margin-top: 8px;
   border-radius: 24px;
-  padding: 16px 12px 22px;
+  padding: 12px 12px 24px;
   overflow: hidden;
   position: relative;
 }
@@ -1046,7 +1046,7 @@ body{
 }
 
 .swipe-btn-edit {
-    background: rgba(10, 132, 255, 0.2);
+    background: #1a1a1c;
     color: var(--accent);
 }
 
@@ -1056,7 +1056,7 @@ body{
 }
 
 .swipe-btn-delete {
-    background: rgba(255, 55, 95, 0.2);
+    background: #1a1a1c;
     color: var(--danger);
 }
 
