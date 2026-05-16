@@ -81,9 +81,12 @@
     <!-- ====== ADD RECORD PAGE ====== -->
     <div class="page" id="add-page">
         <div class="container">
-            <div class="page-header">
-                <h2><i class="fas fa-plus"></i> Add Record</h2>
+            <div class="page-header" style="position: relative;">
+                <h2 id="add-page-title"><i class="fas fa-plus"></i> Add Record</h2>
                 <div class="page-subtitle">Document your film photography</div>
+                <button class="modal-close" id="add-page-close-btn" style="position: absolute; top: 0; right: 0; margin: 0;">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             
             <form id="film-form" class="film-form">
@@ -339,6 +342,20 @@
         <div class="toast-content">
             <i class="toast-icon"></i>
             <span class="toast-message"></span>
+        </div>
+    </div>
+    
+    <!-- ====== RECORD DETAIL MODAL ====== -->
+    <div id="detail-modal" class="modal">
+        <div class="modal-overlay" onclick="closeDetailModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="detail-title">Record Details</h2>
+                <button class="modal-close" onclick="closeDetailModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="detail-body" class="modal-body"></div>
         </div>
     </div>
     
