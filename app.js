@@ -4,12 +4,9 @@
 /* ====== GLOBAL VARIABLES ====== */
 let films = [];
 let currentCoverFlowIndex = 0;
-let uploadedPhotos = {
-    1: null,
-    2: null,
-    3: null
-};
 let coverflowPhotos = [];
+let PREVIEW_IMAGES = [];
+let previousPage = 'list-page'; // 默认返回到列表页
 
 /* ====== LOCAL STORAGE KEYS ====== */
 const STORAGE_KEYS = {
@@ -99,7 +96,7 @@ const isAndroid = /Android/i.test(navigator.userAgent);
 /* Popular countries/regions shown in dropdown (still supports free input via tags) */
 const POPULAR_COUNTRY_CODES = [
     'CN', 'CN-HK', 'CN-TW',
-    'JP', 'KR', 'SG', 'TH',
+    'JP', 'KR', 'SG', 'TH', 'MY',
     'US', 'GB', 'FR', 'DE', 'IT',
     'AU', 'CA'
 ];
@@ -192,6 +189,11 @@ function showListPage() {
 
 function showAddPage() {
     console.log('📱 Switching to Add page');
+    // Only reset form if not coming from edit (editingRecordId will be set)
+    if (!editingRecordId) {
+        resetForm();
+        updateAddPageTitle(false);
+    }
     switchPage('add-page');
 }
 
@@ -209,6 +211,12 @@ function showMyPage() {
 
 function switchPage(pageId) {
     console.log(`🔄 Switching to page: ${pageId}`);
+    
+    // Save current page as previous page before switching
+    const currentActivePage = document.querySelector('.page.active');
+    if (currentActivePage) {
+        previousPage = currentActivePage.id;
+    }
     
     // 1. Hide all pages
     const pages = document.querySelectorAll('.page');
@@ -248,6 +256,14 @@ function setupNavigation() {
             const target = this.dataset.target;
             if (!target) return;
             console.log(`🔘 Tab clicked -> ${target}`);
+            
+            // If navigating away from add page and in edit mode, reset first
+            const currentPage = document.querySelector('.page.active');
+            if (currentPage && currentPage.id === 'add-page' && editingRecordId) {
+                resetForm();
+                editingRecordId = null;
+            }
+            
             if (target === 'coverflow-page') showCoverflowPage();
             else if (target === 'list-page') showListPage();
             else if (target === 'add-page') showAddPage();
@@ -548,8 +564,21 @@ function handlePhotoUpload(boxNumber, input) {
             canvas.toBlob(function(blob) {
                 const compressedReader = new FileReader();
                 compressedReader.onload = function(e) {
-                    // Save compressed image
-                    uploadedPhotos[boxNumber] = e.target.result;
+                    // Update PREVIEW_IMAGES array
+                    if (!PREVIEW_IMAGES) PREVIEW_IMAGES = [];
+                    const index = boxNumber - 1;
+                    
+                    // Fill in any gaps with null if necessary
+                    while (PREVIEW_IMAGES.length < index) {
+                        PREVIEW_IMAGES.push(null);
+                    }
+                    
+                    if (index < PREVIEW_IMAGES.length) {
+                        PREVIEW_IMAGES[index] = e.target.result;
+                    } else {
+                        PREVIEW_IMAGES.push(e.target.result);
+                    }
+                    
                     updatePhotoPreview(boxNumber, e.target.result);
                     
                     // Show compression info
@@ -569,51 +598,70 @@ function handlePhotoUpload(boxNumber, input) {
 
 function updatePhotoPreview(boxNumber, imageData) {
     const uploadWrapper = document.getElementById(`upload-wrapper-${boxNumber}`);
-    const uploadBox = document.getElementById(`upload-box-${boxNumber}`);
-    if (!uploadWrapper || !uploadBox) return;
+    if (!uploadWrapper) return;
     
-    // Hide upload box
-    uploadBox.style.display = 'none';
-    
-    // Create or update preview element directly in the wrapper
-    let previewElement = document.getElementById(`preview-${boxNumber}`);
-    if (!previewElement) {
-        previewElement = document.createElement('div');
-        previewElement.id = `preview-${boxNumber}`;
-        previewElement.className = 'preview-image';
-        uploadWrapper.appendChild(previewElement);
+    // Update PREVIEW_IMAGES array
+    const index = boxNumber - 1;
+    if (!PREVIEW_IMAGES) PREVIEW_IMAGES = [];
+    if (index < PREVIEW_IMAGES.length) {
+        PREVIEW_IMAGES[index] = imageData;
+    } else {
+        PREVIEW_IMAGES.push(imageData);
     }
     
-    previewElement.innerHTML = `
-        <img src="${imageData}" alt="Preview ${boxNumber}">
-        <button class="remove-photo" onclick="removePhoto(${boxNumber})">
-            <i class="fas fa-times"></i>
-        </button>
+    // Render preview
+    uploadWrapper.innerHTML = `
+        <div class="preview-image">
+            <img src="${imageData}" alt="Preview ${boxNumber}">
+            <button class="remove-photo" onclick="removePhoto(${index})">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
     `;
 }
 
-function removePhoto(boxNumber) {
-    uploadedPhotos[boxNumber] = null;
-    
-    // Show upload box again
-    const uploadBox = document.getElementById(`upload-box-${boxNumber}`);
-    if (uploadBox) {
-        uploadBox.style.display = 'flex';
+function removePhoto(index) {
+    // Handle PREVIEW_IMAGES array index (used in edit mode)
+    if (PREVIEW_IMAGES && PREVIEW_IMAGES.length > 0 && index < PREVIEW_IMAGES.length) {
+        PREVIEW_IMAGES.splice(index, 1);
+        
+        // Re-render all photo boxes
+        for (let i = 1; i <= 3; i++) {
+            const wrapper = document.getElementById(`upload-wrapper-${i}`);
+            if (!wrapper) continue;
+            
+            if (i - 1 < PREVIEW_IMAGES.length) {
+                // Show preview
+                const src = PREVIEW_IMAGES[i - 1];
+                wrapper.innerHTML = `
+                    <div class="preview-image">
+                        <img src="${src}" alt="Preview">
+                        <button class="remove-photo" onclick="removePhoto(${i - 1})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            } else {
+                // Show upload box
+                wrapper.innerHTML = `
+                    <label for="photo-${i}" class="upload-box" id="upload-box-${i}">
+                        <i class="fas fa-camera"></i>
+                        <span>Photo ${i}</span>
+                    </label>
+                    <input type="file" id="photo-${i}" accept="image/*" style="display: none;">
+                `;
+                // Re-attach event listener
+                const fileInput = document.getElementById(`photo-${i}`);
+                if (fileInput) {
+                    fileInput.onchange = function() {
+                        handlePhotoUpload(i, this);
+                    };
+                }
+            }
+        }
     }
     
-    // Remove preview
-    const previewElement = document.getElementById(`preview-${boxNumber}`);
-    if (previewElement) {
-        previewElement.remove();
-    }
-    
-    // Reset file input
-    const fileInput = document.getElementById(`photo-${boxNumber}`);
-    if (fileInput) {
-        fileInput.value = '';
-    }
-    
-    showToast(`Photo ${boxNumber} removed`, 'warning');
+    showToast(`Photo removed`, 'warning');
 }
 
 // Film Flow - Film Photography Journal
@@ -628,6 +676,42 @@ function setupForm() {
             saveFilmRecord();
         });
         console.log('✅ Form submission setup complete');
+    }
+    
+    // Close button setup
+    const closeBtn = document.getElementById('add-page-close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+            cancelEditing();
+        });
+    }
+}
+
+function cancelEditing() {
+    console.log('❌ Canceling edit...');
+    // Reset form
+    resetForm();
+    // Clear editing state
+    editingRecordId = null;
+    // Reset title back to "Add Record"
+    updateAddPageTitle(false);
+    // Go back to previous page (or default to list page)
+    if (previousPage) {
+        switchPage(previousPage);
+    } else {
+        showListPage();
+    }
+    showToast('Edit canceled', 'info');
+}
+
+function updateAddPageTitle(isEditing) {
+    const titleEl = document.getElementById('add-page-title');
+    if (titleEl) {
+        if (isEditing) {
+            titleEl.innerHTML = '<i class="fas fa-edit"></i> Edit Record';
+        } else {
+            titleEl.innerHTML = '<i class="fas fa-plus"></i> Add Record';
+        }
     }
 }
 
@@ -692,40 +776,76 @@ function saveFilmRecord() {
         return;
     }
     
-    // Collect uploaded photos
-    const photos = [];
-    for (let i = 1; i <= 3; i++) {
-        if (uploadedPhotos[i]) {
-            photos.push(uploadedPhotos[i]);
+    // Collect photos
+    const photos = [...PREVIEW_IMAGES];
+    
+    // Check if we're editing an existing record
+    if (editingRecordId) {
+        // Update existing record
+        const index = films.findIndex(f => f.id == editingRecordId);
+        if (index !== -1) {
+            films[index] = {
+                ...films[index],
+                name: filmName,
+                type: filmType,
+                iso: iso || null,
+                camera: camera || null,
+                date: dateShot || new Date().toISOString().substring(0, 7),
+                country: country,
+                city: city,
+                notes: notes || null,
+                photos: photos,
+                updatedAt: new Date().toISOString()
+            };
+            
+            // Save and reset
+            saveFilms();
+            editingRecordId = null;
+            resetForm();
+            showToast(`"${filmName}" updated successfully!`, 'success');
+            
+            // Go back to previous page (or list page)
+            if (previousPage) {
+                switchPage(previousPage);
+            } else {
+                showListPage();
+            }
         }
+    } else {
+        // Create new film object
+        const film = {
+            id: Date.now(),
+            name: filmName,
+            type: filmType,
+            iso: iso || null,
+            camera: camera || null,
+            date: dateShot || new Date().toISOString().substring(0, 7),
+            country: country,
+            city: city,
+            notes: notes || null,
+            photos: photos,
+            createdAt: new Date().toISOString()
+        };
+        
+        // Add to films array
+        films.push(film);
+        
+        // Save to localStorage
+        saveFilms();
+        
+        // Reset form
+        resetForm();
+        
+        // Go back to previous page (or list page)
+        if (previousPage) {
+            switchPage(previousPage);
+        } else {
+            showListPage();
+        }
+        
+        // Show success message
+        showToast(`"${filmName}" saved successfully!`, 'success');
     }
-    
-    // Create film object
-    const film = {
-        id: Date.now(),
-        name: filmName,
-        type: filmType,
-        iso: iso || null,
-        camera: camera || null,
-        date: dateShot || new Date().toISOString().substring(0, 7),
-        country: country,
-        city: city,
-        notes: notes || null,
-        photos: photos,
-        createdAt: new Date().toISOString()
-    };
-    
-    // Add to films array
-    films.push(film);
-    
-    // Save to localStorage
-    saveFilms();
-    
-    // Reset form
-    resetForm();
-    
-    // Show success message
-    showToast(`"${filmName}" saved successfully!`, 'success');
     
     // Switch to list page after a delay
     setTimeout(() => {
@@ -752,20 +872,29 @@ function resetForm() {
     if (cityCustomWrapper) cityCustomWrapper.classList.remove('show');
     if (cityCustomInput) cityCustomInput.value = '';
     
-    // Reset photos
+    // Reset PREVIEW_IMAGES
+    PREVIEW_IMAGES = [];
+    
+    // Reset photo boxes
     for (let i = 1; i <= 3; i++) {
-        uploadedPhotos[i] = null;
-        const uploadBox = document.getElementById(`upload-box-${i}`);
-        if (uploadBox) uploadBox.style.display = 'flex';
+        const wrapper = document.getElementById(`upload-wrapper-${i}`);
+        if (!wrapper) continue;
         
-        const previewElement = document.getElementById(`preview-${i}`);
-        if (previewElement) {
-            previewElement.remove();
-        }
+        // Show upload box
+        wrapper.innerHTML = `
+            <label for="photo-${i}" class="upload-box" id="upload-box-${i}">
+                <i class="fas fa-camera"></i>
+                <span>Photo ${i}</span>
+            </label>
+            <input type="file" id="photo-${i}" accept="image/*" style="display: none;">
+        `;
         
+        // Re-attach event listener
         const fileInput = document.getElementById(`photo-${i}`);
         if (fileInput) {
-            fileInput.value = '';
+            fileInput.onchange = function() {
+                handlePhotoUpload(i, this);
+            };
         }
     }
     
@@ -894,8 +1023,8 @@ function initCoverFlow() {
         track.appendChild(itemElement);
     });
     
-    // Set initial position (show the newest photo by default)
-    currentCoverFlowIndex = Math.max(0, coverflowPhotos.length - 1);
+    // Set initial position (show the middle photo by default)
+    currentCoverFlowIndex = Math.floor(coverflowPhotos.length / 2);
     updateCoverFlow();
     
     // Setup swipe events
@@ -1086,41 +1215,510 @@ function renderRecordsList() {
         return new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt);
     });
     
-    // Create records list
+    // Create records list with swipe support
     container.innerHTML = sortedFilms.map(film => `
-        <div class="record-item">
-            <div class="record-photos">
-                ${film.photos && film.photos.length > 0 ? 
-                    film.photos.map(photo => `
-                        <div class="record-photo">
-                            <img src="${photo}" alt="Film photo">
-                        </div>
-                    `).join('') : 
-                    '<div class="record-photo" style="display: flex; align-items: center; justify-content: center; color: var(--label-tertiary);"><i class="fas fa-image"></i></div>'
-                }
+        <div class="record-item-wrapper" data-record-id="${film.id}">
+            <div class="record-swipe-actions record-swipe-actions-left">
+                <button class="swipe-btn swipe-btn-edit" onclick="editRecord('${film.id}')">
+                    <i class="fas fa-edit"></i>
+                </button>
             </div>
-            <div class="record-info">
-                <div class="record-camera">
-                    <i class="fas fa-camera"></i>
-                    ${film.camera || 'Unknown Camera'}
+            <div class="record-swipe-actions record-swipe-actions-right">
+                <button class="swipe-btn swipe-btn-delete" onclick="deleteRecord('${film.id}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <div class="record-item" onclick="openDetailModal('${film.id}')">
+                <div class="record-photos">
+                    ${film.photos && film.photos.length > 0 ? 
+                        film.photos.map(photo => `
+                            <div class="record-photo">
+                                <img src="${photo}" alt="Film photo">
+                            </div>
+                        `).join('') : 
+                        '<div class="record-photo" style="display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,.4);"><i class="fas fa-image"></i></div>'
+                    }
                 </div>
-                <div class="record-film">
-                    <i class="fas fa-film"></i>
-                    ${film.name || 'Unknown Film'}
-                </div>
-                <div class="record-date">
-                    <i class="fas fa-calendar"></i>
-                    ${formatDate(film.date || film.createdAt)}
-                </div>
-                ${film.city ? `
-                    <div class="record-location">
-                        <i class="fas fa-map-marker-alt"></i>
-                        ${film.city}
+                <div class="record-info">
+                    <div class="record-camera">
+                        <i class="fas fa-camera"></i>
+                        ${film.camera || 'Unknown Camera'}
                     </div>
-                ` : ''}
+                    <div class="record-film">
+                        <i class="fas fa-film"></i>
+                        ${film.name || 'Unknown Film'}
+                    </div>
+                    <div class="record-date">
+                        <i class="fas fa-calendar"></i>
+                        ${formatDate(film.date || film.createdAt)}
+                    </div>
+                    ${film.city ? `
+                        <div class="record-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            ${film.city}
+                        </div>
+                    ` : ''}
+                </div>
             </div>
         </div>
     `).join('');
+    
+    // Initialize swipe gestures
+    initSwipeGestures();
+}
+
+/* ====== SWIPE GESTURES ====== */
+function initSwipeGestures() {
+    const wrappers = document.querySelectorAll('.record-item-wrapper');
+    
+    wrappers.forEach(wrapper => {
+        const recordItem = wrapper.querySelector('.record-item');
+        let startX = 0;
+        let startY = 0;
+        let currentX = 0;
+        let isDragging = false;
+        let hasMoved = false;
+        let currentSwipeDirection = null; // 'left' 或 'right'
+        
+        // 防止多个手势同时触发
+        let resetTimeout = null;
+        
+        // 触摸开始
+        const handleTouchStart = (e) => {
+            startX = e.touches ? e.touches[0].clientX : e.clientX;
+            startY = e.touches ? e.touches[0].clientY : e.clientY;
+            currentX = startX;
+            isDragging = true;
+            hasMoved = false;
+            currentSwipeDirection = null;
+            
+            // 立即移除过渡，避免初始延迟
+            recordItem.style.transition = 'none';
+            
+            // 强制重绘，确保样式立即生效
+            recordItem.offsetHeight;
+            
+            // 清除之前的重置定时器
+            if (resetTimeout) clearTimeout(resetTimeout);
+        };
+        
+        // 触摸移动
+        const handleTouchMove = (e) => {
+            if (!isDragging) return;
+            
+            const touchX = e.touches ? e.touches[0].clientX : e.clientX;
+            const touchY = e.touches ? e.touches[0].clientY : e.clientY;
+            const diffX = touchX - startX;
+            const diffY = touchY - startY;
+            
+            // 判断是否是垂直滑动（避免误触）
+            if (!hasMoved && Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 10) {
+                isDragging = false;
+                return;
+            }
+            
+            if (Math.abs(diffX) > 5) {
+                hasMoved = true;
+            }
+            
+            currentX = touchX;
+            const maxSwipe = 70;
+            
+            // 更平滑的边缘阻力效果
+            let translateX = diffX;
+            if (Math.abs(translateX) > maxSwipe) {
+                const overshoot = Math.abs(translateX) - maxSwipe;
+                const resistance = 0.25;
+                translateX = (translateX > 0 ? 1 : -1) * (maxSwipe + overshoot * resistance);
+            }
+            
+            // 根据滑动方向添加类
+            if (translateX > 0 && currentSwipeDirection !== 'right') {
+                currentSwipeDirection = 'right';
+                wrapper.classList.remove('swipe-left', 'swipe-active');
+                wrapper.classList.add('swipe-right');
+            } else if (translateX < 0 && currentSwipeDirection !== 'left') {
+                currentSwipeDirection = 'left';
+                wrapper.classList.remove('swipe-right', 'swipe-active');
+                wrapper.classList.add('swipe-left');
+            }
+            
+            // 使用 requestAnimationFrame 进行更流畅的更新
+            requestAnimationFrame(() => {
+                recordItem.style.transform = `translateX(${translateX}px)`;
+            });
+        };
+        
+        // 触摸结束
+        const handleTouchEnd = () => {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const diff = currentX - startX;
+            
+            // 恢复过渡动画
+            recordItem.style.transition = 'transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1), box-shadow 0.35s ease';
+            
+            if (diff > 40) {
+                // Swipe right - show edit button
+                currentSwipeDirection = 'right';
+                wrapper.classList.remove('swipe-left', 'swipe-active');
+                wrapper.classList.add('swipe-right');
+                requestAnimationFrame(() => {
+                    recordItem.style.transform = 'translateX(64px)';
+                });
+                // 自动关闭其他项
+                closeOtherSwipeItems(wrapper);
+            } else if (diff < -40) {
+                // Swipe left - show delete button
+                currentSwipeDirection = 'left';
+                wrapper.classList.remove('swipe-right', 'swipe-active');
+                wrapper.classList.add('swipe-left');
+                requestAnimationFrame(() => {
+                    recordItem.style.transform = 'translateX(-64px)';
+                });
+                // 自动关闭其他项
+                closeOtherSwipeItems(wrapper);
+            } else {
+                // Reset position with smooth animation
+                requestAnimationFrame(() => {
+                    recordItem.style.transform = 'translateX(0)';
+                });
+                // 移除滑动状态类
+                setTimeout(() => {
+                    wrapper.classList.remove('swipe-left', 'swipe-right', 'swipe-active');
+                    currentSwipeDirection = null;
+                }, 350);
+            }
+        };
+        
+        // 点击记录项时的处理
+        const handleItemClick = (e) => {
+            if (hasMoved) {
+                // 如果有滑动操作，不触发点击事件
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+            }
+        };
+        
+        // 添加事件监听器
+        recordItem.addEventListener('touchstart', handleTouchStart, { passive: true });
+        recordItem.addEventListener('touchmove', handleTouchMove, { passive: true });
+        recordItem.addEventListener('touchend', handleTouchEnd);
+        recordItem.addEventListener('click', handleItemClick, true);
+        
+        // 鼠标事件支持
+        recordItem.addEventListener('mousedown', handleTouchStart);
+        document.addEventListener('mousemove', handleTouchMove);
+        document.addEventListener('mouseup', handleTouchEnd);
+    });
+    
+    // 点击外部区域重置所有滑动项
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.record-item-wrapper')) {
+            closeAllSwipeItems();
+        }
+    });
+}
+
+// 关闭其他滑动项
+function closeOtherSwipeItems(exceptWrapper) {
+    const wrappers = document.querySelectorAll('.record-item-wrapper');
+    wrappers.forEach(wrapper => {
+        if (wrapper !== exceptWrapper) {
+            const item = wrapper.querySelector('.record-item');
+            if (item) {
+                item.style.transition = 'transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1), box-shadow 0.35s ease';
+                requestAnimationFrame(() => {
+                    item.style.transform = 'translateX(0)';
+                });
+            }
+            setTimeout(() => {
+                wrapper.classList.remove('swipe-left', 'swipe-right', 'swipe-active');
+            }, 350);
+        }
+    });
+}
+
+// 关闭所有滑动项
+function closeAllSwipeItems() {
+    const wrappers = document.querySelectorAll('.record-item-wrapper');
+    wrappers.forEach(wrapper => {
+        const item = wrapper.querySelector('.record-item');
+        if (item) {
+            item.style.transition = 'transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1), box-shadow 0.35s ease';
+            requestAnimationFrame(() => {
+                item.style.transform = 'translateX(0)';
+            });
+        }
+        setTimeout(() => {
+            wrapper.classList.remove('swipe-left', 'swipe-right', 'swipe-active');
+        }, 350);
+    });
+}
+
+// 使滑动相关函数全局可用
+window.openDetailModal = openDetailModal;
+window.closeDetailModal = closeDetailModal;
+window.editRecord = editRecord;
+window.deleteRecord = deleteRecord;
+
+/* ====== MODAL FUNCTIONS ====== */
+let editingRecordId = null;
+
+function openDetailModal(recordId) {
+    const film = films.find(f => f.id == recordId);
+    if (!film) return;
+    
+    const modal = document.getElementById('detail-modal');
+    const title = document.getElementById('detail-title');
+    const body = document.getElementById('detail-body');
+    
+    title.textContent = 'Record Details';
+    
+    let photosHTML = '';
+    if (film.photos && film.photos.length > 0) {
+        photosHTML = film.photos.map(photo => `
+            <div class="detail-photo">
+                <img src="${photo}" alt="Film photo">
+            </div>
+        `).join('');
+    }
+    
+    body.innerHTML = `
+        ${photosHTML ? `
+            <div class="detail-section">
+                <h4>Photos</h4>
+                <div class="detail-photos">${photosHTML}</div>
+            </div>
+        ` : ''}
+        
+        <div class="detail-section">
+            <h4>Film Information</h4>
+            <div class="detail-item">
+                <i class="fas fa-film"></i>
+                <span>${film.name || '-'}</span>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-layer-group"></i>
+                <span>${film.type || '-'}</span>
+            </div>
+            ${film.iso ? `
+                <div class="detail-item">
+                    <i class="fas fa-sun"></i>
+                    <span>${film.iso}</span>
+                </div>
+            ` : ''}
+        </div>
+        
+        <div class="detail-section">
+            <h4>Camera & Date</h4>
+            <div class="detail-item">
+                <i class="fas fa-camera"></i>
+                <span>${film.camera || '-'}</span>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-calendar"></i>
+                <span>${formatDate(film.date || film.createdAt)}</span>
+            </div>
+        </div>
+        
+        <div class="detail-section">
+            <h4>Location</h4>
+            <div class="detail-item">
+                <i class="fas fa-globe"></i>
+                <span>${film.country || '-'}</span>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-city"></i>
+                <span>${film.city || '-'}</span>
+            </div>
+        </div>
+        
+        ${film.notes ? `
+            <div class="detail-section">
+                <h4>Notes</h4>
+                <div class="detail-notes">${film.notes}</div>
+            </div>
+        ` : ''}
+        
+        <div class="detail-section" style="display: flex; gap: 12px; justify-content: center; padding-top: 8px;">
+            <button class="swipe-btn-edit swipe-btn" onclick="editRecord('${film.id}')" style="width: auto; padding: 10px 24px; border-radius: 12px;">
+                <i class="fas fa-edit"></i> Edit
+            </button>
+            <button class="swipe-btn-delete swipe-btn" onclick="deleteRecord('${film.id}')" style="width: auto; padding: 10px 24px; border-radius: 12px;">
+                <i class="fas fa-trash"></i> Delete
+            </button>
+        </div>
+    `;
+    
+    modal.classList.add('active');
+}
+
+function closeDetailModal() {
+    const modal = document.getElementById('detail-modal');
+    modal.classList.remove('active');
+}
+
+/* ====== RECORD ACTIONS ====== */
+function editRecord(recordId) {
+    const film = films.find(f => f.id == recordId);
+    if (!film) return;
+    
+    console.log('🎬 Editing record:', film);
+    
+    // Close modal first
+    closeDetailModal();
+    
+    // Set editing mode BEFORE switching page
+    editingRecordId = recordId;
+    updateAddPageTitle(true);
+    
+    // Switch to add page first
+    showAddPage();
+    
+    // Wait a little for page to render, then populate form
+    setTimeout(() => {
+        // Populate basic form fields
+        document.getElementById('film-name').value = film.name || '';
+        document.getElementById('film-type').value = film.type || '';
+        document.getElementById('iso').value = film.iso || '';
+        document.getElementById('camera').value = film.camera || '';
+        document.getElementById('date-shot').value = film.date || '';
+        document.getElementById('notes').value = film.notes || '';
+        
+        // Handle custom country/city - SIMPLE AND DIRECT
+        const countrySelect = document.getElementById('country');
+        const countryCustomWrapper = document.getElementById('country-custom-wrapper');
+        const countryCustomInput = document.getElementById('country-custom-input');
+        const citySelect = document.getElementById('city');
+        const cityCustomWrapper = document.getElementById('city-custom-wrapper');
+        const cityCustomInput = document.getElementById('city-custom-input');
+        
+        // Reset custom fields first
+        countryCustomWrapper.classList.remove('show');
+        cityCustomWrapper.classList.remove('show');
+        countryCustomInput.value = '';
+        cityCustomInput.value = '';
+        
+        // Process country
+        console.log('📍 Processing country:', film.country);
+        
+        let isCountryCustom = true;
+        let matchingCountry = null;
+        
+        // Check if we can find this country in our preset list
+        for (let i = 0; i < countriesRegions.length; i++) {
+            const c = countriesRegions[i];
+            if (c.name === film.country || c.code === film.country) {
+                matchingCountry = c;
+                isCountryCustom = false;
+                break;
+            }
+        }
+        
+        console.log('📍 Matching country found:', matchingCountry);
+        console.log('📍 Is country custom:', isCountryCustom);
+        
+        if (matchingCountry) {
+            // Country is in preset list
+            countrySelect.value = matchingCountry.code;
+            updateCities(matchingCountry.code);
+            
+            // Then handle city
+            if (film.city) {
+                setTimeout(() => {
+                    let isCityCustom = true;
+                    for (let i = 0; i < matchingCountry.cities.length; i++) {
+                        if (matchingCountry.cities[i] === film.city) {
+                            isCityCustom = false;
+                            break;
+                        }
+                    }
+                    
+                    if (isCityCustom) {
+                        citySelect.value = 'other';
+                        cityCustomWrapper.classList.add('show');
+                        cityCustomInput.value = film.city;
+                    } else {
+                        citySelect.value = film.city;
+                    }
+                }, 50);
+            }
+        } else {
+            // Country is custom
+            console.log('📍 Setting custom country:', film.country);
+            countrySelect.value = 'other';
+            countryCustomWrapper.classList.add('show');
+            countryCustomInput.value = film.country;
+            
+            // Verify the value was set
+            console.log('📍 Country custom input value after set:', countryCustomInput.value);
+            
+            // City is also custom
+            if (film.city) {
+                citySelect.value = 'other';
+                cityCustomWrapper.classList.add('show');
+                cityCustomInput.value = film.city;
+            }
+        }
+        
+        // Handle photos (keep existing)
+        PREVIEW_IMAGES = film.photos ? [...film.photos] : [];
+        
+        // Render photo boxes
+        for (let i = 1; i <= 3; i++) {
+            const wrapper = document.getElementById(`upload-wrapper-${i}`);
+            if (!wrapper) continue;
+            
+            if (i - 1 < PREVIEW_IMAGES.length) {
+                // Show preview
+                const src = PREVIEW_IMAGES[i - 1];
+                wrapper.innerHTML = `
+                    <div class="preview-image">
+                        <img src="${src}" alt="Preview">
+                        <button class="remove-photo" onclick="removePhoto(${i - 1})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            } else {
+                // Show upload box
+                wrapper.innerHTML = `
+                    <label for="photo-${i}" class="upload-box" id="upload-box-${i}">
+                        <i class="fas fa-camera"></i>
+                        <span>Photo ${i}</span>
+                    </label>
+                    <input type="file" id="photo-${i}" accept="image/*" style="display: none;">
+                `;
+                // Re-attach event listener
+                const fileInput = document.getElementById(`photo-${i}`);
+                if (fileInput) {
+                    fileInput.onchange = function() {
+                        handlePhotoUpload(i, this);
+                    };
+                }
+            }
+        }
+    }, 100);
+}
+
+function deleteRecord(recordId) {
+    if (!confirm('Are you sure you want to delete this record?')) return;
+    
+    // Close modal first
+    closeDetailModal();
+    
+    // Wait a little for modal to close before updating
+    setTimeout(() => {
+        films = films.filter(f => f.id != recordId);
+        saveFilms();
+        renderRecordsList();
+        initCoverFlow();
+        updateStatistics();
+        showToast('Record deleted', 'success');
+    }, 200);
 }
 
 function getCountryName(countryCode) {
