@@ -114,7 +114,7 @@ body{
 .coverflow-track:active{ cursor: grabbing; }
 .coverflow-item{
   position: absolute;
-  top: 50px;
+  top: 45px;
   left: 50%;
   width: 260px;
   height: 260px;
@@ -191,7 +191,7 @@ body{
 .record-item{
   display:flex;
   gap: 2px;
-  background: var(--panel);
+  background: #1c1c1e;
   border-radius: 18px;
   padding: 12px;
   border: 1px solid rgba(255,255,255,.06);
@@ -975,12 +975,13 @@ body{
     will-change: transform;
 }
 
-.record-item:hover {
-    background: rgba(255,255,255,0.03);
+.record-item-wrapper {
+    overflow: hidden;
 }
 
+.record-item:hover,
 .record-item:active {
-    background: rgba(255,255,255,0.06);
+    background: var(--panel);
 }
 
 /* 滑动时添加阴影效果 */
@@ -995,26 +996,31 @@ body{
     display: flex;
     align-items: center;
     z-index: 1;
-    opacity: 0;
-    transition: opacity 0.2s ease;
+    overflow: hidden;
 }
 
 .record-swipe-actions-left {
     left: 0;
     padding-left: 12px;
     padding-right: 4px;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    border-radius: 18px 0 0 18px;
 }
 
 .record-swipe-actions-right {
     right: 0;
     padding-right: 12px;
     padding-left: 4px;
+    transform: translateX(100%);
+    transition: transform 0.2s ease;
+    border-radius: 0 18px 18px 0;
 }
 
 /* Show actions when swiping */
 .record-item-wrapper.swipe-right .record-swipe-actions-left,
 .record-item-wrapper.swipe-left .record-swipe-actions-right {
-    opacity: 1;
+    transform: translateX(0);
 }
 
 .swipe-btn {
