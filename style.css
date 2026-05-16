@@ -98,9 +98,9 @@ body{
 .btn-large{ padding: 14px 14px; border-radius: 14px; width: 100%; }
 /* ===== Coverflow (Home) ===== */
 .coverflow-wrap{
-  margin-top: 8px;
+  margin-top: 10px;
   border-radius: 24px;
-  padding: 18px 12px 14px;
+  padding: 16px 12px 22px;
   overflow: hidden;
   position: relative;
 }
@@ -473,7 +473,9 @@ body{
 @media (max-width: 480px){
   .upload-row{ flex-direction: row; } /* 保持横向排列 */
 }
-.form-actions{ margin-top: 2px; }
+.form-actions{ 
+  margin-top: 2px;
+}
 /* ===== Stats ===== */
 .stats-grid{
   display:grid;
@@ -665,4 +667,404 @@ body{
 
 #country-custom-input:focus, #city-custom-input:focus {
     border-color: rgba(255,255,255,.2);
+}
+
+/* ===== Record Swipe Actions ===== */
+.record-item-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    margin-bottom: 10px;
+}
+
+.record-item {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    touch-action: pan-y;
+    position: relative;
+    z-index: 2;
+}
+
+.record-item:hover {
+    background: rgba(255,255,255,0.03);
+}
+
+.record-swipe-actions {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    z-index: 1;
+}
+
+.record-swipe-actions-left {
+    left: 0;
+}
+
+.record-swipe-actions-right {
+    right: 0;
+}
+
+.swipe-btn {
+    height: 100%;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+}
+
+.swipe-btn-edit {
+    background: #0a84ff;
+    border-radius: 18px 0 0 18px;
+}
+
+.swipe-btn-delete {
+    background: #ff375f;
+    border-radius: 0 18px 18px 0;
+}
+
+.swipe-btn i {
+    font-size: 18px;
+}
+
+/* ===== Modal ===== */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+}
+
+.modal-content {
+    position: relative;
+    background: #1c1c1e;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 480px;
+    max-height: 85vh;
+    overflow: hidden;
+    z-index: 3001;
+    border: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.modal.active .modal-content {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    flex-shrink: 0;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-weight: 900;
+    font-size: 18px;
+}
+
+.modal-close {
+    background: rgba(255,255,255,0.06);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.modal-body {
+    padding: 16px 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.detail-section {
+    margin-bottom: 16px;
+}
+
+.detail-section:last-child {
+    margin-bottom: 0;
+}
+
+.detail-section h4 {
+    margin: 0 0 10px 0;
+    font-size: 11px;
+    color: #8e8e93;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.detail-item:last-child {
+    margin-bottom: 0;
+}
+
+.detail-item i {
+    width: 18px;
+    color: rgba(255,255,255,0.5);
+    font-size: 14px;
+}
+
+.detail-photos {
+    display: flex;
+    gap: 6px;
+    align-items: stretch;
+    width: 100%;
+}
+
+.detail-photo {
+    flex: 1;
+    height: 83.79px;
+    min-height: 83.79px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #111;
+    border: 1px solid rgba(255,255,255,.05);
+}
+
+.detail-photo img {
+    width: 100%;
+    height: 83.79px;
+    min-height: 83.79px;
+    object-fit: cover;
+    display: block;
+}
+
+.detail-notes {
+    background: rgba(255,255,255,0.03);
+    padding: 12px;
+    border-radius: 12px;
+    color: rgba(255,255,255,0.8);
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+/* Modal buttons */
+.modal-body .swipe-btn {
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.modal-body .swipe-btn-edit {
+    background: rgba(10, 132, 255, 0.15);
+    color: var(--accent);
+}
+
+.modal-body .swipe-btn-edit:hover {
+    background: rgba(10, 132, 255, 0.25);
+    transform: scale(1.02);
+}
+
+.modal-body .swipe-btn-delete {
+    background: rgba(255, 55, 95, 0.15);
+    color: var(--danger);
+}
+
+.modal-body .swipe-btn-delete:hover {
+    background: rgba(255, 55, 95, 0.25);
+    transform: scale(1.02);
+}
+
+/* ====== Record Swipe Actions ====== */
+.record-item-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    margin-bottom: 10px;
+    background: transparent;
+}
+
+/* 遮罩层效果 */
+.record-item-wrapper::before,
+.record-item-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    z-index: 3;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.record-item-wrapper::before {
+    left: 0;
+    background: linear-gradient(to right, var(--bg), transparent);
+}
+
+.record-item-wrapper::after {
+    right: 0;
+    background: linear-gradient(to left, var(--bg), transparent);
+}
+
+/* 左滑时只显示左边遮罩 */
+.record-item-wrapper.swipe-left::before {
+    opacity: 1;
+}
+
+/* 右滑时只显示右边遮罩 */
+.record-item-wrapper.swipe-right::after {
+    opacity: 1;
+}
+
+.record-item {
+    cursor: pointer;
+    transition: transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1), box-shadow 0.35s ease;
+    touch-action: pan-y;
+    position: relative;
+    z-index: 2;
+    user-select: none;
+    -webkit-user-select: none;
+    box-shadow: 0 0 0 rgba(0,0,0,0);
+    will-change: transform;
+}
+
+.record-item:hover {
+    background: rgba(255,255,255,0.03);
+}
+
+.record-item:active {
+    background: rgba(255,255,255,0.06);
+}
+
+/* 滑动时添加阴影效果 */
+.record-item-wrapper.swipe-active .record-item {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.record-swipe-actions {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.record-swipe-actions-left {
+    left: 0;
+    padding-left: 12px;
+    padding-right: 4px;
+}
+
+.record-swipe-actions-right {
+    right: 0;
+    padding-right: 12px;
+    padding-left: 4px;
+}
+
+/* Show actions when swiping */
+.record-item-wrapper.swipe-right .record-swipe-actions-left,
+.record-item-wrapper.swipe-left .record-swipe-actions-right {
+    opacity: 1;
+}
+
+.swipe-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+/* Override for record swipe actions */
+.record-swipe-actions .swipe-btn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+}
+
+.swipe-btn:hover {
+    transform: scale(1.1);
+}
+
+.swipe-btn:active {
+    transform: scale(0.95);
+}
+
+.swipe-btn-edit {
+    background: rgba(10, 132, 255, 0.2);
+    color: var(--accent);
+}
+
+.swipe-btn-edit:hover {
+    background: var(--accent);
+    color: white;
+}
+
+.swipe-btn-delete {
+    background: rgba(255, 55, 95, 0.2);
+    color: var(--danger);
+}
+
+.swipe-btn-delete:hover {
+    background: var(--danger);
+    color: white;
+}
+
+.swipe-btn i {
+    font-size: 16px;
 }
