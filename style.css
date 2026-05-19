@@ -1074,3 +1074,475 @@ body{
 .swipe-btn i {
     font-size: 16px;
 }
+
+/* ===== Display Case / Shelf Styles ===== */
+.shelf {
+    background: var(--panel2);
+    border-radius: 14px;
+    padding: 14px 10px 10px 10px;
+    border: 1px solid rgba(255,255,255,.05);
+}
+
+.shelf-top {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent);
+    margin-bottom: 10px;
+    border-radius: 1px;
+}
+
+.shelf-display-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.scroll-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(10, 132, 255, 0.15) !important;
+    border: none;
+    color: var(--accent) !important;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    outline: none !important;
+}
+
+.scroll-btn:hover {
+    background: var(--accent) !important;
+    color: white !important;
+    transform: scale(1.1);
+}
+
+.scroll-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.scroll-btn:disabled:hover {
+    background: rgba(10, 132, 255, 0.15) !important;
+    color: var(--accent) !important;
+}
+
+.scroll-btn:focus,
+.scroll-btn:focus-visible,
+.scroll-btn:focus-within {
+    outline: none !important;
+    background: rgba(10, 132, 255, 0.15) !important;
+    color: var(--accent) !important;
+    box-shadow: none !important;
+}
+
+.scroll-btn:active {
+    background: var(--accent) !important;
+    color: white !important;
+    transform: scale(0.95);
+}
+
+.display-items-container {
+    flex: 1;
+    overflow: hidden;
+    padding: 10px 8px;
+    margin: -10px 0;
+    position: relative;
+}
+
+.display-items-container::before,
+.display-items-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 10px;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.display-items-container::before {
+    left: 0;
+    background: linear-gradient(to right, var(--panel2), transparent);
+}
+
+.display-items-container::after {
+    right: 0;
+    background: linear-gradient(to left, var(--panel2), transparent);
+}
+
+.display-items {
+    display: flex;
+    gap: 4px;
+    transition: transform 0.3s ease;
+}
+
+#cameras-list.center-aligned,
+#films-list.center-aligned {
+    justify-content: center;
+}
+
+.display-item {
+    flex-shrink: 0;
+    width: 70px;
+    background: linear-gradient(145deg, var(--panel2) 0%, var(--panel) 100%);
+    border-radius: 10px;
+    padding: 7px 4px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,.06);
+    transition: all 0.25s ease;
+    cursor: pointer;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0,0,0,.2);
+    transform: translateY(0) scale(1);
+    will-change: transform, box-shadow;
+}
+
+.display-item:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(0,0,0,.35);
+}
+
+.display-item::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 8px;
+    background: linear-gradient(180deg, rgba(255,255,255,.05), transparent);
+}
+
+.display-item-icon {
+    font-size: 22px;
+    margin-bottom: 3px;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.display-item-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: bottom;
+}
+
+.display-item-name {
+    font-size: 8px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+/* Placeholder item */
+.display-item.placeholder {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    opacity: 0.6;
+    cursor: default;
+}
+
+.display-item.placeholder:hover {
+    transform: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.display-item.placeholder::before {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent);
+}
+
+.display-item.placeholder .display-item-icon {
+    color: rgba(255, 255, 255, 0.3);
+    opacity: 0.6;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.display-item.placeholder .display-item-name {
+    color: rgba(255, 255, 255, 0.25);
+}
+
+/* Delete Button */
+.delete-item {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    background: rgba(255, 55, 95, 0.1);
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.2s ease;
+}
+
+.delete-item:hover {
+    background: var(--danger);
+    color: white;
+}
+
+.display-item.edit-mode .delete-item {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.display-item.shaking {
+    animation: shake 0.5s ease-in-out infinite;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateY(-3px) scale(1.02) rotate(-1deg); }
+    25% { transform: translateY(-3px) scale(1.02) rotate(1deg); }
+    50% { transform: translateY(-3px) scale(1.02) rotate(-1deg); }
+    75% { transform: translateY(-3px) scale(1.02) rotate(1deg); }
+}
+
+/* Add Button */
+.section-add-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.section-add-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: white;
+    transform: scale(1.1);
+}
+
+.section-add-btn:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.section-add-btn:active {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(0.95);
+}
+
+/* Stats Footer */
+.stats-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,.06);
+}
+
+.stats-info {
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.stats-number {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+}
+
+.stats-label {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Form Section Title Layout */
+.form-section h3 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.form-section h3 span {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Modal for Add Item */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 200;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.add-item-modal {
+    width: 100%;
+    max-width: 480px;
+    background: var(--panel);
+    border-radius: 24px 24px 0 0;
+    padding: 24px;
+    animation: slideUp 0.3s ease;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+.type-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.type-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 14px;
+    background: var(--panel2);
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.type-btn.active {
+    background: var(--accent);
+    color: white;
+}
+
+.icon-picker-section {
+    margin-bottom: 16px;
+}
+
+.icon-picker-label {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 12px;
+}
+
+.icon-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.icon-option {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    background: var(--panel2);
+    border-radius: 14px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.icon-option img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center center;
+}
+
+/* Film icons slightly larger */
+.film-icon-grid .icon-option img {
+    transform: scale(1.3);
+}
+
+.icon-option:hover {
+    transform: scale(1.1);
+    border-color: var(--accent);
+}
+
+.icon-option.selected {
+    border-color: var(--accent);
+    background: rgba(10, 132, 255, 0.15);
+}
+
+.name-input-section {
+    margin-bottom: 20px;
+}
+
+.name-input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.07);
+    background: var(--panel2);
+    color: var(--text);
+    font-size: 16px;
+    outline: none;
+}
+
+.name-input:focus {
+    border-color: var(--accent);
+}
+
+.name-input::placeholder {
+    color: var(--muted);
+}
+
+.add-item-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 14px;
+    background: var(--accent);
+    border: none;
+    color: white;
+    font-size: 16px;
+    font-weight: 750;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.add-item-btn:hover {
+    filter: brightness(1.1);
+}
