@@ -2084,64 +2084,356 @@ function importData() {
 }
 
 /* ====== MY PAGE LOGIC ====== */
+// Global variables for display case
+let myPageScrollPositions = { camera: 0, film: 0 };
+let myPageIsEditMode = { camera: false, film: false };
+let myPageLongPressTimer = null;
+const LONG_PRESS_DURATION = 500;
+const ITEM_WIDTH = 74; // item width (70px) + gap (4px)
+
+// Icon options for camera and film separately
+const cameraIconOptions = [
+    'icons/camera_1.png',
+    'icons/camera_2.png', 
+    'icons/camera_3.png',
+    'icons/camera_4.png',
+    'icons/camera_5.png',
+    'icons/camera_6.png',
+    'icons/camera_7.png'
+];
+
+const filmIconOptions = [
+    'icons/Film1.png',
+    'icons/Film2.png',
+    'icons/Film3.png',
+    'icons/Film4.png',
+    'icons/Film5.png',
+    'icons/Film6.png',
+    'icons/Film7.png'
+];
+
+// Current modal state
+let modalCurrentType = 'camera';
+let modalSelectedIcon = cameraIconOptions[0];
+
 function initMyPage() {
     console.log('⚙️ Initializing My page');
     
     renderCamerasList();
     renderFilmsList();
     
-    // 添加相机按钮
+    // Add camera button
     const addCameraBtn = document.getElementById('add-camera-btn');
     if (addCameraBtn) {
         addCameraBtn.onclick = function() {
-            const input = document.getElementById('new-camera-input');
-            const value = normalizeText(input.value);
-            if (value) {
-                addCamera(value);
-                input.value = '';
-            }
+            openAddModal('camera');
         };
     }
     
-    // 添加胶片按钮
+    // Add film button
     const addFilmBtn = document.getElementById('add-film-btn');
     if (addFilmBtn) {
         addFilmBtn.onclick = function() {
-            const input = document.getElementById('new-film-input');
-            const value = normalizeText(input.value);
-            if (value) {
-                addFilmStock(value);
-                input.value = '';
-            }
+            openAddModal('film');
         };
     }
     
-    // 输入框回车事件
-    const cameraInput = document.getElementById('new-camera-input');
-    if (cameraInput) {
-        cameraInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const value = normalizeText(this.value);
-                if (value) {
-                    addCamera(value);
-                    this.value = '';
-                }
+    // Scroll buttons
+    setupScrollButtons();
+    
+    // Initialize long press
+    initLongPress();
+    
+    // Close modal on outside click
+    const modalOverlay = document.getElementById('add-item-modal');
+    if (modalOverlay) {
+        modalOverlay.addEventListener('click', function(e) {
+            if (e.target === modalOverlay) {
+                closeAddItemModal();
             }
         });
     }
     
-    const filmInput = document.getElementById('new-film-input');
-    if (filmInput) {
-        filmInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const value = normalizeText(this.value);
-                if (value) {
-                    addFilmStock(value);
-                    this.value = '';
-                }
-            }
-        });
+    // Ensure all buttons are blurred
+    const allButtons = document.querySelectorAll('.scroll-btn, .section-add-btn');
+    allButtons.forEach(btn => btn.blur());
+}
+
+function setupScrollButtons() {
+    // Camera left
+    const cameraLeft = document.getElementById('camera-left');
+    if (cameraLeft) {
+        cameraLeft.onclick = (e) => {
+            setTimeout(() => e.target.blur(), 0);
+            scrollDisplay('camera', -1);
+        };
     }
+    
+    // Camera right
+    const cameraRight = document.getElementById('camera-right');
+    if (cameraRight) {
+        cameraRight.onclick = (e) => {
+            setTimeout(() => e.target.blur(), 0);
+            scrollDisplay('camera', 1);
+        };
+    }
+    
+    // Film left
+    const filmLeft = document.getElementById('film-left');
+    if (filmLeft) {
+        filmLeft.onclick = (e) => {
+            setTimeout(() => e.target.blur(), 0);
+            scrollDisplay('film', -1);
+        };
+    }
+    
+    // Film right
+    const filmRight = document.getElementById('film-right');
+    if (filmRight) {
+        filmRight.onclick = (e) => {
+            setTimeout(() => e.target.blur(), 0);
+            scrollDisplay('film', 1);
+        };
+    }
+}
+
+function updateStats() {
+    const cameraCount = document.getElementById('camera-count');
+    const filmCount = document.getElementById('film-count');
+    
+    const cameras = loadStringArray(STORAGE_KEYS.cameras);
+    const films = loadStringArray(STORAGE_KEYS.filmNames);
+    
+    if (cameraCount) cameraCount.textContent = cameras.length;
+    if (filmCount) filmCount.textContent = films.length;
+}
+
+function updateScrollButtons(type) {
+    const leftBtn = document.getElementById(`${type}-left`);
+    const rightBtn = document.getElementById(`${type}-right`);
+    const items = document.querySelectorAll(`#${type === 'camera' ? 'cameras' : 'films'}-list .display-item:not(.placeholder)`);
+    const maxScroll = getMaxScroll(type);
+    
+    if (leftBtn) leftBtn.disabled = myPageScrollPositions[type] <= 0;
+    if (rightBtn) rightBtn.disabled = myPageScrollPositions[type] >= maxScroll;
+}
+
+function getMaxScroll(type) {
+    const items = document.querySelectorAll(`#${type === 'camera' ? 'cameras' : 'films'}-list .display-item:not(.placeholder)`);
+    if (items.length === 0) return 0;
+    const maxScroll = Math.max(0, (items.length - 3) * ITEM_WIDTH);
+    return maxScroll;
+}
+
+function scrollDisplay(type, direction) {
+    const containerId = type === 'camera' ? 'cameras-list' : 'films-list';
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    // Check if we have actual items (not just placeholders)
+    const actualItems = document.querySelectorAll(`#${containerId} .display-item:not(.placeholder)`);
+    if (actualItems.length === 0) return;
+    
+    const maxScroll = getMaxScroll(type);
+    
+    myPageScrollPositions[type] += direction * ITEM_WIDTH;
+    myPageScrollPositions[type] = Math.max(0, Math.min(myPageScrollPositions[type], maxScroll));
+    
+    container.style.transform = `translateX(-${myPageScrollPositions[type]}px)`;
+    
+    updateScrollButtons(type);
+}
+
+function initLongPress() {
+    document.querySelectorAll('.display-item:not(.placeholder)').forEach(item => {
+        setupItemEvents(item);
+    });
+}
+
+function setupItemEvents(item) {
+    item.addEventListener('mousedown', startLongPress);
+    item.addEventListener('mouseup', cancelLongPress);
+    item.addEventListener('mouseleave', cancelLongPress);
+    item.addEventListener('touchstart', startLongPress);
+    item.addEventListener('touchend', cancelLongPress);
+    item.addEventListener('touchmove', cancelLongPress);
+}
+
+function startLongPress(e) {
+    // Determine which type of item this is (camera or film)
+    const parent = e.currentTarget.closest('#cameras-list, #films-list');
+    const type = parent ? (parent.id === 'cameras-list' ? 'camera' : 'film') : null;
+    
+    if (!type) return;
+    if (myPageIsEditMode[type]) return;
+    
+    myPageLongPressTimer = setTimeout(() => {
+        enterEditMode(type);
+    }, LONG_PRESS_DURATION);
+}
+
+function cancelLongPress() {
+    if (myPageLongPressTimer) {
+        clearTimeout(myPageLongPressTimer);
+        myPageLongPressTimer = null;
+    }
+}
+
+function enterEditMode(type) {
+    myPageIsEditMode[type] = true;
+    const containerId = type === 'camera' ? 'cameras-list' : 'films-list';
+    const items = document.querySelectorAll(`#${containerId} .display-item`);
+    
+    items.forEach(item => {
+        item.classList.add('edit-mode', 'shaking');
+    });
+    
+    // Add listener to exit edit mode on outside click
+    document.addEventListener('click', handleOutsideClick);
+}
+
+function exitEditMode(type) {
+    myPageIsEditMode[type] = false;
+    const containerId = type === 'camera' ? 'cameras-list' : 'films-list';
+    const items = document.querySelectorAll(`#${containerId} .display-item`);
+    
+    items.forEach(item => {
+        item.classList.remove('edit-mode', 'shaking');
+    });
+    
+    document.removeEventListener('click', handleOutsideClick);
+}
+
+function handleOutsideClick(e) {
+    // Check if click is not on a display item or delete button
+    if (!e.target.closest('.display-item') && !e.target.closest('.delete-item')) {
+        exitEditMode('camera');
+        exitEditMode('film');
+    }
+}
+
+function renderCamerasList() {
+    const container = document.getElementById('cameras-list');
+    if (!container) return;
+    
+    const cameras = loadStringArray(STORAGE_KEYS.cameras);
+    
+    if (cameras.length === 0) {
+        // Show placeholder cards - same structure as real ones
+        container.innerHTML = [1, 2, 3].map(() => `
+            <div class="display-item placeholder">
+                <button class="delete-item"></button>
+                <div class="display-item-icon">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <div class="display-item-name">Add camera</div>
+            </div>
+        `).join('');
+        if (container.classList) container.classList.add('center-aligned');
+        myPageScrollPositions.camera = 0;
+        updateScrollButtons('camera');
+        updateStats();
+        return;
+    }
+    
+    // Sort alphabetically
+    const sortedCameras = [...cameras].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+    
+    container.innerHTML = sortedCameras.map((camera, index) => `
+        <div class="display-item" data-name="${escapeHtmlForJs(camera)}">
+            <button class="delete-item" onclick="deleteCamera('${escapeHtmlForJs(camera)}', event)">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="display-item-icon">
+                <img src="${cameraIconOptions[index % cameraIconOptions.length]}" alt="Camera">
+            </div>
+            <div class="display-item-name">${escapeHtml(camera)}</div>
+        </div>
+    `).join('');
+    
+    container.style.transition = 'transform 0.3s ease';
+    
+    // Re-initialize long press
+    initLongPress();
+    
+    // Reset scroll position if needed
+    const maxScroll = getMaxScroll('camera');
+    if (myPageScrollPositions.camera > maxScroll) {
+        myPageScrollPositions.camera = maxScroll;
+        container.style.transform = `translateX(-${myPageScrollPositions.camera}px)`;
+    }
+    
+    // Control alignment based on number of items
+    if (cameras.length <= 3) {
+        container.classList.add('center-aligned');
+    } else {
+        container.classList.remove('center-aligned');
+    }
+    
+    updateScrollButtons('camera');
+    updateStats();
+}
+
+function renderFilmsList() {
+    const container = document.getElementById('films-list');
+    if (!container) return;
+    
+    const films = loadStringArray(STORAGE_KEYS.filmNames);
+    
+    if (films.length === 0) {
+        // Show placeholder cards - same structure as real ones
+        container.innerHTML = [1, 2, 3].map(() => `
+            <div class="display-item placeholder">
+                <button class="delete-item"></button>
+                <div class="display-item-icon">
+                    <i class="fas fa-film"></i>
+                </div>
+                <div class="display-item-name">Add film</div>
+            </div>
+        `).join('');
+        if (container.classList) container.classList.add('center-aligned');
+        myPageScrollPositions.film = 0;
+        updateScrollButtons('film');
+        updateStats();
+        return;
+    }
+    
+    // Sort alphabetically
+    const sortedFilms = [...films].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+    
+    container.innerHTML = sortedFilms.map((film, index) => `
+        <div class="display-item" data-name="${escapeHtmlForJs(film)}">
+            <button class="delete-item" onclick="deleteFilmStock('${escapeHtmlForJs(film)}', event)">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="display-item-icon">
+                <img src="${filmIconOptions[index % filmIconOptions.length]}" alt="Film">
+            </div>
+            <div class="display-item-name">${escapeHtml(film)}</div>
+        </div>
+    `).join('');
+    
+    container.style.transition = 'transform 0.3s ease';
+    
+    // Re-initialize long press
+    initLongPress();
+    
+    // Reset scroll position if needed
+    const maxScroll = getMaxScroll('film');
+    if (myPageScrollPositions.film > maxScroll) {
+        myPageScrollPositions.film = maxScroll;
+        container.style.transform = `translateX(-${myPageScrollPositions.film}px)`;
+    }
+    
+    // Control alignment based on number of items
+    if (films.length <= 3) {
+        container.classList.add('center-aligned');
+    } else {
+        container.classList.remove('center-aligned');
+    }
+    
+    updateScrollButtons('film');
+    updateStats();
 }
 
 function addCamera(name) {
@@ -2150,7 +2442,7 @@ function addCamera(name) {
     
     let cameras = loadStringArray(STORAGE_KEYS.cameras);
     
-    // 检查是否已存在（不区分大小写）
+    // Check if already exists (case-insensitive)
     const exists = cameras.some(c => normalizeText(c).toLowerCase() === cameraName.toLowerCase());
     if (exists) {
         showToast('Camera already exists', 'warning');
@@ -2163,11 +2455,23 @@ function addCamera(name) {
     showToast('Camera added', 'success');
     renderCamerasList();
     
-    // 更新 Add 页面的选项
+    // Scroll to new item
+    const container = document.getElementById('cameras-list');
+    if (container) {
+        const maxScroll = getMaxScroll('camera');
+        myPageScrollPositions.camera = 0; // Scroll to start since we added to front
+        container.style.transform = `translateX(-${myPageScrollPositions.camera}px)`;
+        updateScrollButtons('camera');
+    }
+    
+    // Update Add page options
     populateFilmAndCameraHistory();
 }
 
-function deleteCamera(name) {
+function deleteCamera(name, event) {
+    if (event) {
+        event.stopPropagation();
+    }
     if (confirm(`Delete camera "${name}"?`)) {
         let cameras = loadStringArray(STORAGE_KEYS.cameras);
         cameras = cameras.filter(c => normalizeText(c) !== normalizeText(name));
@@ -2176,7 +2480,7 @@ function deleteCamera(name) {
         showToast('Camera deleted', 'success');
         renderCamerasList();
         
-        // 更新 Add 页面的选项
+        // Update Add page options
         populateFilmAndCameraHistory();
     }
 }
@@ -2187,7 +2491,7 @@ function addFilmStock(name) {
     
     let films = loadStringArray(STORAGE_KEYS.filmNames);
     
-    // 检查是否已存在（不区分大小写）
+    // Check if already exists (case-insensitive)
     const exists = films.some(f => normalizeText(f).toLowerCase() === filmName.toLowerCase());
     if (exists) {
         showToast('Film already exists', 'warning');
@@ -2200,11 +2504,23 @@ function addFilmStock(name) {
     showToast('Film added', 'success');
     renderFilmsList();
     
-    // 更新 Add 页面的选项
+    // Scroll to new item
+    const container = document.getElementById('films-list');
+    if (container) {
+        const maxScroll = getMaxScroll('film');
+        myPageScrollPositions.film = 0; // Scroll to start since we added to front
+        container.style.transform = `translateX(-${myPageScrollPositions.film}px)`;
+        updateScrollButtons('film');
+    }
+    
+    // Update Add page options
     populateFilmAndCameraHistory();
 }
 
-function deleteFilmStock(name) {
+function deleteFilmStock(name, event) {
+    if (event) {
+        event.stopPropagation();
+    }
     if (confirm(`Delete film "${name}"?`)) {
         let films = loadStringArray(STORAGE_KEYS.filmNames);
         films = films.filter(f => normalizeText(f) !== normalizeText(name));
@@ -2213,67 +2529,109 @@ function deleteFilmStock(name) {
         showToast('Film deleted', 'success');
         renderFilmsList();
         
-        // 更新 Add 页面的选项
+        // Update Add page options
         populateFilmAndCameraHistory();
     }
 }
 
-function renderCamerasList() {
-    const container = document.getElementById('cameras-list');
-    if (!container) return;
+// Modal functions
+function openAddModal(type) {
+    modalCurrentType = type;
+    const icons = type === 'camera' ? cameraIconOptions : filmIconOptions;
+    modalSelectedIcon = icons[0];
     
-    const cameras = loadStringArray(STORAGE_KEYS.cameras);
+    const modal = document.getElementById('add-item-modal');
+    if (!modal) return;
     
-    if (cameras.length === 0) {
-        container.innerHTML = `
-            <div class="empty-list-message">
-                <i class="fas fa-camera" style="margin-right: 6px;"></i>
-                No cameras added yet
-            </div>
-        `;
-        return;
+    // Update type buttons
+    const typeBtns = modal.querySelectorAll('.type-btn');
+    typeBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.type === type);
+    });
+    
+    // Render icon grid
+    renderIconGrid(icons, type);
+    
+    // Reset and focus name input
+    const nameInput = document.getElementById('add-item-name');
+    if (nameInput) {
+        nameInput.value = '';
+        setTimeout(() => nameInput.focus(), 100);
     }
     
-    // 按字母顺序排序
-    const sortedCameras = [...cameras].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+    // Show modal
+    modal.classList.add('active');
+}
+
+function closeAddItemModal() {
+    const modal = document.getElementById('add-item-modal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
+function selectItemType(type) {
+    modalCurrentType = type;
+    const icons = type === 'camera' ? cameraIconOptions : filmIconOptions;
+    modalSelectedIcon = icons[0];
     
-    container.innerHTML = sortedCameras.map(camera => `
-        <div class="item-card">
-            <span class="item-name">${escapeHtml(camera)}</span>
-            <button class="delete-btn" onclick="deleteCamera('${escapeHtmlForJs(camera)}')">
-                <i class="fas fa-trash"></i>
-            </button>
+    const modal = document.getElementById('add-item-modal');
+    if (!modal) return;
+    
+    // Update buttons
+    const typeBtns = modal.querySelectorAll('.type-btn');
+    typeBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.type === type);
+    });
+    
+    // Re-render icon grid
+    renderIconGrid(icons, type);
+}
+
+function renderIconGrid(icons, type) {
+    const grid = document.getElementById('add-item-icon-grid');
+    if (!grid) return;
+    
+    // Add type-specific class to grid
+    grid.className = 'icon-grid';
+    if (type === 'film') {
+        grid.classList.add('film-icon-grid');
+    }
+    
+    grid.innerHTML = icons.map((icon, index) => `
+        <div class="icon-option ${index === 0 ? 'selected' : ''}" 
+             onclick="selectItemIcon('${icon}', this)">
+            <img src="${icon}" alt="Icon ${index + 1}">
         </div>
     `).join('');
 }
 
-function renderFilmsList() {
-    const container = document.getElementById('films-list');
-    if (!container) return;
+function selectItemIcon(icon, element) {
+    modalSelectedIcon = icon;
+    document.querySelectorAll('.icon-option').forEach(opt => {
+        opt.classList.remove('selected');
+    });
+    if (element) {
+        element.classList.add('selected');
+    }
+}
+
+function addNewItem() {
+    const nameInput = document.getElementById('add-item-name');
+    const name = nameInput ? normalizeText(nameInput.value) : '';
     
-    const films = loadStringArray(STORAGE_KEYS.filmNames);
-    
-    if (films.length === 0) {
-        container.innerHTML = `
-            <div class="empty-list-message">
-                <i class="fas fa-film" style="margin-right: 6px;"></i>
-                No films added yet
-            </div>
-        `;
+    if (!name) {
+        if (nameInput) nameInput.focus();
         return;
     }
     
-    // 按字母顺序排序
-    const sortedFilms = [...films].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+    if (modalCurrentType === 'camera') {
+        addCamera(name);
+    } else {
+        addFilmStock(name);
+    }
     
-    container.innerHTML = sortedFilms.map(film => `
-        <div class="item-card">
-            <span class="item-name">${escapeHtml(film)}</span>
-            <button class="delete-btn" onclick="deleteFilmStock('${escapeHtmlForJs(film)}')">
-                <i class="fas fa-trash"></i>
-            </button>
-        </div>
-    `).join('');
+    closeAddItemModal();
 }
 
 function escapeHtml(text) {
@@ -2299,5 +2657,9 @@ window.exportData = exportData;
 window.importData = importData;
 window.deleteCamera = deleteCamera;
 window.deleteFilmStock = deleteFilmStock;
+window.closeAddItemModal = closeAddItemModal;
+window.selectItemType = selectItemType;
+window.selectItemIcon = selectItemIcon;
+window.addNewItem = addNewItem;
 
 console.log('🎉 Film Flow application loaded successfully!');
