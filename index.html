@@ -243,29 +243,75 @@
             <div class="my-page-container">
                 <!-- Cameras Section -->
                 <div class="form-section">
-                    <h3><i class="fas fa-camera-retro"></i> My Cameras</h3>
-                    <div class="add-item-row">
-                        <input type="text" id="new-camera-input" placeholder="Add camera model (e.g. Canon AE-1)">
-                        <button class="btn btn-primary" id="add-camera-btn">
+                    <h3>
+                        <span style="display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-camera-retro"></i> My Cameras
+                        </span>
+                        <button class="section-add-btn" id="add-camera-btn">
                             <i class="fas fa-plus"></i>
                         </button>
+                    </h3>
+                    <div class="shelf">
+                        <div class="shelf-top"></div>
+                        <div class="shelf-display-wrapper">
+                            <button class="scroll-btn" id="camera-left">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div class="display-items-container">
+                                <div class="display-items" id="cameras-list">
+                                    <!-- Cameras will be inserted here -->
+                                </div>
+                            </div>
+                            <button class="scroll-btn" id="camera-right">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div id="cameras-list" class="items-list">
-                        <!-- Cameras will be inserted here -->
+                    <div class="stats-footer">
+                        <div class="stats-info">
+                            <span class="stats-number" id="camera-count">0</span>
+                            <span class="stats-label">cameras</span>
+                        </div>
+                        <div class="stats-info">
+                            <span style="color: var(--muted); font-size: 13px;">Collection on display</span>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- Films Section -->
                 <div class="form-section">
-                    <h3><i class="fas fa-film"></i> My Films</h3>
-                    <div class="add-item-row">
-                        <input type="text" id="new-film-input" placeholder="Add film name (e.g. Kodak Gold 200)">
-                        <button class="btn btn-primary" id="add-film-btn">
+                    <h3>
+                        <span style="display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-film"></i> My Films
+                        </span>
+                        <button class="section-add-btn" id="add-film-btn">
                             <i class="fas fa-plus"></i>
                         </button>
+                    </h3>
+                    <div class="shelf">
+                        <div class="shelf-top"></div>
+                        <div class="shelf-display-wrapper">
+                            <button class="scroll-btn" id="film-left">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div class="display-items-container">
+                                <div class="display-items" id="films-list">
+                                    <!-- Films will be inserted here -->
+                                </div>
+                            </div>
+                            <button class="scroll-btn" id="film-right">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div id="films-list" class="items-list">
-                        <!-- Films will be inserted here -->
+                    <div class="stats-footer">
+                        <div class="stats-info">
+                            <span class="stats-number" id="film-count">0</span>
+                            <span class="stats-label">films</span>
+                        </div>
+                        <div class="stats-info">
+                            <span style="color: var(--muted); font-size: 13px;">Collection on display</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -356,6 +402,35 @@
                 </button>
             </div>
             <div id="detail-body" class="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- ====== ADD ITEM MODAL ===== -->
+    <div class="modal-overlay" id="add-item-modal" onclick="closeAddItemModal(event)">
+        <div class="add-item-modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">Add to Collection</div>
+                <button class="modal-close" onclick="closeAddItemModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="type-selector">
+                    <button class="type-btn active" data-type="camera" onclick="selectItemType('camera')">📷 Camera</button>
+                    <button class="type-btn" data-type="film" onclick="selectItemType('film')">🎞️ Film</button>
+                </div>
+                
+                <div class="icon-picker-section">
+                    <div class="icon-picker-label">Select Icon</div>
+                    <div class="icon-grid" id="add-item-icon-grid"></div>
+                </div>
+                
+                <div class="name-input-section">
+                    <input type="text" class="name-input" id="add-item-name" placeholder="Enter name">
+                </div>
+                
+                <button class="add-item-btn" onclick="addNewItem()">Add to Collection</button>
+            </div>
         </div>
     </div>
     
