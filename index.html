@@ -406,10 +406,11 @@
     </div>
 
     <!-- ====== ADD ITEM MODAL ===== -->
-    <div class="modal-overlay" id="add-item-modal" onclick="closeAddItemModal(event)">
-        <div class="add-item-modal" onclick="event.stopPropagation()">
+    <div id="add-item-modal" class="modal">
+        <div class="modal-overlay" onclick="closeAddItemModal()"></div>
+        <div class="modal-content">
             <div class="modal-header">
-                <div class="modal-title">Add to Collection</div>
+                <h2>Add to Collection</h2>
                 <button class="modal-close" onclick="closeAddItemModal()">
                     <i class="fas fa-times"></i>
                 </button>
