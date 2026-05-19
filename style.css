@@ -42,11 +42,12 @@ body{
   margin:0;
   font-weight: 900;
   letter-spacing: .2px;
+  font-size: 22px;
 }
 .header .sub{
   margin-top: 6px;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
 }
 .home-page-container{
   min-height: calc(100vh - 92px - env(safe-area-inset-bottom) - 18px);
@@ -66,11 +67,12 @@ body{
   align-items:center;
   justify-content:center;
   gap:10px;
+  font-size: 20px;
 }
 .page-subtitle{
   margin-top: 6px;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
 }
 /* ===== Buttons ===== */
 .btn{
@@ -85,6 +87,7 @@ body{
   align-items:center;
   justify-content:center;
   gap:10px;
+  font-size: 14px;
 }
 .btn:active{ transform: scale(.98); }
 .btn.primary, .btn-primary{
@@ -288,7 +291,7 @@ body{
 .form-section h3{
   margin: 0 0 12px;
   font-weight: 850;
-  font-size: 16px;
+  font-size: 15px;
   display:flex;
   align-items:center;
   gap: 10px;
@@ -299,7 +302,7 @@ body{
   display:flex;
   align-items:center;
   gap: 8px;
-  font-size: 12px;
+  font-size: 13px;
   color: rgba(255,255,255,.78);
   margin: 0 0 6px;
 }
@@ -796,7 +799,7 @@ body{
 .modal-header h2 {
     margin: 0;
     font-weight: 900;
-    font-size: 18px;
+    font-size: 17px;
 }
 
 .modal-close {
@@ -1225,7 +1228,7 @@ body{
     width: 40px;
     height: 40px;
     display: inline-flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
 }
 
@@ -1233,12 +1236,12 @@ body{
     width: 100%;
     height: 100%;
     object-fit: contain;
-    object-position: bottom;
+    object-position: center;
 }
 
 .display-item-name {
-    font-size: 8px;
-    font-weight: 600;
+    font-size: 10px;
+    font-weight: 700;
     line-height: 1.2;
 }
 
@@ -1382,8 +1385,9 @@ body{
 .form-section h3 {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 10px;
+    position: relative;
 }
 
 .form-section h3 span {
@@ -1392,44 +1396,13 @@ body{
     gap: 10px;
 }
 
-/* Modal for Add Item */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
+.form-section h3 button {
+    position: absolute;
     right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.85);
-    display: none;
-    align-items: flex-end;
-    justify-content: center;
-    z-index: 200;
-    animation: fadeIn 0.2s ease;
 }
 
-.modal-overlay.active {
-    display: flex;
-}
+/* Modal for Add Item - using same style as detail modal */
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.add-item-modal {
-    width: 100%;
-    max-width: 480px;
-    background: var(--panel);
-    border-radius: 24px 24px 0 0;
-    padding: 24px;
-    animation: slideUp 0.3s ease;
-    border: 1px solid rgba(255,255,255,0.06);
-}
-
-@keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
-}
 
 .type-selector {
     display: flex;
@@ -1445,8 +1418,8 @@ body{
     border: none;
     color: var(--muted);
     cursor: pointer;
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 700;
     transition: all 0.2s ease;
 }
 
@@ -1466,14 +1439,23 @@ body{
 }
 
 .icon-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    display: flex;
     gap: 10px;
     margin-bottom: 12px;
+    overflow-x: auto;
+    padding: 4px 0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.icon-grid::-webkit-scrollbar {
+    display: none;
 }
 
 .icon-option {
-    aspect-ratio: 1;
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1498,7 +1480,7 @@ body{
 }
 
 .icon-option:hover {
-    transform: scale(1.1);
+    transform: scale(1.05);
     border-color: var(--accent);
 }
 
@@ -1518,7 +1500,7 @@ body{
     border: 1px solid rgba(255,255,255,0.07);
     background: var(--panel2);
     color: var(--text);
-    font-size: 16px;
+    font-size: 15px;
     outline: none;
 }
 
@@ -1537,7 +1519,7 @@ body{
     background: var(--accent);
     border: none;
     color: white;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 750;
     cursor: pointer;
     transition: all 0.2s ease;
