@@ -90,6 +90,13 @@ body{
   font-size: 14px;
 }
 .btn:active{ transform: scale(.98); }
+.btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+.btn:disabled:active {
+    transform: none;
+}
 .btn.primary, .btn-primary{
   background: var(--accent);
   color: #fff;
@@ -1096,7 +1103,7 @@ body{
 .shelf-display-wrapper {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .scroll-btn {
