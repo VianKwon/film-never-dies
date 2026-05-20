@@ -2119,6 +2119,21 @@ let modalSelectedIcon = cameraIconOptions[0];
 function initMyPage() {
     console.log('⚙️ Initializing My page');
     
+    // Add window resize listener
+    if (!window.myPageResizeListenerAdded) {
+        window.addEventListener('resize', () => {
+            // Update both camera and film buttons on resize
+            if (document.getElementById('my-page')?.classList.contains('active')) {
+                updateScrollButtons('camera');
+                updateScrollButtons('film');
+                // Re-align items if needed
+                renderCamerasList();
+                renderFilmsList();
+            }
+        });
+        window.myPageResizeListenerAdded = true;
+    }
+    
     renderCamerasList();
     renderFilmsList();
     
@@ -2155,7 +2170,7 @@ function initMyPage() {
     }
     
     // Ensure all buttons are blurred
-    const allButtons = document.querySelectorAll('.scroll-btn, .section-add-btn');
+    const allButtons = document.querySelectorAll('.btn, .section-add-btn');
     allButtons.forEach(btn => btn.blur());
 }
 
@@ -2164,7 +2179,8 @@ function setupScrollButtons() {
     const cameraLeft = document.getElementById('camera-left');
     if (cameraLeft) {
         cameraLeft.onclick = (e) => {
-            setTimeout(() => e.target.blur(), 0);
+            if (cameraLeft.disabled) return;
+            e.preventDefault();
             scrollDisplay('camera', -1);
         };
     }
@@ -2173,7 +2189,8 @@ function setupScrollButtons() {
     const cameraRight = document.getElementById('camera-right');
     if (cameraRight) {
         cameraRight.onclick = (e) => {
-            setTimeout(() => e.target.blur(), 0);
+            if (cameraRight.disabled) return;
+            e.preventDefault();
             scrollDisplay('camera', 1);
         };
     }
@@ -2182,7 +2199,8 @@ function setupScrollButtons() {
     const filmLeft = document.getElementById('film-left');
     if (filmLeft) {
         filmLeft.onclick = (e) => {
-            setTimeout(() => e.target.blur(), 0);
+            if (filmLeft.disabled) return;
+            e.preventDefault();
             scrollDisplay('film', -1);
         };
     }
@@ -2191,7 +2209,8 @@ function setupScrollButtons() {
     const filmRight = document.getElementById('film-right');
     if (filmRight) {
         filmRight.onclick = (e) => {
-            setTimeout(() => e.target.blur(), 0);
+            if (filmRight.disabled) return;
+            e.preventDefault();
             scrollDisplay('film', 1);
         };
     }
@@ -2221,7 +2240,8 @@ function updateScrollButtons(type) {
 function getMaxScroll(type) {
     const items = document.querySelectorAll(`#${type === 'camera' ? 'cameras' : 'films'}-list .display-item:not(.placeholder)`);
     if (items.length === 0) return 0;
-    const maxScroll = Math.max(0, (items.length - 3) * ITEM_WIDTH);
+    const visibleCount = getVisibleItemCount(type);
+    const maxScroll = Math.max(0, (items.length - visibleCount) * ITEM_WIDTH);
     return maxScroll;
 }
 
@@ -2242,6 +2262,15 @@ function scrollDisplay(type, direction) {
     container.style.transform = `translateX(-${myPageScrollPositions[type]}px)`;
     
     updateScrollButtons(type);
+}
+
+function getVisibleItemCount(type) {
+    const container = document.getElementById(`${type === 'camera' ? 'cameras' : 'films'}-list`).closest('.display-items-container');
+    if (!container) return 3; // fallback to 3
+    const containerWidth = container.clientWidth;
+    // 计算能容纳的item数量（向上取整）
+    const count = Math.max(1, Math.floor(containerWidth / ITEM_WIDTH));
+    return count;
 }
 
 function initLongPress() {
@@ -2364,7 +2393,8 @@ function renderCamerasList() {
     }
     
     // Control alignment based on number of items
-    if (cameras.length <= 3) {
+    const visibleCount = getVisibleItemCount('camera');
+    if (cameras.length <= visibleCount) {
         container.classList.add('center-aligned');
     } else {
         container.classList.remove('center-aligned');
@@ -2426,7 +2456,8 @@ function renderFilmsList() {
     }
     
     // Control alignment based on number of items
-    if (films.length <= 3) {
+    const visibleCount = getVisibleItemCount('film');
+    if (films.length <= visibleCount) {
         container.classList.add('center-aligned');
     } else {
         container.classList.remove('center-aligned');
