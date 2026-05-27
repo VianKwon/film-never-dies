@@ -965,7 +965,7 @@ function initCoverFlow() {
     
     if (filmsWithPhotos.length === 0) {
         track.innerHTML = `
-            <div class="coverflow-empty">
+            <div class="empty-state">
                 <div class="empty-icon">
                     <i class="fas fa-images"></i>
                 </div>
@@ -1207,7 +1207,7 @@ function renderRecordsList() {
         container.innerHTML = `
             <div class="records-empty-wrapper">
                 <div class="records-empty-track">
-                    <div class="empty-list">
+                    <div class="empty-state">
                         <div class="empty-icon">
                             <i class="fas fa-film"></i>
                         </div>
@@ -1755,7 +1755,7 @@ function updateStatistics() {
         
         // Show empty state
         receiptContainer.innerHTML = `
-            <div class="empty-list">
+            <div class="empty-state">
                 <div class="empty-icon">
                     <i class="fas fa-receipt"></i>
                 </div>
@@ -1900,7 +1900,7 @@ function updateCameraStats() {
     
     if (films.length === 0) {
         cameraStats.innerHTML = `
-            <div class="empty-stat">
+            <div class="empty-state">
                 <i class="fas fa-camera-slash"></i>
                 <p>No camera data yet</p>
             </div>
@@ -1919,7 +1919,7 @@ function updateCameraStats() {
     const cameras = Object.keys(cameraCount).sort((a, b) => cameraCount[b] - cameraCount[a]).slice(0, 5);
     if (cameras.length === 0) {
         cameraStats.innerHTML = `
-            <div class="empty-stat">
+            <div class="empty-state">
                 <i class="fas fa-camera-slash"></i>
                 <p>No camera data yet</p>
             </div>
@@ -1945,7 +1945,7 @@ function updateFilmStats() {
     
     if (films.length === 0) {
         filmStats.innerHTML = `
-            <div class="empty-stat">
+            <div class="empty-state">
                 <i class="fas fa-film"></i>
                 <p>No film data yet</p>
             </div>
@@ -1964,7 +1964,7 @@ function updateFilmStats() {
     const filmNames = Object.keys(filmCount).sort((a, b) => filmCount[b] - filmCount[a]).slice(0, 5);
     if (filmNames.length === 0) {
         filmStats.innerHTML = `
-            <div class="empty-stat">
+            <div class="empty-state">
                 <i class="fas fa-film"></i>
                 <p>No film data yet</p>
             </div>
@@ -1990,7 +1990,7 @@ function updateCityStats() {
     
     if (films.length === 0) {
         cityStats.innerHTML = `
-            <div class="empty-stat">
+            <div class="empty-state">
                 <i class="fas fa-map-marker-alt"></i>
                 <p>No city data yet</p>
             </div>
@@ -2037,7 +2037,7 @@ function updateTypeStats() {
     
     if (films.length === 0) {
         typeStats.innerHTML = `
-            <div class="empty-stat">
+            <div class="empty-state">
                 <i class="fas fa-chart-pie"></i>
                 <p>No type data yet</p>
             </div>
@@ -2619,8 +2619,8 @@ function renderCamerasList() {
     if (cameras.length === 0) {
         // Show friendly empty state
         container.innerHTML = `
-            <div class="gear-empty-state">
-                <div class="gear-empty-icon">
+            <div class="empty-state">
+                <div class="empty-icon">
                     <i class="fas fa-camera"></i>
                 </div>
                 <div class="gear-empty-text">Collect your cameras!</div>
@@ -2681,8 +2681,8 @@ function renderFilmsList() {
     if (films.length === 0) {
         // Show friendly empty state
         container.innerHTML = `
-            <div class="gear-empty-state">
-                <div class="gear-empty-icon">
+            <div class="empty-state">
+                <div class="empty-icon">
                     <i class="fas fa-film"></i>
                 </div>
                 <div class="gear-empty-text">Collect your films!</div>
