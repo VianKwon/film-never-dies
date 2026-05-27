@@ -26,6 +26,38 @@ body{
   line-height:1.4;
 }
 /* ===== Layout ===== */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.empty-state .empty-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  color: #667eea;
+  opacity: 0.8;
+}
+.empty-state h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 12px;
+}
+.empty-state p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 24px;
+}
+.empty-state .btn-large {
+  width: 100%;
+  max-width: 280px;
+}
+
 .page{
   display:none;
   min-height:100vh;
@@ -224,18 +256,6 @@ body{
   gap:8px;
   align-items:center;
 }
-/* Empty coverflow */
-.coverflow-empty{
-  text-align:center;
-  padding: 22px 10px;
-}
-.coverflow-empty .empty-icon{
-  font-size: 44px;
-  color: rgba(255,255,255,.35);
-  margin-bottom: 12px;
-}
-.coverflow-empty h3{ margin: 0 0 6px; }
-.coverflow-empty p{ margin: 0 0 14px; color: var(--muted); }
 /* ===== Records list ===== */
 .records-container{
   display:flex;
@@ -256,18 +276,7 @@ body{
   position: relative;
 }
 .records-empty-track {
-  height: 360px;
   position: relative;
-}
-.records-container.empty-center .empty-list{
-  text-align:center;
-  padding: 60px 20px;
-  color: var(--muted);
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
 }
 .record-item{
   display:flex;
@@ -348,37 +357,6 @@ body{
   text-align:center;
   flex-shrink: 0;
 }
-.empty-list{
-  text-align:center;
-  padding: 60px 20px;
-  color: var(--muted);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-.empty-list .empty-icon{ 
-  font-size: 64px; 
-  margin-bottom: 20px; 
-  color: #667eea;
-  opacity: 0.8;
-}
-.empty-list h3{
-  font-size: 22px;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 12px;
-}
-.empty-list p{
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: 24px;
-}
-.empty-list .btn-large {
-    width: 100%;
-    max-width: 280px;
-}
-
 /* ===== Forms (Add) ===== */
 .film-form{
   display:flex;
@@ -753,9 +731,6 @@ body{
 }
 
 /* Stats Empty State (use same as other empty states) */
-.stats-empty {
-  /* uses .empty-list styles */
-}
 
 
 
@@ -1485,26 +1460,7 @@ body{
     line-height: 1.2;
 }
 
-/* Gear Empty State */
-.gear-empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 30px 20px;
-    text-align: center;
-}
-.gear-empty-icon {
-    font-size: 40px;
-    color: #667eea;
-    opacity: 0.7;
-    margin-bottom: 12px;
-}
-.gear-empty-text {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.5);
-}
-
+/* Gear Empty State - Removed in favor of global .empty-state */
 /* Placeholder item */
 .display-item.placeholder {
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
