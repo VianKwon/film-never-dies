@@ -320,40 +320,69 @@
     
     <!-- ====== STATISTICS PAGE ====== -->
     <div class="page" id="stats-page">
-        <div class="container">
+        <div class="container stats-page-container">
             <div class="page-header">
                 <h2><i class="fas fa-chart-bar"></i> Statistics</h2>
                 <div class="page-subtitle">Your film photography analytics</div>
             </div>
+
+            <div class="stats-content">
+                <!-- Printer Slot -->
+                <div class="printer-slot"></div>
+                
+                <!-- Receipt Container -->
+                <div class="receipt-container" id="stats-receipt">
+                    <div class="receipt-wrapper">
+                        <div class="receipt" id="stats-paper">
+                            <div class="r-header">
+                                <h1>FILM FLOW LAB</h1>
+                                <p>ANNUAL PHOTOGRAPHY REPORT</p>
+                                <p>DATE: <span id="receipt-date">2026-05-26</span></p>
+                            </div>
+
+                            <div class="r-section">
+                                <div class="r-title">-- OVERVIEW --</div>
+                                <div class="r-line"><span>ROLLS DEVELOPED</span><span class="r-line-dots"></span><span id="receipt-rolls">0</span></div>
+                                <div class="r-line"><span>EST. EXPOSURES</span><span class="r-line-dots"></span><span id="receipt-exposures">0</span></div>
+                                <div class="r-line"><span>CAMERAS USED</span><span class="r-line-dots"></span><span id="receipt-cameras">0</span></div>
+                                <div class="r-line"><span>CITIES VISITED</span><span class="r-line-dots"></span><span id="receipt-cities">0</span></div>
+                                <div class="r-line"><span>FILMS TRIED</span><span class="r-line-dots"></span><span id="receipt-films">0</span></div>
+                            </div>
+
+                            <div class="r-section">
+                                <div class="r-title">-- TOP CAMERAS --</div>
+                                <div id="receipt-top-cameras">
+                                    <div class="r-line"><span>01. NO DATA</span><span class="r-line-dots"></span><span>-</span></div>
+                                </div>
+                            </div>
+
+                            <div class="r-section">
+                                <div class="r-title">-- TOP FILMS --</div>
+                                <div id="receipt-top-films">
+                                    <div class="r-line"><span>01. NO DATA</span><span class="r-line-dots"></span><span>-</span></div>
+                                </div>
+                            </div>
+
+                            <div class="r-line r-total">
+                                <span>TOTAL SCORE</span><span class="r-line-dots"></span><span>AWESOME</span>
+                            </div>
+
+                            <div class="r-footer">
+                                <p style="font-size: 11px;">THANK YOU FOR SHOOTING FILM</p>
+                                <div class="barcode"></div>
+                                <p style="font-size: 10px; color: #777;" id="receipt-barcode-text">0000-0000-0000-FF</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
-            <div class="stats-grid">
-                <div class="stat">
-                    <div class="num" id="stat-total">0</div>
-                    <div class="lab">Total rolls</div>
-                </div>
-                <div class="stat">
-                    <div class="num" id="stat-cameras">0</div>
-                    <div class="lab">Cameras used</div>
-                </div>
-                <div class="stat">
-                    <div class="num" id="stat-cities">0</div>
-                    <div class="lab">Cities shot in</div>
-                </div>
-            </div>
-            <div class="card top-card">
-                <div class="top-title">Top cameras</div>
-                <div id="camera-stats"><!-- filled by JS --></div>
-            </div>
-            <div class="card top-card">
-                <div class="top-title">Top films</div>
-                <div id="film-stats"><!-- filled by JS --></div>
-            </div>
             <div class="data-actions">
+                <button class="btn btn-primary" id="reprint-btn" onclick="reprintReceipt()">
+                    <i class="fas fa-print"></i> Print Again
+                </button>
                 <button class="btn" onclick="exportData()">
                     <i class="fas fa-download"></i> Export
-                </button>
-                <button class="btn" onclick="importData()">
-                    <i class="fas fa-upload"></i> Import
                 </button>
             </div>
         </div>
