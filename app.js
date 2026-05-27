@@ -201,6 +201,7 @@ function showStatsPage() {
     console.log('📱 Switching to Stats page');
     switchPage('stats-page');
     updateStatistics();
+    initReceiptAnimation();
 }
 
 function showMyPage() {
@@ -966,12 +967,12 @@ function initCoverFlow() {
         track.innerHTML = `
             <div class="coverflow-empty">
                 <div class="empty-icon">
-                    <i class="fas fa-camera"></i>
+                    <i class="fas fa-images"></i>
                 </div>
                 <h3>No photos yet</h3>
-                <p>Add your first film record to start the gallery</p>
-                <button class="btn btn-primary" id="go-to-records-btn">
-                    <i class="fas fa-list"></i> Go to Records
+                <p>Add a record and your photos will be displayed here!</p>
+                <button class="btn btn-primary btn-large" id="go-to-records-btn">
+                    <i class="fas fa-plus"></i> Add First Record
                 </button>
             </div>
         `;
@@ -980,16 +981,23 @@ function initCoverFlow() {
         setTimeout(() => {
             const goBtn = document.getElementById('go-to-records-btn');
             if (goBtn) {
-                goBtn.onclick = showListPage;
+                goBtn.onclick = showAddPage;
             }
         }, 100);
         
-        document.getElementById('camera-info').textContent = '-';
-        document.getElementById('film-info').textContent = '-';
+        // Hide info and controls when no photos
+        document.querySelector('.cf-info')?.classList.add('hidden');
+        document.querySelector('.cf-actions')?.classList.add('hidden');
+        document.querySelector('.cf-hint')?.classList.add('hidden');
         
         console.log('✅ Cover Flow initialized (empty state)');
         return;
     }
+    
+    // Show info and controls when there are photos
+    document.querySelector('.cf-info')?.classList.remove('hidden');
+    document.querySelector('.cf-actions')?.classList.remove('hidden');
+    document.querySelector('.cf-hint')?.classList.remove('hidden');
     
     // Create array of all photos with film info (store globally for shuffle & click)
     coverflowPhotos = [];
@@ -1195,20 +1203,27 @@ function renderRecordsList() {
     if (!container) return;
     
     if (films.length === 0) {
+        container.classList.add('empty-center');
         container.innerHTML = `
-            <div class="empty-list">
-                <div class="empty-icon">
-                    <i class="fas fa-film"></i>
+            <div class="records-empty-wrapper">
+                <div class="records-empty-track">
+                    <div class="empty-list">
+                        <div class="empty-icon">
+                            <i class="fas fa-film"></i>
+                        </div>
+                        <h3>No records yet</h3>
+                        <p>Start your first film record and capture your memories!</p>
+                        <button class="btn btn-primary btn-large" onclick="showAddPage()">
+                            <i class="fas fa-plus"></i> Add First Record
+                        </button>
+                    </div>
                 </div>
-                <h3>No records yet</h3>
-                <p>Add your first film record</p>
-                <button class="btn btn-primary" onclick="showAddPage()">
-                    <i class="fas fa-plus"></i> Add First Record
-                </button>
             </div>
         `;
         return;
     }
+    
+    container.classList.remove('empty-center');
     
     // Sort films by date (newest first)
     const sortedFilms = [...films].sort((a, b) => {
@@ -1728,28 +1743,155 @@ function getCountryName(countryCode) {
 
 /* ====== STATISTICS FUNCTIONS ====== */
 function updateStatistics() {
-    // Update overview stats
-    document.getElementById('stat-total').textContent = films.length;
+    const receiptContainer = document.getElementById('stats-receipt');
+    const reprintBtn = document.getElementById('reprint-btn');
+    const printerSlot = document.querySelector('.printer-slot');
+    const dataActions = document.querySelector('.data-actions');
+    
+    if (films.length === 0) {
+        // Hide printer slot and receipt container style
+        if (printerSlot) printerSlot.classList.add('hidden');
+        receiptContainer.classList.add('stats-empty-container');
+        
+        // Show empty state
+        receiptContainer.innerHTML = `
+            <div class="empty-list">
+                <div class="empty-icon">
+                    <i class="fas fa-receipt"></i>
+                </div>
+                <h3>No stats yet</h3>
+                <p>Start your first film record and view your analytics!</p>
+                <button class="btn btn-primary btn-large" onclick="showAddPage()">
+                    <i class="fas fa-plus"></i> Add First Record
+                </button>
+            </div>
+        `;
+        if (reprintBtn) reprintBtn.classList.add('hidden');
+        return;
+    }
+    
+    // Show printer slot and restore receipt container
+    if (printerSlot) printerSlot.classList.remove('hidden');
+    receiptContainer.classList.remove('stats-empty-container');
+    if (reprintBtn) reprintBtn.classList.remove('hidden');
     
     // Count unique cameras
     const cameras = new Set();
     films.forEach(film => {
         if (film.camera) cameras.add(film.camera);
     });
-    document.getElementById('stat-cameras').textContent = cameras.size;
     
     // Count unique cities
     const cities = new Set();
     films.forEach(film => {
         if (film.city) cities.add(film.city);
     });
-    document.getElementById('stat-cities').textContent = cities.size;
+    
+    // Count unique films
+    const filmNames = new Set();
+    films.forEach(film => {
+        if (film.name) filmNames.add(film.name);
+    });
+    
+    // Calculate exposures (assuming 36 exposures per roll)
+    const exposures = films.length * 36;
+    
+    // Update receipt data
+    updateReceiptStats(films.length, exposures, cameras.size, cities.size, filmNames.size);
     
     // Update detailed stats
     updateCameraStats();
     updateFilmStats();
     updateCityStats();
     updateTypeStats();
+}
+
+function updateReceiptStats(rolls, exposures, cameraCount, cityCount, filmCount) {
+    // Update date
+    const today = new Date();
+    const dateStr = today.toISOString().split('T')[0];
+    document.getElementById('receipt-date').textContent = dateStr;
+    
+    // Update overview stats
+    document.getElementById('receipt-rolls').textContent = rolls;
+    document.getElementById('receipt-exposures').textContent = exposures.toLocaleString();
+    document.getElementById('receipt-cameras').textContent = cameraCount;
+    document.getElementById('receipt-cities').textContent = cityCount;
+    document.getElementById('receipt-films').textContent = filmCount;
+    
+    // Update barcode text
+    const barcodeText = `${String(rolls).padStart(4, '0')}-${String(exposures).padStart(4, '0')}-${dateStr.slice(2, 4)}-FF`;
+    document.getElementById('receipt-barcode-text').textContent = barcodeText;
+    
+    // Update top cameras
+    const cameraStats = {};
+    films.forEach(film => {
+        if (film.camera) {
+            cameraStats[film.camera] = (cameraStats[film.camera] || 0) + 1;
+        }
+    });
+    const topCameras = Object.keys(cameraStats).sort((a, b) => cameraStats[b] - cameraStats[a]).slice(0, 3);
+    
+    let cameraHtml = '';
+    topCameras.forEach((camera, index) => {
+        const count = cameraStats[camera];
+        cameraHtml += `<div class="r-line"><span>${String(index + 1).padStart(2, '0')}. ${camera.toUpperCase()}</span><span class="r-line-dots"></span><span>${count}x</span></div>`;
+    });
+    
+    if (cameraHtml === '') {
+        cameraHtml = '<div class="r-line"><span>01. NO DATA</span><span class="r-line-dots"></span><span>-</span></div>';
+    }
+    document.getElementById('receipt-top-cameras').innerHTML = cameraHtml;
+    
+    // Update top films
+    const filmStats = {};
+    films.forEach(film => {
+        if (film.name) {
+            filmStats[film.name] = (filmStats[film.name] || 0) + 1;
+        }
+    });
+    const topFilms = Object.keys(filmStats).sort((a, b) => filmStats[b] - filmStats[a]).slice(0, 3);
+    
+    let filmHtml = '';
+    topFilms.forEach((filmName, index) => {
+        const count = filmStats[filmName];
+        filmHtml += `<div class="r-line"><span>${String(index + 1).padStart(2, '0')}. ${filmName.toUpperCase()}</span><span class="r-line-dots"></span><span>${count}x</span></div>`;
+    });
+    
+    if (filmHtml === '') {
+        filmHtml = '<div class="r-line"><span>01. NO DATA</span><span class="r-line-dots"></span><span>-</span></div>';
+    }
+    document.getElementById('receipt-top-films').innerHTML = filmHtml;
+}
+
+function reprintReceipt() {
+    const container = document.getElementById('stats-receipt');
+    const receipt = container.querySelector('.receipt');
+    
+    receipt.style.transition = 'none';
+    receipt.style.transform = 'translateY(-100%)';
+    container.classList.remove('printing');
+    
+    void receipt.offsetWidth;
+    
+    receipt.style.transition = '';
+    
+    setTimeout(() => {
+        container.classList.add('printing');
+        receipt.style.transform = 'translateY(0)';
+    }, 50);
+}
+
+function initReceiptAnimation() {
+    const container = document.getElementById('stats-receipt');
+    const receipt = container.querySelector('.receipt');
+    
+    if (!container) return;
+    
+    setTimeout(() => {
+        container.classList.add('printing');
+        receipt.style.transform = 'translateY(0)';
+    }, 300);
 }
 
 function updateCameraStats() {
@@ -2091,6 +2233,14 @@ let myPageLongPressTimer = null;
 const LONG_PRESS_DURATION = 500;
 const ITEM_WIDTH = 74; // item width (70px) + gap (4px)
 
+// Drag variables
+let dragState = {
+    isDragging: false,
+    type: null,
+    startX: 0,
+    startScroll: 0
+};
+
 // Icon options for camera and film separately
 const cameraIconOptions = [
     'icons/camera_1.png',
@@ -2156,6 +2306,9 @@ function initMyPage() {
     // Scroll buttons
     setupScrollButtons();
     
+    // Drag handlers
+    setupDragHandlers();
+    
     // Initialize long press
     initLongPress();
     
@@ -2216,6 +2369,86 @@ function setupScrollButtons() {
     }
 }
 
+function setupDragHandlers() {
+    const containers = [
+        { type: 'camera', el: document.getElementById('cameras-list') },
+        { type: 'film', el: document.getElementById('films-list') }
+    ];
+    
+    containers.forEach(({ type, el }) => {
+        if (!el) return;
+        
+        el.addEventListener('mousedown', (e) => startDrag(e, type));
+        el.addEventListener('touchstart', (e) => startDrag(e, type), { passive: true });
+    });
+    
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('touchmove', drag, { passive: true });
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
+}
+
+function startDrag(e, type) {
+    // 如果在编辑模式，不允许拖拽
+    if (myPageIsEditMode[type]) return;
+    
+    dragState.isDragging = true;
+    dragState.type = type;
+    dragState.startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+    dragState.startScroll = myPageScrollPositions[type];
+    
+    const container = document.getElementById(`${type === 'camera' ? 'cameras' : 'films'}-list`);
+    if (container) {
+        container.classList.add('dragging');
+        container.style.transition = 'none';
+    }
+    
+    // 取消长按计时器，防止触发编辑模式
+    cancelLongPress();
+}
+
+function drag(e) {
+    if (!dragState.isDragging || !dragState.type) return;
+    
+    const type = dragState.type;
+    const x = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+    const diff = dragState.startX - x;
+    
+    const container = document.getElementById(`${type === 'camera' ? 'cameras' : 'films'}-list`);
+    const maxScroll = getMaxScroll(type);
+    
+    if (container) {
+        myPageScrollPositions[type] = Math.max(0, Math.min(dragState.startScroll + diff, maxScroll));
+        container.style.transform = `translateX(-${myPageScrollPositions[type]}px)`;
+        updateScrollButtons(type);
+    }
+}
+
+function endDrag() {
+    if (!dragState.isDragging || !dragState.type) return;
+    
+    const type = dragState.type;
+    const container = document.getElementById(`${type === 'camera' ? 'cameras' : 'films'}-list`);
+    
+    if (container) {
+        container.classList.remove('dragging');
+        
+        // 对齐到 item 边界
+        const maxScroll = getMaxScroll(type);
+        let targetPosition = Math.round(myPageScrollPositions[type] / ITEM_WIDTH) * ITEM_WIDTH;
+        targetPosition = Math.max(0, Math.min(targetPosition, maxScroll));
+        
+        myPageScrollPositions[type] = targetPosition;
+        container.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)';
+        container.style.transform = `translateX(-${myPageScrollPositions[type]}px)`;
+        updateScrollButtons(type);
+    }
+    
+    // 重置拖拽状态
+    dragState.isDragging = false;
+    dragState.type = null;
+}
+
 function updateStats() {
     const cameraCount = document.getElementById('camera-count');
     const filmCount = document.getElementById('film-count');
@@ -2232,16 +2465,43 @@ function updateScrollButtons(type) {
     const rightBtn = document.getElementById(`${type}-right`);
     const items = document.querySelectorAll(`#${type === 'camera' ? 'cameras' : 'films'}-list .display-item:not(.placeholder)`);
     const maxScroll = getMaxScroll(type);
+    const container = document.getElementById(`${type === 'camera' ? 'cameras' : 'films'}-list`).closest('.display-items-container');
     
     if (leftBtn) leftBtn.disabled = myPageScrollPositions[type] <= 0;
-    if (rightBtn) rightBtn.disabled = myPageScrollPositions[type] >= maxScroll;
+    // 用一个小阈值来判断是否达到最大滚动位置，防止浮点数误差
+    if (rightBtn) {
+        const isAtEnd = myPageScrollPositions[type] >= (maxScroll - 1);
+        rightBtn.disabled = isAtEnd;
+    }
+    
+    // 更新渐变遮罩
+    if (container) {
+        container.classList.toggle('scroll-at-start', myPageScrollPositions[type] <= 0);
+        container.classList.toggle('scroll-at-end', myPageScrollPositions[type] >= maxScroll);
+    }
 }
 
 function getMaxScroll(type) {
     const items = document.querySelectorAll(`#${type === 'camera' ? 'cameras' : 'films'}-list .display-item:not(.placeholder)`);
     if (items.length === 0) return 0;
-    const visibleCount = getVisibleItemCount(type);
-    const maxScroll = Math.max(0, (items.length - visibleCount) * ITEM_WIDTH);
+    
+    const container = document.getElementById(`${type === 'camera' ? 'cameras' : 'films'}-list`).closest('.display-items-container');
+    if (!container) {
+        const visibleCount = getVisibleItemCount(type);
+        return Math.max(0, (items.length - visibleCount) * ITEM_WIDTH);
+    }
+    
+    // 获取容器实际可用宽度（减去左右padding）
+    const containerWidth = container.clientWidth;
+    const containerStyle = getComputedStyle(container);
+    const paddingLeft = parseFloat(containerStyle.paddingLeft) || 0;
+    const paddingRight = parseFloat(containerStyle.paddingRight) || 0;
+    const availableWidth = containerWidth - paddingLeft - paddingRight;
+    
+    const totalItemsWidth = items.length * ITEM_WIDTH;
+    
+    // 最大滚动 = 总宽度 - 可用宽度
+    const maxScroll = Math.max(0, totalItemsWidth - availableWidth);
     return maxScroll;
 }
 
@@ -2255,10 +2515,12 @@ function scrollDisplay(type, direction) {
     if (actualItems.length === 0) return;
     
     const maxScroll = getMaxScroll(type);
+    const newPosition = myPageScrollPositions[type] + direction * ITEM_WIDTH;
     
-    myPageScrollPositions[type] += direction * ITEM_WIDTH;
-    myPageScrollPositions[type] = Math.max(0, Math.min(myPageScrollPositions[type], maxScroll));
+    // 严格限制在 0 和 maxScroll 之间
+    myPageScrollPositions[type] = Math.max(0, Math.min(newPosition, maxScroll));
     
+    container.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)';
     container.style.transform = `translateX(-${myPageScrollPositions[type]}px)`;
     
     updateScrollButtons(type);
@@ -2267,9 +2529,16 @@ function scrollDisplay(type, direction) {
 function getVisibleItemCount(type) {
     const container = document.getElementById(`${type === 'camera' ? 'cameras' : 'films'}-list`).closest('.display-items-container');
     if (!container) return 3; // fallback to 3
+    
+    // 获取容器实际可用宽度（减去左右padding）
     const containerWidth = container.clientWidth;
-    // 计算能容纳的item数量（向上取整）
-    const count = Math.max(1, Math.floor(containerWidth / ITEM_WIDTH));
+    const containerStyle = getComputedStyle(container);
+    const paddingLeft = parseFloat(containerStyle.paddingLeft) || 0;
+    const paddingRight = parseFloat(containerStyle.paddingRight) || 0;
+    const availableWidth = containerWidth - paddingLeft - paddingRight;
+    
+    // 计算能容纳的item数量（向下取整）
+    const count = Math.max(1, Math.floor(availableWidth / ITEM_WIDTH));
     return count;
 }
 
@@ -2348,16 +2617,15 @@ function renderCamerasList() {
     const cameras = loadStringArray(STORAGE_KEYS.cameras);
     
     if (cameras.length === 0) {
-        // Show placeholder cards - same structure as real ones
-        container.innerHTML = [1, 2, 3].map(() => `
-            <div class="display-item placeholder">
-                <button class="delete-item"></button>
-                <div class="display-item-icon">
+        // Show friendly empty state
+        container.innerHTML = `
+            <div class="gear-empty-state">
+                <div class="gear-empty-icon">
                     <i class="fas fa-camera"></i>
                 </div>
-                <div class="display-item-name">Add camera</div>
+                <div class="gear-empty-text">Collect your cameras!</div>
             </div>
-        `).join('');
+        `;
         if (container.classList) container.classList.add('center-aligned');
         myPageScrollPositions.camera = 0;
         updateScrollButtons('camera');
@@ -2411,16 +2679,15 @@ function renderFilmsList() {
     const films = loadStringArray(STORAGE_KEYS.filmNames);
     
     if (films.length === 0) {
-        // Show placeholder cards - same structure as real ones
-        container.innerHTML = [1, 2, 3].map(() => `
-            <div class="display-item placeholder">
-                <button class="delete-item"></button>
-                <div class="display-item-icon">
+        // Show friendly empty state
+        container.innerHTML = `
+            <div class="gear-empty-state">
+                <div class="gear-empty-icon">
                     <i class="fas fa-film"></i>
                 </div>
-                <div class="display-item-name">Add film</div>
+                <div class="gear-empty-text">Collect your films!</div>
             </div>
-        `).join('');
+        `;
         if (container.classList) container.classList.add('center-aligned');
         myPageScrollPositions.film = 0;
         updateScrollButtons('film');
@@ -2486,14 +2753,24 @@ function addCamera(name) {
     showToast('Camera added', 'success');
     renderCamerasList();
     
-    // Scroll to new item
-    const container = document.getElementById('cameras-list');
-    if (container) {
-        const maxScroll = getMaxScroll('camera');
-        myPageScrollPositions.camera = 0; // Scroll to start since we added to front
-        container.style.transform = `translateX(-${myPageScrollPositions.camera}px)`;
-        updateScrollButtons('camera');
-    }
+    // Scroll to new item and center it
+    setTimeout(() => {
+        const container = document.getElementById('cameras-list');
+        const displayContainer = document.getElementById('cameras-list').closest('.display-items-container');
+        if (container && displayContainer) {
+            // 先获取排序后的列表并找到新项的索引
+            const sortedCameras = [...cameras].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+            const newItemIndex = sortedCameras.indexOf(cameraName);
+            
+            const containerWidth = displayContainer.clientWidth - 16;
+            const newItemPos = Math.max(0, newItemIndex * ITEM_WIDTH - (containerWidth - ITEM_WIDTH) / 2);
+            
+            myPageScrollPositions.camera = newItemPos;
+            container.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)';
+            container.style.transform = `translateX(-${myPageScrollPositions.camera}px)`;
+            updateScrollButtons('camera');
+        }
+    }, 50);
     
     // Update Add page options
     populateFilmAndCameraHistory();
@@ -2535,14 +2812,24 @@ function addFilmStock(name) {
     showToast('Film added', 'success');
     renderFilmsList();
     
-    // Scroll to new item
-    const container = document.getElementById('films-list');
-    if (container) {
-        const maxScroll = getMaxScroll('film');
-        myPageScrollPositions.film = 0; // Scroll to start since we added to front
-        container.style.transform = `translateX(-${myPageScrollPositions.film}px)`;
-        updateScrollButtons('film');
-    }
+    // Scroll to new item and center it
+    setTimeout(() => {
+        const container = document.getElementById('films-list');
+        const displayContainer = document.getElementById('films-list').closest('.display-items-container');
+        if (container && displayContainer) {
+            // 先获取排序后的列表并找到新项的索引
+            const sortedFilms = [...films].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+            const newItemIndex = sortedFilms.indexOf(filmName);
+            
+            const containerWidth = displayContainer.clientWidth - 16;
+            const newItemPos = Math.max(0, newItemIndex * ITEM_WIDTH - (containerWidth - ITEM_WIDTH) / 2);
+            
+            myPageScrollPositions.film = newItemPos;
+            container.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)';
+            container.style.transform = `translateX(-${myPageScrollPositions.film}px)`;
+            updateScrollButtons('film');
+        }
+    }, 50);
     
     // Update Add page options
     populateFilmAndCameraHistory();
@@ -2580,6 +2867,12 @@ function openAddModal(type) {
         btn.classList.toggle('active', btn.dataset.type === type);
     });
     
+    // Reset scroll position of icon grid
+    const grid = document.getElementById('add-item-icon-grid');
+    if (grid) {
+        grid.scrollLeft = 0;
+    }
+    
     // Render icon grid
     renderIconGrid(icons, type);
     
@@ -2614,6 +2907,12 @@ function selectItemType(type) {
     typeBtns.forEach(btn => {
         btn.classList.toggle('active', btn.dataset.type === type);
     });
+    
+    // Reset scroll position of icon grid
+    const grid = document.getElementById('add-item-icon-grid');
+    if (grid) {
+        grid.scrollLeft = 0;
+    }
     
     // Re-render icon grid
     renderIconGrid(icons, type);
