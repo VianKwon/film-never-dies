@@ -159,8 +159,8 @@ body{
   overflow: hidden;
   position: relative;
 }
-.coverflow-track{
-  height: 360px;
+.coverflow-track {
+  height: 320px;
   position: relative;
   user-select: none;
   cursor: grab;
@@ -262,18 +262,21 @@ body{
   flex-direction:column;
   gap: 10px;
 }
-.records-container.empty-center{
+.records-container.empty-center {
   gap: 0;
-  min-height: auto;
+  min-height: calc(100vh - 92px - env(safe-area-inset-bottom) - 100px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   margin-top: 0;
 }
 .records-empty-wrapper {
-  margin-top: 8px;
+  margin-top: 0;
   border-radius: 24px;
-  padding: 12px 12px 24px;
+  padding: 0;
   overflow: hidden;
   position: relative;
-  height: 360px;
+  height: 320px;
 }
 .records-empty-track {
   position: absolute;
@@ -690,7 +693,7 @@ body{
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 360px;
+  height: 320px;
 }
 
 .receipt-wrapper {
@@ -843,7 +846,13 @@ body{
 @media (max-width: 480px){
   .coverflow-item{ width: 220px; height: 220px; }
   .coverflow-item.center{ transform: translateX(-50%) scale(1.20); }
-  .coverflow-track{ height: 320px; }
+  .coverflow-track {
+  height: 320px;
+  position: relative;
+  user-select: none;
+  cursor: grab;
+  touch-action: none;
+}
   /* 移动端保持横向正方形排列，不换行 */
   .upload-row{ flex-direction: row; }
   .upload-box-wrapper{ flex: 1; }
