@@ -965,7 +965,7 @@ function initCoverFlow() {
     
     if (filmsWithPhotos.length === 0) {
         track.innerHTML = `
-            <div class="empty-state">
+            <div class="coverflow-empty">
                 <div class="empty-icon">
                     <i class="fas fa-images"></i>
                 </div>
@@ -1205,19 +1205,15 @@ function renderRecordsList() {
     if (films.length === 0) {
         container.classList.add('empty-center');
         container.innerHTML = `
-            <div class="records-empty-wrapper">
-                <div class="records-empty-track">
-                    <div class="empty-state">
-                        <div class="empty-icon">
-                            <i class="fas fa-film"></i>
-                        </div>
-                        <h3>No records yet</h3>
-                        <p>Start your first film record and capture your memories!</p>
-                        <button class="btn btn-primary btn-large" onclick="showAddPage()">
-                            <i class="fas fa-plus"></i> Add First Record
-                        </button>
-                    </div>
+            <div class="empty-list">
+                <div class="empty-icon">
+                    <i class="fas fa-film"></i>
                 </div>
+                <h3>No records yet</h3>
+                <p>Start your first film record and capture your memories!</p>
+                <button class="btn btn-primary btn-large" onclick="showAddPage()">
+                    <i class="fas fa-plus"></i> Add First Record
+                </button>
             </div>
         `;
         return;
@@ -1755,7 +1751,7 @@ function updateStatistics() {
         
         // Show empty state
         receiptContainer.innerHTML = `
-            <div class="empty-state">
+            <div class="empty-list">
                 <div class="empty-icon">
                     <i class="fas fa-receipt"></i>
                 </div>
@@ -1767,6 +1763,7 @@ function updateStatistics() {
             </div>
         `;
         if (reprintBtn) reprintBtn.classList.add('hidden');
+        if (dataActions) dataActions.classList.add('hidden');
         return;
     }
     
@@ -1774,6 +1771,7 @@ function updateStatistics() {
     if (printerSlot) printerSlot.classList.remove('hidden');
     receiptContainer.classList.remove('stats-empty-container');
     if (reprintBtn) reprintBtn.classList.remove('hidden');
+    if (dataActions) dataActions.classList.remove('hidden');
     
     // Count unique cameras
     const cameras = new Set();
@@ -1900,7 +1898,7 @@ function updateCameraStats() {
     
     if (films.length === 0) {
         cameraStats.innerHTML = `
-            <div class="empty-state">
+            <div class="empty-stat">
                 <i class="fas fa-camera-slash"></i>
                 <p>No camera data yet</p>
             </div>
@@ -1919,7 +1917,7 @@ function updateCameraStats() {
     const cameras = Object.keys(cameraCount).sort((a, b) => cameraCount[b] - cameraCount[a]).slice(0, 5);
     if (cameras.length === 0) {
         cameraStats.innerHTML = `
-            <div class="empty-state">
+            <div class="empty-stat">
                 <i class="fas fa-camera-slash"></i>
                 <p>No camera data yet</p>
             </div>
@@ -1945,7 +1943,7 @@ function updateFilmStats() {
     
     if (films.length === 0) {
         filmStats.innerHTML = `
-            <div class="empty-state">
+            <div class="empty-stat">
                 <i class="fas fa-film"></i>
                 <p>No film data yet</p>
             </div>
@@ -1964,7 +1962,7 @@ function updateFilmStats() {
     const filmNames = Object.keys(filmCount).sort((a, b) => filmCount[b] - filmCount[a]).slice(0, 5);
     if (filmNames.length === 0) {
         filmStats.innerHTML = `
-            <div class="empty-state">
+            <div class="empty-stat">
                 <i class="fas fa-film"></i>
                 <p>No film data yet</p>
             </div>
@@ -1990,7 +1988,7 @@ function updateCityStats() {
     
     if (films.length === 0) {
         cityStats.innerHTML = `
-            <div class="empty-state">
+            <div class="empty-stat">
                 <i class="fas fa-map-marker-alt"></i>
                 <p>No city data yet</p>
             </div>
@@ -2037,7 +2035,7 @@ function updateTypeStats() {
     
     if (films.length === 0) {
         typeStats.innerHTML = `
-            <div class="empty-state">
+            <div class="empty-stat">
                 <i class="fas fa-chart-pie"></i>
                 <p>No type data yet</p>
             </div>
@@ -2403,12 +2401,15 @@ function startDrag(e, type) {
         container.style.transition = 'none';
     }
     
-    // 取消长按计时器，防止触发编辑模式
-    cancelLongPress();
+    // 只有在有移动时才取消长按
+    // 长按计时器会在 drag 函数中根据移动距离来取消
 }
 
 function drag(e) {
     if (!dragState.isDragging || !dragState.type) return;
+    
+    // 如果有移动，取消长按计时器
+    cancelLongPress();
     
     const type = dragState.type;
     const x = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
@@ -2549,6 +2550,13 @@ function initLongPress() {
 }
 
 function setupItemEvents(item) {
+    item.removeEventListener('mousedown', startLongPress);
+    item.removeEventListener('mouseup', cancelLongPress);
+    item.removeEventListener('mouseleave', cancelLongPress);
+    item.removeEventListener('touchstart', startLongPress);
+    item.removeEventListener('touchend', cancelLongPress);
+    item.removeEventListener('touchmove', cancelLongPress);
+    
     item.addEventListener('mousedown', startLongPress);
     item.addEventListener('mouseup', cancelLongPress);
     item.addEventListener('mouseleave', cancelLongPress);
@@ -2619,8 +2627,8 @@ function renderCamerasList() {
     if (cameras.length === 0) {
         // Show friendly empty state
         container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-icon">
+            <div class="gear-empty-state">
+                <div class="gear-empty-icon">
                     <i class="fas fa-camera"></i>
                 </div>
                 <div class="gear-empty-text">Collect your cameras!</div>
@@ -2681,8 +2689,8 @@ function renderFilmsList() {
     if (films.length === 0) {
         // Show friendly empty state
         container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-icon">
+            <div class="gear-empty-state">
+                <div class="gear-empty-icon">
                     <i class="fas fa-film"></i>
                 </div>
                 <div class="gear-empty-text">Collect your films!</div>
@@ -2786,6 +2794,7 @@ function deleteCamera(name, event) {
         saveStringArray(STORAGE_KEYS.cameras, cameras);
         
         showToast('Camera deleted', 'success');
+        exitEditMode('camera');
         renderCamerasList();
         
         // Update Add page options
@@ -2845,6 +2854,7 @@ function deleteFilmStock(name, event) {
         saveStringArray(STORAGE_KEYS.filmNames, films);
         
         showToast('Film deleted', 'success');
+        exitEditMode('film');
         renderFilmsList();
         
         // Update Add page options
