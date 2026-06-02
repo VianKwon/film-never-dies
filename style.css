@@ -26,38 +26,6 @@ body{
   line-height:1.4;
 }
 /* ===== Layout ===== */
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--muted);
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-.empty-state .empty-icon {
-  font-size: 64px;
-  margin-bottom: 20px;
-  color: #667eea;
-  opacity: 0.8;
-}
-.empty-state h3 {
-  font-size: 22px;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 12px;
-}
-.empty-state p {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: 24px;
-}
-.empty-state .btn-large {
-  width: 100%;
-  max-width: 280px;
-}
-
 .page{
   display:none;
   min-height:100vh;
@@ -86,6 +54,19 @@ body{
   display:flex;
   flex-direction:column;
   justify-content:center;
+}
+/* Records 页面容器样式，保持标题在原位置 */
+#list-page .container {
+  min-height: calc(100vh - 92px - env(safe-area-inset-bottom) - 18px);
+  display: flex;
+  flex-direction: column;
+}
+/* 空状态时让内容区域占据剩余空间并垂直居中 */
+.records-container.empty-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .page-header{
   text-align:center;
@@ -256,6 +237,28 @@ body{
   gap:8px;
   align-items:center;
 }
+/* Empty coverflow */
+.coverflow-empty{
+  text-align:center;
+  padding: 22px 10px;
+}
+.coverflow-empty .empty-icon{
+  font-size: 44px;
+  color: #667eea;
+  opacity: 0.8;
+  margin-bottom: 12px;
+}
+.coverflow-empty h3{ 
+  margin: 0 0 6px; 
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+}
+.coverflow-empty p{ 
+  margin: 0 0 14px; 
+  font-size: 14px;
+  color: var(--muted); 
+}
 /* ===== Records list ===== */
 .records-container{
   display:flex;
@@ -265,18 +268,45 @@ body{
 }
 .records-container.empty-center{
   gap: 0;
-  min-height: auto;
   margin-top: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
-.records-empty-wrapper {
-  margin-top: 8px;
+.records-container.empty-center .empty-list{
+  text-align:center;
+  padding: 60px 20px;
+  color: var(--muted);
+  height: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   border-radius: 24px;
-  padding: 12px 12px 24px;
   overflow: hidden;
-  position: relative;
 }
-.records-empty-track {
-  position: relative;
+.empty-list .empty-icon{ 
+  font-size: 44px; 
+  color: #667eea;
+  opacity: 0.8;
+  margin-bottom: 12px;
+}
+.empty-list h3{ 
+  margin: 0 0 6px; 
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+}
+.empty-list p{ 
+  margin: 0 0 14px; 
+  font-size: 14px;
+  color: var(--muted); 
+}
+.empty-list .btn-large {
+    width: 100%;
+    max-width: 280px;
 }
 .record-item{
   display:flex;
@@ -357,6 +387,8 @@ body{
   text-align:center;
   flex-shrink: 0;
 }
+
+
 /* ===== Forms (Add) ===== */
 .film-form{
   display:flex;
@@ -613,7 +645,6 @@ body{
 /* Stats Page Container */
 #stats-page {
   padding: 18px 16px 0;
-  overflow: hidden;
 }
 
 .stats-page-container {
@@ -628,7 +659,9 @@ body{
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .data-actions{
@@ -687,7 +720,36 @@ body{
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 400px;
+  flex: 1;
+}
+.receipt-container.stats-empty-container .empty-list{
+  text-align:center;
+  padding: 60px 20px;
+  color: var(--muted);
+  height: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 24px;
+  overflow: hidden;
+}
+.receipt-container.stats-empty-container .empty-icon{ 
+  font-size: 44px; 
+  color: #667eea;
+  opacity: 0.8;
+  margin-bottom: 12px;
+}
+.receipt-container.stats-empty-container .empty-list h3{ 
+  margin: 0 0 6px; 
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+}
+.receipt-container.stats-empty-container .empty-list p{ 
+  margin: 0 0 14px; 
+  font-size: 14px;
+  color: var(--muted); 
 }
 
 .receipt-wrapper {
@@ -731,6 +793,9 @@ body{
 }
 
 /* Stats Empty State (use same as other empty states) */
+.stats-empty {
+  /* uses .empty-list styles */
+}
 
 
 
@@ -1460,7 +1525,26 @@ body{
     line-height: 1.2;
 }
 
-/* Gear Empty State - Removed in favor of global .empty-state */
+/* Gear Empty State */
+.gear-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    text-align: center;
+}
+.gear-empty-icon {
+    font-size: 40px;
+    color: #667eea;
+    opacity: 0.7;
+    margin-bottom: 12px;
+}
+.gear-empty-text {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
 /* Placeholder item */
 .display-item.placeholder {
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
@@ -1586,7 +1670,7 @@ body{
 .stats-number {
   font-size: 20px;
   font-weight: 900;
-  color: #ffffff;
+  color: #667eea;
   line-height: 1;
 }
 
