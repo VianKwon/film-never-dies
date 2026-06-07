@@ -26,6 +26,38 @@ body{
   line-height:1.4;
 }
 /* ===== Layout ===== */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.empty-state .empty-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  color: #667eea;
+  opacity: 0.8;
+}
+.empty-state h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 12px;
+}
+.empty-state p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 24px;
+}
+.empty-state .btn-large {
+  width: 100%;
+  max-width: 280px;
+}
+
 .page{
   display:none;
   min-height:100vh;
@@ -54,19 +86,6 @@ body{
   display:flex;
   flex-direction:column;
   justify-content:center;
-}
-/* Records 页面容器样式，保持标题在原位置 */
-#list-page .container {
-  min-height: calc(100vh - 92px - env(safe-area-inset-bottom) - 18px);
-  display: flex;
-  flex-direction: column;
-}
-/* 空状态时让内容区域占据剩余空间并垂直居中 */
-.records-container.empty-center {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
 }
 .page-header{
   text-align:center;
@@ -140,8 +159,8 @@ body{
   overflow: hidden;
   position: relative;
 }
-.coverflow-track{
-  height: 360px;
+.coverflow-track {
+  height: 320px;
   position: relative;
   user-select: none;
   cursor: grab;
@@ -227,9 +246,6 @@ body{
   gap:10px;
   margin-top: 10px;
 }
-#coverflow-shuffle {
-  padding: 14px 28px;
-}
 .cf-hint{
   color: rgba(255,255,255,.35);
   font-size: 12px;
@@ -240,76 +256,33 @@ body{
   gap:8px;
   align-items:center;
 }
-/* Empty coverflow */
-.coverflow-empty{
-  text-align:center;
-  padding: 22px 10px;
-}
-.coverflow-empty .empty-icon{
-  font-size: 44px;
-  color: #667eea;
-  opacity: 0.8;
-  margin-bottom: 12px;
-}
-.coverflow-empty h3{ 
-  margin: 0 0 6px; 
-  font-size: 22px;
-  font-weight: 700;
-  color: #ffffff;
-}
-.coverflow-empty p{ 
-  margin: 0 0 14px; 
-  font-size: 14px;
-  color: var(--muted); 
-}
 /* ===== Records list ===== */
 .records-container{
   display:flex;
   flex-direction:column;
   gap: 10px;
-  min-height: 400px;
 }
-.records-container.empty-center{
+.records-container.empty-center {
   gap: 0;
+  min-height: calc(100vh - 92px - env(safe-area-inset-bottom) - 100px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   margin-top: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
 }
-.records-container.empty-center .empty-list{
-  text-align:center;
-  padding: 60px 20px;
-  color: var(--muted);
-  height: 360px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+.records-empty-wrapper {
+  margin-top: 0;
   border-radius: 24px;
+  padding: 0;
   overflow: hidden;
+  position: relative;
+  height: 320px;
 }
-.empty-list .empty-icon{ 
-  font-size: 44px; 
-  color: #667eea;
-  opacity: 0.8;
-  margin-bottom: 12px;
-}
-.empty-list h3{ 
-  margin: 0 0 6px; 
-  font-size: 22px;
-  font-weight: 700;
-  color: #ffffff;
-}
-.empty-list p{ 
-  margin: 0 0 14px; 
-  font-size: 14px;
-  color: var(--muted); 
-}
-.empty-list .btn-large {
-    width: 100%;
-    max-width: 280px;
+.records-empty-track {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
 }
 .record-item{
   display:flex;
@@ -390,8 +363,6 @@ body{
   text-align:center;
   flex-shrink: 0;
 }
-
-
 /* ===== Forms (Add) ===== */
 .film-form{
   display:flex;
@@ -593,18 +564,7 @@ body{
   .upload-row{ flex-direction: row; } /* 保持横向排列 */
 }
 .form-actions{ 
-  margin-top: 18px;
-  display: flex;
-  justify-content: center;
-}
-
-#add-page .form-actions .btn-large {
-    padding: 14px 28px;
-    font-size: 14px;
-    font-weight: 600;
-    border-radius: 12px;
-    width: 100%;
-    max-width: 100%;
+  margin-top: 2px;
 }
 /* ===== Stats ===== */
 .stats-grid{
@@ -659,6 +619,7 @@ body{
 /* Stats Page Container */
 #stats-page {
   padding: 18px 16px 0;
+  overflow: hidden;
 }
 
 .stats-page-container {
@@ -673,9 +634,7 @@ body{
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  padding-bottom: 18px;
 }
 
 .data-actions{
@@ -734,36 +693,7 @@ body{
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex: 1;
-}
-.receipt-container.stats-empty-container .empty-list{
-  text-align:center;
-  padding: 60px 20px;
-  color: var(--muted);
-  height: 360px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-radius: 24px;
-  overflow: hidden;
-}
-.receipt-container.stats-empty-container .empty-icon{ 
-  font-size: 44px; 
-  color: #667eea;
-  opacity: 0.8;
-  margin-bottom: 12px;
-}
-.receipt-container.stats-empty-container .empty-list h3{ 
-  margin: 0 0 6px; 
-  font-size: 22px;
-  font-weight: 700;
-  color: #ffffff;
-}
-.receipt-container.stats-empty-container .empty-list p{ 
-  margin: 0 0 14px; 
-  font-size: 14px;
-  color: var(--muted); 
+  height: 320px;
 }
 
 .receipt-wrapper {
@@ -807,9 +737,6 @@ body{
 }
 
 /* Stats Empty State (use same as other empty states) */
-.stats-empty {
-  /* uses .empty-list styles */
-}
 
 
 
@@ -919,7 +846,13 @@ body{
 @media (max-width: 480px){
   .coverflow-item{ width: 220px; height: 220px; }
   .coverflow-item.center{ transform: translateX(-50%) scale(1.20); }
-  .coverflow-track{ height: 320px; }
+  .coverflow-track {
+  height: 320px;
+  position: relative;
+  user-select: none;
+  cursor: grab;
+  touch-action: none;
+}
   /* 移动端保持横向正方形排列，不换行 */
   .upload-row{ flex-direction: row; }
   .upload-box-wrapper{ flex: 1; }
@@ -1498,9 +1431,6 @@ body{
     box-shadow: 0 4px 12px rgba(0,0,0,.2);
     transform: translateY(0) scale(1);
     will-change: transform, box-shadow;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
 }
 
 .display-item:hover {
@@ -1534,10 +1464,6 @@ body{
     height: 100%;
     object-fit: contain;
     object-position: center;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
-    pointer-events: none;
 }
 
 .display-item-name {
@@ -1546,26 +1472,7 @@ body{
     line-height: 1.2;
 }
 
-/* Gear Empty State */
-.gear-empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 30px 20px;
-    text-align: center;
-}
-.gear-empty-icon {
-    font-size: 40px;
-    color: #667eea;
-    opacity: 0.7;
-    margin-bottom: 12px;
-}
-.gear-empty-text {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.5);
-}
-
+/* Gear Empty State - Removed in favor of global .empty-state */
 /* Placeholder item */
 .display-item.placeholder {
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
@@ -1691,7 +1598,7 @@ body{
 .stats-number {
   font-size: 20px;
   font-weight: 900;
-  color: #667eea;
+  color: #ffffff;
   line-height: 1;
 }
 
@@ -1767,13 +1674,6 @@ body{
     padding: 4px 0;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    cursor: grab;
-    user-select: none;
-    -webkit-user-select: none;
-}
-
-.icon-grid.dragging {
-    cursor: grabbing;
 }
 
 .icon-grid::-webkit-scrollbar {
@@ -1800,10 +1700,6 @@ body{
     height: 100%;
     object-fit: contain;
     object-position: center center;
-    -webkit-user-drag: none;
-    user-select: none;
-    -webkit-user-select: none;
-    pointer-events: none;
 }
 
 /* Film icons slightly larger */
