@@ -2260,6 +2260,22 @@ const filmIconOptions = [
     'icons/Film7.png'
 ];
 
+// Preload icons to cache
+function preloadIcons() {
+    const allIcons = [...cameraIconOptions, ...filmIconOptions];
+    allIcons.forEach(src => {
+        const img = new Image();
+        img.src = src;
+    });
+}
+
+// Preload icons when page is idle
+if (window.requestIdleCallback) {
+    window.requestIdleCallback(preloadIcons);
+} else {
+    window.addEventListener('load', preloadIcons);
+}
+
 // Current modal state
 let modalCurrentType = 'camera';
 let modalSelectedIcon = cameraIconOptions[0];
@@ -2389,6 +2405,11 @@ function setupDragHandlers() {
 function startDrag(e, type) {
     // 如果在编辑模式，不允许拖拽
     if (myPageIsEditMode[type]) return;
+    
+    // 阻止默认行为（防止文字选中、图片拖拽等）
+    if (e.type.includes('mouse')) {
+        e.preventDefault();
+    }
     
     dragState.isDragging = true;
     dragState.type = type;
@@ -2556,13 +2577,20 @@ function setupItemEvents(item) {
     item.removeEventListener('touchstart', startLongPress);
     item.removeEventListener('touchend', cancelLongPress);
     item.removeEventListener('touchmove', cancelLongPress);
+    item.removeEventListener('contextmenu', preventContextMenu);
     
     item.addEventListener('mousedown', startLongPress);
     item.addEventListener('mouseup', cancelLongPress);
     item.addEventListener('mouseleave', cancelLongPress);
-    item.addEventListener('touchstart', startLongPress);
+    item.addEventListener('touchstart', startLongPress, { passive: false });
     item.addEventListener('touchend', cancelLongPress);
     item.addEventListener('touchmove', cancelLongPress);
+    item.addEventListener('contextmenu', preventContextMenu);
+}
+
+function preventContextMenu(e) {
+    e.preventDefault();
+    return false;
 }
 
 function startLongPress(e) {
@@ -2944,6 +2972,59 @@ function renderIconGrid(icons, type) {
             <img src="${icon}" alt="Icon ${index + 1}">
         </div>
     `).join('');
+    
+    // Add drag-to-scroll functionality
+    setupIconGridDrag(grid);
+}
+
+function setupIconGridDrag(grid) {
+    if (!grid) return;
+    
+    let isDown = false;
+    let startX = 0;
+    let scrollLeft = 0;
+    let totalMovement = 0;
+    
+    grid.addEventListener('mousedown', (e) => {
+        isDown = true;
+        totalMovement = 0;
+        startX = e.pageX - grid.offsetLeft;
+        scrollLeft = grid.scrollLeft;
+        grid.classList.add('dragging');
+    });
+    
+    grid.addEventListener('mouseleave', () => {
+        isDown = false;
+        grid.classList.remove('dragging');
+    });
+    
+    grid.addEventListener('mouseup', (e) => {
+        isDown = false;
+        grid.classList.remove('dragging');
+    });
+    
+    grid.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - grid.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        totalMovement = Math.abs(walk);
+        grid.scrollLeft = scrollLeft - walk;
+    });
+    
+    // Prevent click events if there was significant drag movement
+    grid.addEventListener('click', (e) => {
+        if (totalMovement > 5) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        totalMovement = 0;
+    }, true);
+    
+    // Prevent image drag
+    grid.addEventListener('dragstart', (e) => {
+        e.preventDefault();
+    });
 }
 
 function selectItemIcon(icon, element) {
