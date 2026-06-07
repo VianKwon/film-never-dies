@@ -227,6 +227,9 @@ body{
   gap:10px;
   margin-top: 10px;
 }
+#coverflow-shuffle {
+  padding: 14px 28px;
+}
 .cf-hint{
   color: rgba(255,255,255,.35);
   font-size: 12px;
@@ -590,7 +593,18 @@ body{
   .upload-row{ flex-direction: row; } /* 保持横向排列 */
 }
 .form-actions{ 
-  margin-top: 2px;
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+}
+
+#add-page .form-actions .btn-large {
+    padding: 14px 28px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 100%;
 }
 /* ===== Stats ===== */
 .stats-grid{
@@ -1484,6 +1498,9 @@ body{
     box-shadow: 0 4px 12px rgba(0,0,0,.2);
     transform: translateY(0) scale(1);
     will-change: transform, box-shadow;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .display-item:hover {
@@ -1517,6 +1534,10 @@ body{
     height: 100%;
     object-fit: contain;
     object-position: center;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    pointer-events: none;
 }
 
 .display-item-name {
@@ -1746,6 +1767,13 @@ body{
     padding: 4px 0;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.icon-grid.dragging {
+    cursor: grabbing;
 }
 
 .icon-grid::-webkit-scrollbar {
@@ -1772,6 +1800,10 @@ body{
     height: 100%;
     object-fit: contain;
     object-position: center center;
+    -webkit-user-drag: none;
+    user-select: none;
+    -webkit-user-select: none;
+    pointer-events: none;
 }
 
 /* Film icons slightly larger */
