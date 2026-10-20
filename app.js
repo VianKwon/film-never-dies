@@ -124,6 +124,9 @@ document.addEventListener('DOMContentLoaded', function() {
     populateCountries();
     populateFilmAndCameraHistory();
     initCountryCityHybrid();
+    initRecordDropdowns();
+    initMonthPicker();
+    syncDateDisplay();
     
     // Setup file input change events
     setTimeout(() => {
@@ -195,13 +198,90 @@ function showAddPage() {
         updateAddPageTitle(false);
     }
     switchPage('add-page');
+    syncRecordDropdowns();
+}
+
+function syncRecordDropdowns() {
+    syncDateDisplay();
+    if (window.jQuery && jQuery.fn.select2) {
+        jQuery('#film-form select').trigger('change.select2');
+    }
+}
+
+function syncDateDisplay() {
+    const input = document.getElementById('date-shot');
+    const display = document.getElementById('date-shot-toggle');
+    if (input && display) display.textContent = input.value || 'Select month';
+}
+
+function initMonthPicker() {
+    const input = document.getElementById('date-shot');
+    const toggle = document.getElementById('date-shot-toggle');
+    const panel = document.getElementById('month-picker');
+    const grid = document.getElementById('month-picker-grid');
+    const names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    let year = new Date().getFullYear();
+    function close() {
+        panel.hidden = true;
+        toggle.setAttribute('aria-expanded', 'false');
+    }
+    function choose(value) {
+        input.value = value;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        syncDateDisplay();
+        close();
+        toggle.focus();
+    }
+    function render() {
+        document.getElementById('month-picker-year').textContent = year;
+        grid.replaceChildren();
+        names.forEach((name, index) => {
+            const value = `${year}-${String(index + 1).padStart(2, '0')}`;
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.textContent = name;
+            button.setAttribute('aria-pressed', String(input.value === value));
+            button.addEventListener('click', () => choose(value));
+            grid.appendChild(button);
+        });
+    }
+    toggle.addEventListener('click', () => {
+        if (!panel.hidden) return close();
+        year = input.value ? Number(input.value.slice(0, 4)) : new Date().getFullYear();
+        render();
+        panel.hidden = false;
+        toggle.setAttribute('aria-expanded', 'true');
+    });
+    document.getElementById('month-year-prev').addEventListener('click', () => { year = Math.max(1, year - 1); render(); });
+    document.getElementById('month-year-next').addEventListener('click', () => { year = Math.min(9999, year + 1); render(); });
+    document.getElementById('month-picker-clear').addEventListener('click', () => choose(''));
+    document.getElementById('month-picker-today').addEventListener('click', () => {
+        const now = new Date();
+        choose(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`);
+    });
+    document.addEventListener('click', event => {
+        if (!toggle.closest('.month-field').contains(event.target)) close();
+    });
+    panel.parentElement.addEventListener('keydown', event => {
+        if (event.key === 'Escape') { close(); toggle.focus(); }
+    });
+}
+
+function initRecordDropdowns() {
+    if (!window.jQuery || !jQuery.fn.select2) return;
+    jQuery('#film-form select').each(function() {
+        jQuery(this).select2({
+            width: '100%',
+            minimumResultsForSearch: Infinity,
+            dropdownParent: jQuery(this).closest('.form-group')
+        });
+    });
 }
 
 function showStatsPage() {
     console.log('📱 Switching to Stats page');
     switchPage('stats-page');
     updateStatistics();
-    initReceiptAnimation();
 }
 
 function showMyPage() {
@@ -466,8 +546,12 @@ function initCountryCityHybrid() {
         return;
     }
     
-    // Country change handler
-    countrySelect.addEventListener('change', function() {
+    // jQuery receives both Select2 changes and native select changes.
+    const onChange = (element, handler) => {
+        if (window.jQuery) jQuery(element).on('change', handler);
+        else element.addEventListener('change', handler);
+    };
+    onChange(countrySelect, function() {
         if (this.value === 'other') {
             countryCustomWrapper.classList.add('show');
             countryCustomInput.focus();
@@ -489,10 +573,11 @@ function initCountryCityHybrid() {
             // Update cities normally
             updateCities(this.value);
         }
+        syncRecordDropdowns();
     });
     
     // City change handler
-    citySelect.addEventListener('change', function() {
+    onChange(citySelect, function() {
         if (this.value === 'other') {
             cityCustomWrapper.classList.add('show');
             cityCustomInput.focus();
@@ -860,6 +945,7 @@ function resetForm() {
     const filmForm = document.getElementById('film-form');
     if (filmForm) {
         filmForm.reset();
+        syncRecordDropdowns();
     }
     
     // Reset custom country/city inputs and hide wrappers
@@ -1678,6 +1764,8 @@ function editRecord(recordId) {
         // Handle photos (keep existing)
         PREVIEW_IMAGES = film.photos ? [...film.photos] : [];
         
+        syncRecordDropdowns();
+
         // Render photo boxes
         for (let i = 1; i <= 3; i++) {
             const wrapper = document.getElementById(`upload-wrapper-${i}`);
