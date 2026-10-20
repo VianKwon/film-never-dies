@@ -203,6 +203,7 @@ function showAddPage() {
 
 function syncRecordDropdowns() {
     syncDateDisplay();
+    if (window.refreshLocationMatch) window.refreshLocationMatch();
     if (window.jQuery && jQuery.fn.select2) {
         jQuery('#film-form select').trigger('change.select2');
     }
@@ -879,6 +880,7 @@ function saveFilmRecord() {
                 date: dateShot || new Date().toISOString().substring(0, 7),
                 country: country,
                 city: city,
+                location: window.getSavedLocation ? window.getSavedLocation(country, city) : null,
                 notes: notes || null,
                 photos: photos,
                 updatedAt: new Date().toISOString()
@@ -908,6 +910,7 @@ function saveFilmRecord() {
             date: dateShot || new Date().toISOString().substring(0, 7),
             country: country,
             city: city,
+            location: window.getSavedLocation ? window.getSavedLocation(country, city) : null,
             notes: notes || null,
             photos: photos,
             createdAt: new Date().toISOString()
@@ -1741,6 +1744,7 @@ function editRecord(recordId) {
                     } else {
                         citySelect.value = film.city;
                     }
+                    syncRecordDropdowns();
                 }, 50);
             }
         } else {

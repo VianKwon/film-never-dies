@@ -668,7 +668,9 @@ body{
 #stats-page .analytics-overview-title { margin: 0 auto 0 0; font-size: 16px; min-width: 0; }
 #stats-page .analytics-toolbar > details, #stats-page .analytics-toolbar > button { flex: 0 0 auto; }
 #stats-page .analytics-year-picker { position: relative; font-size: 13px; }
-#stats-page .analytics-year-picker summary { display: flex; align-items: center; gap: 12px; height: 40px; padding: 0 12px; background: var(--panel2); border: 1px solid rgba(255,255,255,.07); border-radius: 12px; cursor: pointer; list-style: none; }
+#stats-page .analytics-year-picker summary { display: flex; align-items: center; justify-content: center; gap: 8px; height: 40px; min-width: 72px; padding: 0 10px; background: transparent; border: 1px solid transparent; border-radius: 8px; cursor: pointer; list-style: none; font-weight: 600; font-variant-numeric: tabular-nums; }
+#stats-page .analytics-year-picker summary:hover, #stats-page .analytics-year-picker[open] summary { background: var(--panel2); }
+#stats-page .analytics-year-picker summary:focus-visible { outline: 2px solid #667eea; outline-offset: 2px; }
 #stats-page .analytics-year-picker summary::-webkit-details-marker { display: none; }
 #stats-page .analytics-year-picker summary i { font-size: 11px; opacity: .7; }
 #stats-page .analytics-year-options { position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 20; padding: 4px; border: 1px solid rgba(255,255,255,.18); border-radius: 8px; background: var(--panel2); max-height: 240px; overflow-y: auto; }
@@ -686,6 +688,8 @@ body{
 #stats-page .place-lines path { fill: none; stroke: #667eea; stroke-width: 1; opacity: .65; }
 #stats-page .place-star { fill: #8798ef; }
 #stats-page .places-chart text { fill: var(--text); font-size: 10px; }
+#stats-page .places-chart text { paint-order: stroke; stroke: #000; stroke-width: 3px; stroke-linejoin: round; }
+#stats-page .place-label-leader { fill: none; stroke: #777; stroke-width: .6; opacity: .65; }
 #stats-page .monthly-chart { display: grid; grid-template-columns: repeat(12,minmax(0,1fr)); gap: 5px; margin-top: 20px; }
 #stats-page .monthly-column { min-width: 0; text-align: center; }
 #stats-page .monthly-column > span { font-size: 10px; display: block; height: 17px; }
@@ -1049,6 +1053,28 @@ body{
 .month-picker button:hover, .month-picker button:focus-visible { background: #383838; }
 .month-picker button[aria-pressed="true"] { background: #5265bd; }
 .month-picker-footer { border-top: 1px solid rgba(255,255,255,.1); padding-top: 6px; }
+
+.location-search { margin-top: 10px; }
+#film-form #city-custom-wrapper.show { display: flow-root; max-height: none; overflow: visible; height: auto; }
+#film-form #city-custom-wrapper.show > .form-group { position: static; margin: 0 !important; padding-top: 12px; }
+.location-actions { display: flex; gap: 8px; }
+.location-search button, #stats-page .location-repairs button { color: var(--text); background: var(--panel2); border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: 10px 12px; min-height: 40px; font: inherit; font-size: 12px; cursor: pointer; }
+.location-actions .location-search-button { flex: 1; }
+.location-search button:disabled { opacity: .5; cursor: wait; }
+.location-feedback { font-size: 12px; color: #aaa; margin: 8px 0; overflow-wrap: anywhere; }
+.location-results { display: grid; gap: 4px; max-height: 230px; overflow-y: auto; }
+.location-results button { text-align: left; }
+.location-results strong, .location-results small { display: block; overflow-wrap: anywhere; }
+.location-results small { color: #aaa; margin-top: 4px; }
+.location-results button:hover { border-color: #667eea; }
+.location-manual { display: grid; gap: 8px; margin-top: 8px; }
+.location-manual[hidden] { display: none; }
+.location-manual label { display: block; }
+.location-manual input { margin-top: 4px; }
+.location-search .location-later { background: transparent; border: 0; padding-left: 0; color: #9aa8f2; }
+.location-credit { display: block; color: #888; font-size: 10px; margin-top: 4px; }
+#stats-page .location-repairs { display: grid; gap: 6px; margin-top: 10px; }
+#stats-page .location-repairs button { text-align: left; }
 
 /* ===== Bottom navigation (5 tabs now) ===== */
 .nav{

@@ -17,20 +17,35 @@
         'CN-HK': { 'Hong Kong Island': [114.19,22.26], Kowloon: [114.18,22.32] },
         'CN-TW': { Taipei: [121.57,25.03], Kaohsiung: [120.30,22.63] }
     };
+    // Mukho Port, Donghae: https://www.wikidata.org/wiki/Q11241497
+    Object.assign(coordinates.KR, {
+        Mukho: [129.1155, 37.5534],
+        'Mukho-dong': [129.1155, 37.5534],
+        'Mukho Port': [129.1155, 37.5534],
+        'Mukho-hang': [129.1155, 37.5534],
+        '\uBB35\uD638': [129.1155, 37.5534],
+        '\uBB35\uD638\uD56D': [129.1155, 37.5534]
+    });
+    const locationKey = value => String(value ?? '').normalize('NFKC').trim().toLowerCase().replace(/[\s_-]+/g, '');
     const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     let selectedYear = '';
     let mode = 'name';
     const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     function location(record) {
-        const country = countriesRegions.find(c => c.code === record.country || c.name === record.country);
+        const saved = record.location || window.getSavedLocation?.(record.country,record.city);
+        if (saved && Number.isFinite(saved.longitude) && Number.isFinite(saved.latitude) && Math.abs(saved.latitude) <= 90 && Math.abs(saved.longitude) <= 180) return [saved.longitude,saved.latitude];
+        const country = countriesRegions.find(c => locationKey(c.code) === locationKey(record.country) || locationKey(c.name) === locationKey(record.country));
         const entries = coordinates[country ? country.code : record.country];
-        return entries && Object.entries(entries).find(([name]) => name.toLowerCase() === String(record.city).trim().toLowerCase())?.[1];
+        return entries && Object.entries(entries).find(([name]) => locationKey(name) === locationKey(record.city))?.[1];
     }
     function route(records) {
-        const ordered = [...records].sort((a,b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt));
+        // Reverse the Records ordering, including its tie order within one month.
+        const ordered = [...records].sort((a,b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt)).reverse();
         const visits = ordered.map(r => ({ record: r, point: location(r) }));
         const known = visits.filter(v => v.point);
-        if (!known.length) return '<p class="analytics-muted">No mapped shooting locations yet.</p>';
+        const unresolved = visits.filter(v => !v.point);
+        const repair = unresolved.length ? `<div class="location-repairs">${unresolved.map(v => `<button type="button" data-locate-record="${escape(v.record.id)}"><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Locate ${escape(v.record.city)} <i class="fas fa-chevron-right" aria-hidden="true"></i></button>`).join('')}</div>` : '';
+        if (!known.length) return '<p class="analytics-muted">No mapped shooting locations yet.</p>' + repair;
         // Mercator projection, uniformly scaled to preserve actual geographic positions.
         const projected = known.map(v => [v.point[0], Math.log(Math.tan(Math.PI / 4 + v.point[1] * Math.PI / 360)) * 180 / Math.PI]);
         const xs = projected.map(p => p[0]), ys = projected.map(p => p[1]);
@@ -47,18 +62,35 @@
         }).join('');
         const seen = new Set();
         const labels = [];
+        const measure = document.createElement('canvas').getContext('2d');
+        measure.font = '10px sans-serif';
+        const overlaps = (a,b) => a.x < b.x+b.w+4 && a.x+a.w+4 > b.x && a.y < b.y+b.h+4 && a.y+a.h+4 > b.y;
         const dots = known.map((v,i) => {
             const key = v.point.join(',');
             if (seen.has(key)) return '';
             seen.add(key);
             const [x,y] = points[i];
-            let labelY = y - 12;
-            while (labels.some(p => Math.abs(p[0]-x) < 75 && Math.abs(p[1]-labelY) < 15)) labelY += 16;
-            labels.push([x,labelY]);
-            return `<g><title>${escape(v.record.city)}</title><path class="place-star" d="M ${x} ${y-7} Q ${x+1.5} ${y-1.5} ${x+7} ${y} Q ${x+1.5} ${y+1.5} ${x} ${y+7} Q ${x-1.5} ${y+1.5} ${x-7} ${y} Q ${x-1.5} ${y-1.5} ${x} ${y-7} Z"/><text x="${x}" y="${labelY}" text-anchor="${x < 65 ? 'start' : x > 255 ? 'end' : 'middle'}">${escape(v.record.city)}</text></g>`;
+            const name = String(v.record.city);
+            const text = name.length > 28 ? name.slice(0,27) + '...' : name;
+            const width = Math.min(300, measure.measureText(text).width + 4);
+            // Place labels independently of geographic markers; reserve nearby markers too.
+            const candidates = [];
+            for (let top = 5; top <= 150; top += 15) {
+                for (const left of [x-width/2,x+12,x-width-12]) {
+                    const rect = { x: Math.max(5,Math.min(315-width,left)), y: top, w: width, h: 11 };
+                    if (labels.some(other => overlaps(rect,other))) continue;
+                    if (points.some(([px,py]) => overlaps(rect,{x:px-8,y:py-8,w:16,h:16}))) continue;
+                    candidates.push({ ...rect, distance: Math.hypot(rect.x+width/2-x,rect.y+5-y) });
+                }
+            }
+            candidates.sort((a,b) => a.distance-b.distance);
+            const label = candidates[0];
+            if (label) labels.push(label);
+            const labelMarkup = label ? `<path class="place-label-leader" d="M ${x} ${y} L ${Math.max(label.x,Math.min(label.x+width,x))} ${label.y+6}"/><text x="${label.x}" y="${label.y+9}" text-anchor="start">${escape(text)}</text>` : '';
+            return `<g><title>${escape(name)}</title>${labelMarkup}<path class="place-star" d="M ${x} ${y-7} Q ${x+1.5} ${y-1.5} ${x+7} ${y} Q ${x+1.5} ${y+1.5} ${x} ${y+7} Q ${x-1.5} ${y+1.5} ${x-7} ${y} Q ${x-1.5} ${y-1.5} ${x} ${y-7} Z"/></g>`;
         }).join('');
         const missing = visits.filter(v => !v.point).length;
-        return `<svg class="places-chart" viewBox="0 0 320 170" role="img" aria-label="Shooting locations connected in Records order, newest first"><defs><marker id="route-direction" viewBox="0 0 6 6" refX="3" refY="3" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 6 3 L 0 6 Z" fill="#667eea"/></marker></defs><g class="place-lines">${lines}</g>${dots}</svg>${missing ? `<p class="analytics-muted">${missing} record(s) have locations not yet mapped.</p>` : ''}`;
+        return `<svg class="places-chart" viewBox="0 0 320 170" role="img" aria-label="Shooting locations connected from earliest to latest, in reverse Records order"><defs><marker id="route-direction" viewBox="0 0 6 6" refX="3" refY="3" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 6 3 L 0 6 Z" fill="#667eea"/></marker></defs><g class="place-lines">${lines}</g>${dots}</svg>${missing ? `<p class="analytics-muted">${missing} record(s) have locations not yet mapped.</p>` : ''}`;
     }
     window.updateStatistics = function() {
         const content = document.querySelector('#stats-page .stats-content');
@@ -86,7 +118,26 @@
         overview.className = 'analytics-overview-title';
         overview.textContent = 'Overview';
         content.querySelector('.analytics-toolbar').prepend(overview);
+        content.querySelector('.analytics-year-picker summary .fa-calendar').remove();
         content.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', () => { mode = button.dataset.mode; updateStatistics(); }));
         content.querySelector('.analytics-export').addEventListener('click', exportData);
+        const places = content.querySelector('.analytics-section');
+        const unresolved = records.filter(record => !location(record));
+        if (unresolved.length && !places.querySelector('.location-repairs')) {
+            const repairs = document.createElement('div');
+            repairs.className = 'location-repairs';
+            unresolved.forEach(record => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.dataset.locateRecord = record.id;
+                button.textContent = `Locate ${record.city}`;
+                repairs.appendChild(button);
+            });
+            places.appendChild(repairs);
+        }
+        content.querySelectorAll('[data-locate-record]').forEach(button => button.addEventListener('click', () => {
+            editRecord(button.dataset.locateRecord);
+            setTimeout(() => document.getElementById('city-custom-input').scrollIntoView({ block: 'center', behavior: 'smooth' }), 150);
+        }));
     };
 })();
