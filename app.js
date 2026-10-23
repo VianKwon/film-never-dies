@@ -2744,6 +2744,27 @@ function handleOutsideClick(e) {
     }
 }
 
+function savedGearIcon(type, name, options, index) {
+    try {
+        const icons = JSON.parse(localStorage.getItem('filmFlowGearIcons') || '{}');
+        const icon = icons[`${type}:${normalizeText(name).toLowerCase()}`];
+        if (options.includes(icon)) return icon;
+    } catch (error) { console.warn('Unable to read gear icons', error); }
+    const fallback = options[index % options.length];
+    saveGearIcon(type, name, fallback);
+    return fallback;
+}
+
+function saveGearIcon(type, name, icon) {
+    const options = type === 'camera' ? cameraIconOptions : filmIconOptions;
+    if (!options.includes(icon)) return;
+    try {
+        const icons = JSON.parse(localStorage.getItem('filmFlowGearIcons') || '{}');
+        icons[`${type}:${normalizeText(name).toLowerCase()}`] = icon;
+        localStorage.setItem('filmFlowGearIcons', JSON.stringify(icons));
+    } catch (error) { showToast('Unable to save icon. Local storage may be full.', 'error'); }
+}
+
 function renderCamerasList() {
     const container = document.getElementById('cameras-list');
     if (!container) return;
@@ -2776,7 +2797,7 @@ function renderCamerasList() {
                 <i class="fas fa-times"></i>
             </button>
             <div class="display-item-icon">
-                <img src="${cameraIconOptions[index % cameraIconOptions.length]}" alt="Camera">
+                <img src="${savedGearIcon('camera', camera, cameraIconOptions, index)}" alt="Camera">
             </div>
             <div class="display-item-name">${escapeHtml(camera)}</div>
         </div>
@@ -2838,7 +2859,7 @@ function renderFilmsList() {
                 <i class="fas fa-times"></i>
             </button>
             <div class="display-item-icon">
-                <img src="${filmIconOptions[index % filmIconOptions.length]}" alt="Film">
+                <img src="${savedGearIcon('film', film, filmIconOptions, index)}" alt="Film">
             </div>
             <div class="display-item-name">${escapeHtml(film)}</div>
         </div>
@@ -2882,6 +2903,7 @@ function addCamera(name) {
     }
     
     cameras.unshift(cameraName);
+    saveGearIcon('camera', cameraName, modalSelectedIcon);
     saveStringArray(STORAGE_KEYS.cameras, cameras);
     
     showToast('Camera added', 'success');
@@ -2942,6 +2964,7 @@ function addFilmStock(name) {
     }
     
     films.unshift(filmName);
+    saveGearIcon('film', filmName, modalSelectedIcon);
     saveStringArray(STORAGE_KEYS.filmNames, films);
     
     showToast('Film added', 'success');
