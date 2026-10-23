@@ -1004,7 +1004,13 @@ function saveFilms() {
 
 function loadFilms() {
     try {
-        const saved = localStorage.getItem(STORAGE_KEYS.records);
+        let saved = localStorage.getItem(STORAGE_KEYS.records);
+        // An existing empty array is intentional and must not be repopulated.
+        if (saved === null && Array.isArray(window.FILM_FLOW_DEMO_RECORDS)) {
+            saved = JSON.stringify(window.FILM_FLOW_DEMO_RECORDS);
+            try { localStorage.setItem(STORAGE_KEYS.records, saved); }
+            catch (error) { console.warn('Demo records loaded without persistence', error); }
+        }
         if (saved) {
             films = JSON.parse(saved);
             
@@ -1127,7 +1133,7 @@ function initCoverFlow() {
     // Setup swipe events
     setupSwipeEvents();
     
-    console.log(`✅ Cover Flow initialized with ${allPhotos.length} photos`);
+    console.log(`✅ Cover Flow initialized with ${coverflowPhotos.length} photos`);
 }
 
 function updateCoverFlow() {
