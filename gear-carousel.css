@@ -5,9 +5,7 @@ html:has(#coverflow-page.active)::-webkit-scrollbar,
 html:has(#my-page.active)::-webkit-scrollbar { display: none; }
 body:has(#coverflow-page.active),
 body:has(#my-page.active) { overscroll-behavior-y: none; overflow-x: clip; }
-#coverflow-page,
 #my-page { min-height: 100svh; }
-#coverflow-page .home-page-container { min-height: calc(100svh - 110px - env(safe-area-inset-bottom)); }
 #my-page .gear-stage { touch-action: none; }
 #add-item-icon-grid.film-icon-grid .icon-option img { width: 23.1px; height: 42px; transform: none; object-fit: contain; }
 #my-page > .container { max-width: 620px; min-width: 0; }
