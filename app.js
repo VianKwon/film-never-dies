@@ -2404,7 +2404,12 @@ function initMyPage() {
     
     // Add window resize listener
     if (!window.myPageResizeListenerAdded) {
+        let gearViewportWidth = document.documentElement.clientWidth;
         window.addEventListener('resize', () => {
+            // Mobile browser chrome changes height while scrolling, not the collection layout.
+            const width = document.documentElement.clientWidth;
+            if (width === gearViewportWidth) return;
+            gearViewportWidth = width;
             // Update both camera and film buttons on resize
             if (document.getElementById('my-page')?.classList.contains('active')) {
                 updateScrollButtons('camera');

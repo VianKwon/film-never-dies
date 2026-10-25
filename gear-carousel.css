@@ -11,7 +11,7 @@
 #my-page .arc-shelf .display-items-container { margin: 0; padding: 0; overflow: hidden; }
 #my-page .arc-shelf .display-items-container::before,
 #my-page .arc-shelf .display-items-container::after { display: none; }
-#my-page .gear-carousel { --stage-height: clamp(96px, calc((100dvh - 500px) / 2), 142px); display: block; position: relative; padding: 0 0 4px; cursor: default; transform: none !important; }
+#my-page .gear-carousel { --stage-height: clamp(96px, calc((100svh - 500px) / 2), 142px); display: block; position: relative; padding: 0 0 4px; cursor: default; transform: none !important; }
 .gear-stage { position: relative; height: var(--stage-height, 142px); overflow: hidden; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
 .gear-stage:focus-visible { outline: 1px solid #8290f0; outline-offset: -3px; }
 .gear-arc { position: absolute; width: 88%; height: 62px; bottom: 13px; left: 6%; border-radius: 50%; border-bottom: 1px solid #ffffff25; background: radial-gradient(ellipse at 50% 78%, #ffffff07, #ffffff02 55%, transparent 74%); pointer-events: none; }
@@ -24,6 +24,7 @@
 .gear-object[data-position="right"] { transform: translate(min(25vw, 130px), -18px) scale(.76); opacity: .72; pointer-events: auto; z-index: 2; }
 .gear-object[data-position="hidden"] { visibility: hidden; }
 .gear-stage-film .gear-object { width: 64px; margin-left: -32px; height: clamp(56px, calc(var(--stage-height) - 43px), 78px); }
+.gear-stage-camera .gear-object { width: 88px; margin-left: -44px; height: clamp(56px, calc(var(--stage-height) - 45px), 80px); }
 .gear-object.is-held img { filter: brightness(1.12); transform-origin: center bottom; animation: gear-delete-wiggle .28s ease-in-out infinite; }
 .gear-carousel.is-editing .gear-object:focus:not(:focus-visible) { outline: none; }
 @keyframes gear-delete-wiggle {
