@@ -1,6 +1,8 @@
 /* Shared arc display; collection data and saved icon choices stay in app.js. */
 (() => {
     const selected = { camera: null, film: null };
+    const lastIndex = { camera: 0, film: 0 };
+    const normalizedIcons = new Map();
     const listId = type => type === 'camera' ? 'cameras-list' : 'films-list';
     let closeMenu = () => {};
 
@@ -10,7 +12,8 @@
         closeMenu();
         const names = loadStringArray(type === 'camera' ? STORAGE_KEYS.cameras : STORAGE_KEYS.filmNames)
             .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-        let index = Math.max(0, names.indexOf(selected[type]));
+        let index = names.indexOf(selected[type]);
+        if (index < 0) index = Math.min(lastIndex[type], Math.max(0, names.length - 1));
         selected[type] = names[index] || null;
         const options = type === 'camera' ? cameraIconOptions : filmIconOptions;
         host.closest('.shelf').classList.add('arc-shelf');
@@ -31,7 +34,13 @@
             item.className = 'gear-object';
             item.setAttribute('aria-label', name);
             const img = document.createElement('img');
+            const iconPath = savedGearIcon(type, name, options, i);
+            img.style.visibility = 'hidden';
             img.addEventListener('load', () => {
+                if (normalizedIcons.has(iconPath)) {
+                    img.style.visibility = '';
+                    return;
+                }
                 // Original icons have uneven transparent margins; normalize the visible bounds.
                 const canvas = document.createElement('canvas');
                 canvas.width = img.naturalWidth;
@@ -46,15 +55,19 @@
                         top = Math.min(top, y); bottom = Math.max(bottom, y);
                     }
                 }
-                if (right < left) return;
+                if (right < left) { img.style.visibility = ''; return; }
                 const cropped = document.createElement('canvas');
-                cropped.width = right - left + 1;
                 cropped.height = bottom - top + 1;
-                cropped.getContext('2d').drawImage(canvas, left, top, cropped.width, cropped.height,
+                cropped.width = type === 'film' ? Math.round(cropped.height * .55) : right - left + 1;
+                cropped.getContext('2d').drawImage(canvas, left, top, right - left + 1, cropped.height,
                     0, 0, cropped.width, cropped.height);
-                img.src = cropped.toDataURL();
+                const normalized = cropped.toDataURL();
+                normalizedIcons.set(iconPath, normalized);
+                img.onload = () => { img.style.visibility = ''; };
+                img.src = normalized;
             }, { once: true });
-            img.src = savedGearIcon(type, name, options, i);
+            item.dataset.icon = iconPath;
+            img.src = normalizedIcons.get(iconPath) || iconPath;
             img.alt = '';
             img.draggable = false;
             item.append(img);
@@ -122,6 +135,7 @@
             });
         }
         function paint() {
+            lastIndex[type] = index;
             selected[type] = names[index] || null;
             objects.forEach((item, i) => {
                 let offset = i - index;
@@ -238,7 +252,7 @@
     for (const type of ['camera', 'film']) {
         const original = type === 'camera' ? addCamera : addFilmStock;
         const add = name => {
-            selected[type] = normalizeText(name);
+            if (!selected[type]) selected[type] = normalizeText(name);
             original(name);
         };
         if (type === 'camera') addCamera = add;

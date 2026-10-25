@@ -1,4 +1,5 @@
 /* Arc display is scoped to My Gear; other page surfaces remain unchanged. */
+#add-item-icon-grid.film-icon-grid .icon-option img { width: 23.1px; height: 42px; transform: none; object-fit: contain; }
 #my-page > .container { max-width: 620px; min-width: 0; }
 #my-page .my-page-container { gap: 12px; }
 #my-page .my-page-container > .form-section { padding: 12px; min-width: 0; }
@@ -24,7 +25,14 @@
 .gear-object[data-position="right"] { transform: translate(min(25vw, 130px), -18px) scale(.76); opacity: .72; pointer-events: auto; z-index: 2; }
 .gear-object[data-position="hidden"] { visibility: hidden; }
 .gear-stage-film .gear-object { width: 64px; margin-left: -32px; height: clamp(56px, calc(var(--stage-height) - 43px), 78px); }
-.gear-stage-camera .gear-object { width: 88px; margin-left: -44px; height: clamp(56px, calc(var(--stage-height) - 45px), 80px); }
+.gear-stage-camera,
+.gear-stage-film { height: max(88px, calc(var(--stage-height) - 18px)); }
+.gear-stage-film .gear-object img { scale: .94; transform-origin: center bottom; }
+.gear-stage-camera .gear-object { width: 88px; margin-left: -44px; height: clamp(56px, calc(var(--stage-height) - 45px), 80px); padding: 5px 12px 0; }
+.gear-stage-camera .gear-object[data-icon="icons/fuji-dl50.png"] { bottom: 26px; }
+.gear-stage-camera .gear-object[data-icon="icons/minolta-apex105-piano-black.png"] { bottom: 22px; }
+.gear-stage-camera .gear-object[data-icon="icons/fuji-tw3.png"] img { scale: .94; transform-origin: center bottom; }
+.gear-stage-camera .gear-object[data-icon="icons/minolta-dimage-x.png"] img { scale: .90; transform-origin: center bottom; }
 .gear-object.is-held img { filter: brightness(1.12); transform-origin: center bottom; animation: gear-delete-wiggle .28s ease-in-out infinite; }
 .gear-carousel.is-editing .gear-object:focus:not(:focus-visible) { outline: none; }
 @keyframes gear-delete-wiggle {

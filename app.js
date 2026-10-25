@@ -1013,6 +1013,26 @@ function loadFilms() {
         }
         if (saved) {
             films = JSON.parse(saved);
+            const renameFilm = name => {
+                const key = normalizeText(name).toLowerCase();
+                if (key === 'ilford fp5') return 'ILFORD HP5 400';
+                if (key === 'aeronega') return 'AERONEGA 100';
+                if (key === 'escura showa') return 'Escura Showa 400';
+                return name;
+            };
+            if (!localStorage.getItem('filmFlowFilmNamesCorrectionV3')) {
+                films.forEach(film => {
+                    film.name = renameFilm(film.name);
+                    if (film.id === 1792399368227 && film.name === 'Escura Showa 400') film.iso = '400';
+                });
+                const history = loadStringArray(STORAGE_KEYS.filmNames).map(renameFilm);
+                saveStringArray(STORAGE_KEYS.filmNames, [...new Set(history)]);
+                saveGearIcon('film', 'ILFORD HP5 400', 'icons/film-hp5.png');
+                saveGearIcon('film', 'AERONEGA 100', 'icons/film-aeronega100.png');
+                saveGearIcon('film', 'Escura Showa 400', 'icons/film-showa400.png');
+                saveFilms();
+                localStorage.setItem('filmFlowFilmNamesCorrectionV3', '1');
+            }
             
             // Ensure photos are properly loaded
             films.forEach(film => {
@@ -2360,23 +2380,24 @@ let dragState = {
 
 // Icon options for camera and film separately
 const cameraIconOptions = [
-    'icons/camera_1.png',
-    'icons/camera_2.png', 
     'icons/camera_3.png',
-    'icons/camera_4.png',
-    'icons/camera_5.png',
-    'icons/camera_6.png',
-    'icons/camera_7.png'
+    'icons/canon-epoca135.png',
+    'icons/fuji-dl50.png',
+    'icons/fuji-tw3.png',
+    'icons/yashica-mf2-super.png',
+    'icons/diana-mini-mint.png',
+    'icons/minolta-apex105-piano-black.png',
+    'icons/minolta-dimage-x.png'
 ];
 
 const filmIconOptions = [
-    'icons/Film1.png',
-    'icons/Film2.png',
-    'icons/Film3.png',
-    'icons/Film4.png',
-    'icons/Film5.png',
-    'icons/Film6.png',
-    'icons/Film7.png'
+    'icons/film-gold200.png',
+    'icons/film-ultramax400.png',
+    'icons/film-fujicolor200.png',
+    'icons/film-hp5.png',
+    'icons/film-fp4.png',
+    'icons/film-aeronega100.png',
+    'icons/film-showa400.png'
 ];
 
 // Preload icons to cache
@@ -2771,12 +2792,44 @@ function handleOutsideClick(e) {
 }
 
 function savedGearIcon(type, name, options, index) {
+    const modelKey = normalizeText(name).toLowerCase().replace(/[^a-z0-9]/g, '');
+    const cameraModels = {
+        canonepoca135: 'icons/canon-epoca135.png',
+        fujidl50: 'icons/fuji-dl50.png',
+        fujitw3: 'icons/fuji-tw3.png',
+        yashicamf2super: 'icons/yashica-mf2-super.png',
+        dianaminimint: 'icons/diana-mini-mint.png',
+        minoltaapex105: 'icons/minolta-apex105-piano-black.png',
+        minoltaapex105black: 'icons/minolta-apex105-piano-black.png',
+        minoltadimagex: 'icons/minolta-dimage-x.png'
+    };
+    const filmModels = {
+        gold200: 'icons/film-gold200.png', kodakgold200: 'icons/film-gold200.png',
+        ultramax400: 'icons/film-ultramax400.png', kodakultramax400: 'icons/film-ultramax400.png',
+        fujicolor200: 'icons/film-fujicolor200.png', fujic200: 'icons/film-fujicolor200.png',
+        hp5: 'icons/film-hp5.png', hp5plus: 'icons/film-hp5.png', ilfordhp5: 'icons/film-hp5.png', ilfordhp5400: 'icons/film-hp5.png', ilfordhp5plus: 'icons/film-hp5.png',
+        fp4: 'icons/film-fp4.png', fp4plus: 'icons/film-fp4.png', ilfordfp4: 'icons/film-fp4.png', ilfordfp4plus: 'icons/film-fp4.png',
+        aeronega: 'icons/film-aeronega100.png', aeronega100: 'icons/film-aeronega100.png',
+        escurashowa: 'icons/film-showa400.png', escurashowa400: 'icons/film-showa400.png', showa400: 'icons/film-showa400.png'
+    };
+    const modelIcon = type === 'camera' ? cameraModels[modelKey] : filmModels[modelKey];
     try {
         const icons = JSON.parse(localStorage.getItem('filmFlowGearIcons') || '{}');
         const icon = icons[`${type}:${normalizeText(name).toLowerCase()}`];
+        // Upgrade legacy model icons once; later manual choices remain authoritative.
+        if (modelIcon && (!icon || /^icons\/(?:camera_[1-7]|Film[1-7])\.png$/.test(icon))) {
+            const migrationKey = type === 'camera' ? 'filmFlowCameraModelIconsV1' : 'filmFlowFilmModelIconsV1';
+            const migrated = JSON.parse(localStorage.getItem(migrationKey) || '{}');
+            if (!migrated[modelKey]) {
+                saveGearIcon(type, name, modelIcon);
+                migrated[modelKey] = true;
+                localStorage.setItem(migrationKey, JSON.stringify(migrated));
+                return modelIcon;
+            }
+        }
         if (options.includes(icon)) return icon;
     } catch (error) { console.warn('Unable to read gear icons', error); }
-    const fallback = options[index % options.length];
+    const fallback = modelIcon || (type === 'camera' ? options[0] : options[index % options.length]);
     saveGearIcon(type, name, fallback);
     return fallback;
 }
@@ -3121,6 +3174,32 @@ function renderIconGrid(icons, type) {
     `).join('');
     
     // Add drag-to-scroll functionality
+    if (type === 'film') grid.querySelectorAll('img').forEach(img => {
+        img.style.visibility = 'hidden';
+        const normalize = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(img, 0, 0);
+            const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+            let left = canvas.width, top = canvas.height, right = -1, bottom = -1;
+            for (let y = 0; y < canvas.height; y++) for (let x = 0; x < canvas.width; x++) {
+                if (pixels[(y * canvas.width + x) * 4 + 3] > 24) {
+                    left = Math.min(left, x); right = Math.max(right, x);
+                    top = Math.min(top, y); bottom = Math.max(bottom, y);
+                }
+            }
+            if (right >= left) {
+                const output = document.createElement('canvas');
+                output.height = 400; output.width = 220;
+                output.getContext('2d').drawImage(canvas, left, top, right-left+1, bottom-top+1, 0, 0, 220, 400);
+                img.src = output.toDataURL();
+            }
+            img.style.visibility = '';
+        };
+        if (img.complete && img.naturalWidth) normalize();
+        else img.addEventListener('load', normalize, { once: true });
+    });
     setupIconGridDrag(grid);
 }
 
