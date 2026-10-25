@@ -1374,7 +1374,28 @@ function renderRecordsList() {
 }
 
 /* ====== SWIPE GESTURES ====== */
+let swipeDismissBound = false;
+
 function initSwipeGestures() {
+    if (!swipeDismissBound) {
+        swipeDismissBound = true;
+        let dismissOnClick = false;
+        const hasOpenSwipe = () => Boolean(document.querySelector(
+            '.record-item-wrapper.swipe-left, .record-item-wrapper.swipe-right, .record-item-wrapper.swipe-active'
+        ));
+        // Remember the state before touchend starts resetting the card.
+        document.addEventListener('pointerdown', () => {
+            dismissOnClick = hasOpenSwipe();
+        }, true);
+        document.addEventListener('click', (event) => {
+            const shouldDismiss = dismissOnClick;
+            dismissOnClick = false;
+            if (!shouldDismiss || event.target.closest('.swipe-btn')) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            closeAllSwipeItems();
+        }, true);
+    }
     const wrappers = document.querySelectorAll('.record-item-wrapper');
     
     wrappers.forEach(wrapper => {

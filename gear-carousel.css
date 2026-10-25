@@ -1,0 +1,51 @@
+/* Arc display is scoped to My Gear; other page surfaces remain unchanged. */
+#my-page > .container { max-width: 620px; min-width: 0; }
+#my-page .my-page-container { gap: 12px; }
+#my-page .my-page-container > .form-section { padding: 12px; min-width: 0; }
+#my-page .my-page-container > .form-section h3 { margin-bottom: 8px; min-height: 30px; }
+#my-page .stats-footer { margin-top: 8px; padding-top: 8px; flex-wrap: wrap; gap: 8px; }
+#my-page .arc-shelf { background: #ffffff01; padding: 0; border: 1px solid #ffffff0b; border-radius: 8px; overflow: hidden; }
+#my-page .arc-shelf .shelf-top,
+#my-page .arc-shelf .shelf-display-wrapper > button { display: none; }
+#my-page .arc-shelf .shelf-display-wrapper { display: block; }
+#my-page .arc-shelf .display-items-container { margin: 0; padding: 0; overflow: hidden; }
+#my-page .arc-shelf .display-items-container::before,
+#my-page .arc-shelf .display-items-container::after { display: none; }
+#my-page .gear-carousel { --stage-height: clamp(96px, calc((100dvh - 500px) / 2), 142px); display: block; position: relative; padding: 0 0 4px; cursor: default; transform: none !important; }
+.gear-stage { position: relative; height: var(--stage-height, 142px); overflow: hidden; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.gear-stage:focus-visible { outline: 1px solid #8290f0; outline-offset: -3px; }
+.gear-arc { position: absolute; width: 88%; height: 62px; bottom: 13px; left: 6%; border-radius: 50%; border-bottom: 1px solid #ffffff25; background: radial-gradient(ellipse at 50% 78%, #ffffff07, #ffffff02 55%, transparent 74%); pointer-events: none; }
+.gear-arc::after { content: ''; position: absolute; inset: 57% 6% -2px; border-radius: 0 0 50% 50%; box-shadow: 0 3px 6px -5px #0005; }
+.gear-object { position: absolute; left: 50%; bottom: 19px; width: 100px; height: clamp(62px, calc(var(--stage-height) - 37px), 90px); margin-left: -50px; padding: 5px 8px 0; border: 0; background: transparent; cursor: pointer; transform-origin: center bottom; transition: transform .38s ease, opacity .3s ease; opacity: 0; pointer-events: none; -webkit-touch-callout: none; }
+.gear-object::after { content: ''; position: absolute; bottom: -2px; left: 18%; right: 18%; height: 7px; border-radius: 50%; background: #0007; filter: blur(3px); z-index: -1; }
+.gear-object img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; pointer-events: none; }
+.gear-object[data-position="center"] { transform: translate(0, 0) scale(1.12); opacity: 1; pointer-events: auto; z-index: 3; }
+.gear-object[data-position="left"] { transform: translate(calc(-1 * min(25vw, 130px)), -18px) scale(.76); opacity: .72; pointer-events: auto; z-index: 2; }
+.gear-object[data-position="right"] { transform: translate(min(25vw, 130px), -18px) scale(.76); opacity: .72; pointer-events: auto; z-index: 2; }
+.gear-object[data-position="hidden"] { visibility: hidden; }
+.gear-stage-film .gear-object { width: 64px; margin-left: -32px; height: clamp(56px, calc(var(--stage-height) - 43px), 78px); }
+.gear-object.is-held img { filter: brightness(1.12); transform-origin: center bottom; animation: gear-delete-wiggle .28s ease-in-out infinite; }
+.gear-carousel.is-editing .gear-object:focus:not(:focus-visible) { outline: none; }
+@keyframes gear-delete-wiggle {
+    0%, 100% { transform: rotate(-2deg); }
+    50% { transform: rotate(2deg); }
+}
+.gear-object:focus-visible { outline: 1px solid #8290f0; border-radius: 8px; }
+.gear-caption { min-height: 28px; padding: 0 14px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 14px; line-height: 18px; font-weight: 600; overflow-wrap: anywhere; }
+.gear-pagination { height: 26px; display: flex; justify-content: center; align-items: center; gap: 0; color: var(--muted); font-size: 12px; }
+.gear-dot { border: 0; background: transparent; width: 26px; height: 26px; padding: 9px; cursor: pointer; }
+.gear-dot::after { content: ''; display: block; width: 8px; height: 8px; border-radius: 50%; background: #626269; }
+.gear-dot[aria-current="true"]::after { background: #8290f0; }
+.gear-delete-menu { position: absolute; z-index: 8; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: 0; background: #353538; color: #ff375f; border-radius: 50%; padding: 0; font-size: 14px; cursor: pointer; box-shadow: 0 2px 6px #0004; }
+.gear-delete-menu:hover { background: #48484c; }
+.gear-delete-menu:focus-visible { outline: 2px solid #8290f0; outline-offset: 2px; }
+.gear-delete-menu[hidden] { display: none; }
+.gear-arc-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 13px; }
+@media (max-width: 380px) {
+    .gear-object { width: 88px; margin-left: -44px; }
+    .gear-caption { font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .gear-object { transition: none; }
+    .gear-object.is-held img { animation: none; }
+}
