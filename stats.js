@@ -50,8 +50,8 @@
         const projected = known.map(v => [v.point[0], Math.log(Math.tan(Math.PI / 4 + v.point[1] * Math.PI / 360)) * 180 / Math.PI]);
         const xs = projected.map(p => p[0]), ys = projected.map(p => p[1]);
         const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
-        const scale = Math.min(260 / (maxX - minX || 1), 100 / (maxY - minY || 1));
-        const points = projected.map(p => [160 + (p[0] - (minX + maxX)/2) * scale, 85 - (p[1] - (minY + maxY)/2) * scale]);
+        const scale = Math.min(260 / (maxX - minX || 1), 80 / (maxY - minY || 1));
+        const points = projected.map(p => [160 + (p[0] - (minX + maxX)/2) * scale, 70 - (p[1] - (minY + maxY)/2) * scale]);
         let cursor = 0;
         const positions = visits.map(v => v.point ? points[cursor++] : null);
         const lines = positions.map((p,i) => {
@@ -75,7 +75,7 @@
             const width = Math.min(300, measure.measureText(text).width + 4);
             // Place labels independently of geographic markers; reserve nearby markers too.
             const candidates = [];
-            for (let top = 5; top <= 150; top += 15) {
+            for (let top = 5; top <= 120; top += 15) {
                 for (const left of [x-width/2,x+12,x-width-12]) {
                     const rect = { x: Math.max(5,Math.min(315-width,left)), y: top, w: width, h: 11 };
                     if (labels.some(other => overlaps(rect,other))) continue;
@@ -90,7 +90,7 @@
             return `<g><title>${escape(name)}</title>${labelMarkup}<path class="place-star" d="M ${x} ${y-7} Q ${x+1.5} ${y-1.5} ${x+7} ${y} Q ${x+1.5} ${y+1.5} ${x} ${y+7} Q ${x-1.5} ${y+1.5} ${x-7} ${y} Q ${x-1.5} ${y-1.5} ${x} ${y-7} Z"/></g>`;
         }).join('');
         const missing = visits.filter(v => !v.point).length;
-        return `<svg class="places-chart" viewBox="0 0 320 170" role="img" aria-label="Shooting locations connected from earliest to latest, in reverse Records order"><defs><marker id="route-direction" viewBox="0 0 6 6" refX="3" refY="3" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 6 3 L 0 6 Z" fill="#667eea"/></marker></defs><g class="place-lines">${lines}</g>${dots}</svg>${missing ? `<p class="analytics-muted">${missing} record(s) have locations not yet mapped.</p>` : ''}`;
+        return `<svg class="places-chart" viewBox="0 0 320 140" role="img" aria-label="Shooting locations connected from earliest to latest, in reverse Records order"><defs><marker id="route-direction" viewBox="0 0 6 6" refX="3" refY="3" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 6 3 L 0 6 Z" fill="#667eea"/></marker></defs><g class="place-lines">${lines}</g>${dots}</svg>${missing ? `<p class="analytics-muted">${missing} record(s) have locations not yet mapped.</p>` : ''}`;
     }
     window.updateStatistics = function() {
         const content = document.querySelector('#stats-page .stats-content');
@@ -109,7 +109,7 @@
         content.innerHTML = `<div class="analytics-toolbar"><details class="analytics-year-picker"><summary aria-label="Statistics year"><i class="fas fa-calendar" aria-hidden="true"></i>${selectedYear}<i class="fas fa-chevron-down" aria-hidden="true"></i></summary><div class="analytics-year-options">${(years.length ? years : [selectedYear]).map(y => `<button type="button" data-year="${y}" aria-pressed="${y === selectedYear}">${y}</button>`).join('')}</div></details><button type="button" class="analytics-export" aria-label="Export records" title="Export records"><i class="fas fa-download" aria-hidden="true"></i></button></div>
             <div class="analytics-totals"><div><strong>${records.length}</strong><span>Rolls</span></div><div><strong>${cameras.size}</strong><span>Cameras</span></div><div><strong>${cities.size}</strong><span>Cities</span></div></div>
             ${!records.length ? '<p class="analytics-muted">No records for this year yet.</p>' : ''}
-            <section class="analytics-section"><h3>Places</h3>${route(records)}</section>
+            <section class="analytics-section analytics-places"><h3>Places</h3>${route(records)}</section>
             <section class="analytics-section"><h3>Rolls per Month</h3><div class="monthly-chart">${months.map((count,i) => `<div class="monthly-column"><div class="monthly-track"><div style="height:${count/max*100}%">${count ? `<span>${count}</span>` : ''}</div></div><small>${monthNames[i]}</small></div>`).join('')}</div></section>
             <section class="analytics-section"><div class="analytics-section-heading"><h3>Film &amp; Camera</h3><div class="analytics-modes"><button type="button" data-mode="name" aria-pressed="${mode === 'name'}">Film</button><button type="button" data-mode="camera" aria-pressed="${mode === 'camera'}">Camera</button></div></div><div class="usage-list">${[...counts].sort((a,b) => b[1]-a[1]).map(([name,count]) => `<div class="usage-row"><span>${escape(name)}</span><div class="usage-track"><div style="width:${count/Math.max(1,records.length)*100}%"></div></div><small>${count} ${count === 1 ? 'roll' : 'rolls'}</small></div>`).join('') || '<p class="analytics-muted">No data yet.</p>'}</div></section>
             `;
