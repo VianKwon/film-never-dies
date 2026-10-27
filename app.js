@@ -2400,20 +2400,11 @@ const filmIconOptions = [
     'icons/film-showa400.png'
 ];
 
-// Preload icons to cache
-function preloadIcons() {
-    const allIcons = [...cameraIconOptions, ...filmIconOptions];
-    allIcons.forEach(src => {
-        const img = new Image();
-        img.src = src;
-    });
-}
-
-// Preload icons when page is idle
-if (window.requestIdleCallback) {
-    window.requestIdleCallback(preloadIcons);
-} else {
-    window.addEventListener('load', preloadIcons);
+// Keep saved icon identifiers stable; only their delivery assets change.
+function gearIconSource(icon, picker = false) {
+    if (![...cameraIconOptions, ...filmIconOptions].includes(icon)) return icon;
+    const suffix = picker && cameraIconOptions.includes(icon) ? '-picker.webp' : '.webp';
+    return icon.replace('icons/', 'icons/optimized/').replace(/\.png$/, suffix);
 }
 
 // Current modal state
@@ -3169,37 +3160,11 @@ function renderIconGrid(icons, type) {
     grid.innerHTML = icons.map((icon, index) => `
         <div class="icon-option ${index === 0 ? 'selected' : ''}" 
              onclick="selectItemIcon('${icon}', this)">
-            <img src="${icon}" alt="Icon ${index + 1}">
+            <img src="${gearIconSource(icon, true)}" alt="Icon ${index + 1}" decoding="async" loading="lazy">
         </div>
     `).join('');
     
     // Add drag-to-scroll functionality
-    if (type === 'film') grid.querySelectorAll('img').forEach(img => {
-        img.style.visibility = 'hidden';
-        const normalize = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
-            const context = canvas.getContext('2d');
-            context.drawImage(img, 0, 0);
-            const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
-            let left = canvas.width, top = canvas.height, right = -1, bottom = -1;
-            for (let y = 0; y < canvas.height; y++) for (let x = 0; x < canvas.width; x++) {
-                if (pixels[(y * canvas.width + x) * 4 + 3] > 24) {
-                    left = Math.min(left, x); right = Math.max(right, x);
-                    top = Math.min(top, y); bottom = Math.max(bottom, y);
-                }
-            }
-            if (right >= left) {
-                const output = document.createElement('canvas');
-                output.height = 400; output.width = 220;
-                output.getContext('2d').drawImage(canvas, left, top, right-left+1, bottom-top+1, 0, 0, 220, 400);
-                img.src = output.toDataURL();
-            }
-            img.style.visibility = '';
-        };
-        if (img.complete && img.naturalWidth) normalize();
-        else img.addEventListener('load', normalize, { once: true });
-    });
     setupIconGridDrag(grid);
 }
 

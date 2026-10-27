@@ -2,7 +2,6 @@
 (() => {
     const selected = { camera: null, film: null };
     const lastIndex = { camera: 0, film: 0 };
-    const normalizedIcons = new Map();
     const listId = type => type === 'camera' ? 'cameras-list' : 'films-list';
     let closeMenu = () => {};
 
@@ -35,39 +34,9 @@
             item.setAttribute('aria-label', name);
             const img = document.createElement('img');
             const iconPath = savedGearIcon(type, name, options, i);
-            img.style.visibility = 'hidden';
-            img.addEventListener('load', () => {
-                if (normalizedIcons.has(iconPath)) {
-                    img.style.visibility = '';
-                    return;
-                }
-                // Original icons have uneven transparent margins; normalize the visible bounds.
-                const canvas = document.createElement('canvas');
-                canvas.width = img.naturalWidth;
-                canvas.height = img.naturalHeight;
-                const context = canvas.getContext('2d');
-                context.drawImage(img, 0, 0);
-                const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
-                let left = canvas.width, top = canvas.height, right = -1, bottom = -1;
-                for (let y = 0; y < canvas.height; y++) for (let x = 0; x < canvas.width; x++) {
-                    if (pixels[(y * canvas.width + x) * 4 + 3] > 24) {
-                        left = Math.min(left, x); right = Math.max(right, x);
-                        top = Math.min(top, y); bottom = Math.max(bottom, y);
-                    }
-                }
-                if (right < left) { img.style.visibility = ''; return; }
-                const cropped = document.createElement('canvas');
-                cropped.height = bottom - top + 1;
-                cropped.width = type === 'film' ? Math.round(cropped.height * .55) : right - left + 1;
-                cropped.getContext('2d').drawImage(canvas, left, top, right - left + 1, cropped.height,
-                    0, 0, cropped.width, cropped.height);
-                const normalized = cropped.toDataURL();
-                normalizedIcons.set(iconPath, normalized);
-                img.onload = () => { img.style.visibility = ''; };
-                img.src = normalized;
-            }, { once: true });
             item.dataset.icon = iconPath;
-            img.src = normalizedIcons.get(iconPath) || iconPath;
+            img.dataset.source = gearIconSource(iconPath);
+            img.decoding = 'async';
             img.alt = '';
             img.draggable = false;
             item.append(img);
@@ -144,6 +113,8 @@
                     if (offset < -names.length / 2) offset += names.length;
                 }
                 item.dataset.position = offset === 0 ? 'center' : offset === -1 ? 'left' : offset === 1 ? 'right' : 'hidden';
+                const img = item.querySelector('img');
+                if (Math.abs(offset) <= 1 && !img.hasAttribute('src')) img.src = img.dataset.source;
                 item.tabIndex = Math.abs(offset) <= 1 ? 0 : -1;
                 item.setAttribute('aria-hidden', String(Math.abs(offset) > 1));
             });
